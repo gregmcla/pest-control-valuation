@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pest Control Business Valuation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        label, input, button {
+            margin: 10px 0;
+            display: block;
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Pest Control Business Valuation Tool</h1>
+    <label for="annual_revenue">Annual Revenue ($):</label>
+    <input type="number" id="annual_revenue" placeholder="Enter annual revenue" required>
+
+    <label for="ebitda">EBITDA ($):</label>
+    <input type="number" id="ebitda" placeholder="Enter EBITDA" required>
+
+    <label for="multiple">Multiple:</label>
+    <input type="number" id="multiple" placeholder="Enter multiple (default is 5)" value="5" required>
+
+    <button onclick="valuate()">Calculate Valuation</button>
+
+    <div class="result" id="result"></div>
+
+    <!-- JavaScript Section -->
+    <script>
+        async function valuate() {
+            const annualRevenue = document.getElementById('annual_revenue').value;
+            const ebitda = document.getElementById('ebitda').value;
+            const multiple = document.getElementById('multiple').value;
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/api/valuate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        annual_revenue: parseFloat(annualRevenue),
+                        ebitda: parseFloat(ebitda),
+                        multiple: parseFloat(multiple),
+                    }),
+                });
+
+                const data = await response.json();
+                document.getElementById('result').innerText = `Valuation: $${data.valuation.toLocaleString()}`;
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+    </script>
+</body>
+</html>
+
