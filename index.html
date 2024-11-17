@@ -33,7 +33,7 @@
             const multiple = document.getElementById('multiple').value;
 
             try {
-                const response = await fetch('/api/valuate', { // Use relative path
+                const response = await fetch('https://pest-control-valuation.onrender.com/api/valuate', { // Replace with Render backend URL
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -44,6 +44,10 @@
                         multiple: parseFloat(multiple),
                     }),
                 });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
 
                 const data = await response.json();
                 document.getElementById('result').innerText = `Valuation: $${data.valuation.toLocaleString()}`;
