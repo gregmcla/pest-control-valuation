@@ -86,27 +86,12 @@
         <option value="Manufacturing">Manufacturing</option>
       </select>
 
-      <!-- Sub-Industry Dropdown (for B2B Software) -->
-      <div id="b2b-software-options" style="display: none;">
-        <label for="b2b-subindustry">B2B Sub-Industry</label>
-        <select id="b2b-subindustry">
-          <option value="" disabled selected>Select a Sub-Industry</option>
-          <option value="SaaS">SaaS</option>
-          <option value="FinTech">FinTech</option>
-          <option value="MarTech">MarTech</option>
-          <option value="HealthTech">HealthTech</option>
-        </select>
-      </div>
-
       <label for="annual-revenue">Annual Revenue ($)</label>
       <input type="number" id="annual-revenue" placeholder="Enter Annual Revenue" required>
 
       <label for="ebitda">EBITDA ($)</label>
       <input type="number" id="ebitda" placeholder="Enter EBITDA">
       <button type="button" id="calc-ebitda">Estimate EBITDA</button>
-
-      <label for="recurring-revenue">Recurring Revenue ($)</label>
-      <input type="number" id="recurring-revenue" placeholder="Optional Recurring Revenue">
 
       <label for="growth-rate">Growth Rate (%)</label>
       <input type="number" id="growth-rate" placeholder="Optional Growth Rate">
@@ -132,7 +117,6 @@
   </div>
 
   <script>
-    // Initialize the chart
     let valuationChart = null;
 
     function initializeChart() {
@@ -151,49 +135,40 @@
         },
         options: {
           responsive: true,
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: function (context) {
+                  return `Valuation: $${context.raw.toLocaleString()}`;
+                },
+              },
+            },
+            datalabels: {
+              anchor: 'end',
+              align: 'top',
+              formatter: function (value, context) {
+                const multiples = ['X Multiple 1', 'X Multiple 2'];
+              },
+            },
+          },
           scales: {
             y: {
-              beginAtZero: true
-            }
-          }
-        }
+              beginAtZero: true,
+            },
+          },
+        },
       });
-    }
-
-    function addChartData(currentValuation, improved1, improved2) {
-      valuationChart.data.datasets[0].data = [currentValuation, improved1, improved2];
-      valuationChart.update();
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      initializeChart(); // Initialize the chart on page load
+      initializeChart();
+    document.getElementById('valuation-form').addEventListener('submit', async (event) => {
+      event.preventDefault();
 
-      // Show B2B Sub-Industry dropdown if B2B Software is selected
-      document.getElementById('industry').addEventListener('change', (event) => {
-        const industry = event.target.value;
-        const b2bOptions = document.getElementById('b2b-software-options');
-        if (industry === "B2B Software") {
-          b2bOptions.style.display = "block";
-        } else {
-          b2bOptions.style.display = "none";
-        }
-      });
-
-      document.getElementById('calc-ebitda').addEventListener('click', () => {
-        const annualRevenue = parseFloat(document.getElementById('annual-revenue').value) || 0;
-        const estimatedEBITDA = (annualRevenue * 0.15).toFixed(2); // Example: 15% margin
-        document.getElementById('ebitda').value = estimatedEBITDA;
-        alert(`Estimated EBITDA is $${estimatedEBITDA}`);
-      });
-
-      document.getElementById('valuation-form').addEventListener('submit', async (event) => {
-        event.preventDefault(); // Prevent form refresh
-
+        // Get form values
         const industry = document.getElementById('industry').value;
-        const b2bSubIndustry = document.getElementById('b2b-subindustry')?.value || null;
         const annualRevenue = parseFloat(document.getElementById('annual-revenue').value) || 0;
         const ebitda = parseFloat(document.getElementById('ebitda').value) || 0;
-        const recurringRevenue = parseFloat(document.getElementById('recurring-revenue').value) || null;
         const growthRate = parseFloat(document.getElementById('growth-rate').value) || null;
         const customerRetention = parseFloat(document.getElementById('customer-retention').value) || null;
         const geographicReach = parseFloat(document.getElementById('geographic-reach').value) || null;
@@ -205,10 +180,8 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               industry,
-              b2bSubIndustry,
               annualRevenue,
               ebitda,
-                           recurringRevenue,
               growthRate,
               customerRetention,
               geographicReach,
@@ -220,35 +193,61 @@
 
           if (!response.ok) throw new Error(data.message || 'Unknown error');
 
-          // Display results
+          // Current valuation and multiple
+          const currentMultiple = data.currentMultiple;
+          const currentValuation = data.valuation;
+
+          // Improved scenarios
+          const improvedScenario1 = data.guidance[0].valuation;
+          const improvedScenario2 = data.guidance[1].valuation;
+          const multipleScenario1 = data.guidance[0].multiple;
+          const multipleScenario2 = data.guidance[1].multiple;
+
+          // Display results with multiples
           document.getElementById('result').style.display = 'block';
-          document.getElementById('result').innerHTML = `<strong>Estimated Valuation:</strong> $${data.valuation.toLocaleString()}`;
+          document.getElementById('result').innerHTML = `
+            <strong>Estimated Valuation:</strong> $${currentValuation.toLocaleString()} (${currentMultiple}x)
+          `;
+
+          // Display insights
           document.getElementById('insights').style.display = 'block';
-          document.getElementById('insights').innerHTML = `<strong>Insights:</strong><br>${data.insights}`;
+          document.getElementById('insights').innerHTML = `
+            <strong>Insights:</strong><br>${data.insights}
+          `;
 
-          // Generate improved scenarios for guidance
-          const improvedScenario1 = data.valuation * 1.2; // Example: Increase by 20%
-          const improvedScenario2 = data.valuation * 1.5; // Example: Increase by 50%
-
+          // Display guidance
           const guidance = `
             <h3>How to Improve Your Valuation</h3>
             <ul>
-              <li><strong>Scenario 1:</strong> Focus on increasing growth rate and customer retention.</li>
-              <li><strong>Scenario 2:</strong> Expand geographic reach and emphasize recurring revenue.</li>
+              <li>
+                <strong>Scenario 1:</strong> Increase growth rate by 10% and customer retention by 15% to achieve a multiple of ${multipleScenario1}x,
+                resulting in a valuation of <strong>$${improvedScenario1.toLocaleString()}</strong>.
+              </li>
+              <li>
+                <strong>Scenario 2:</strong> Expand geographic reach by 5 states and improve recurring revenue by 20% to achieve a multiple of ${multipleScenario2}x,
+                resulting in a valuation of <strong>$${improvedScenario2.toLocaleString()}</strong>.
+              </li>
             </ul>
-            <p>Scenario 1 results in a valuation of <strong>$${improvedScenario1.toLocaleString()}</strong>. Scenario 2 results in a valuation of <strong>$${improvedScenario2.toLocaleString()}</strong>.</p>
           `;
           document.getElementById('guidance').style.display = 'block';
           document.getElementById('guidance').innerHTML = guidance;
 
           // Update the chart
-          addChartData(data.valuation, improvedScenario1, improvedScenario2);
+          valuationChart.data.labels = ['Current Scenario', 'Improved Scenario 1', 'Improved Scenario 2'];
+          valuationChart.data.datasets[0].data = [currentValuation, improvedScenario1, improvedScenario2];
+          valuationChart.update();
 
         } catch (error) {
-          // Display error message
           document.getElementById('error').textContent = error.message;
           document.getElementById('error').style.display = 'block';
         }
+      });
+
+      document.getElementById('calc-ebitda').addEventListener('click', () => {
+        const annualRevenue = parseFloat(document.getElementById('annual-revenue').value) || 0;
+        const estimatedEBITDA = (annualRevenue * 0.15).toFixed(2);
+        document.getElementById('ebitda').value = estimatedEBITDA;
+        alert(`Estimated EBITDA is $${estimatedEBITDA}`);
       });
     });
   </script>

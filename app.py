@@ -10,14 +10,12 @@ def valuate():
         # Parse JSON request data
         data = request.json
         industry = data.get("industry")
-        b2b_subindustry = data.get("b2bSubIndustry", None)
         annual_revenue = float(data.get("annualRevenue", 0))
         ebitda = float(data.get("ebitda", 0))
-        recurring_revenue = float(data.get("recurringRevenue", 0))
         multiple = data.get("multiple", None)
-        growth_rate = data.get("growthRate", None)
-        customer_retention = data.get("customerRetention", None)
-        geographic_reach = data.get("geographicReach", None)
+        growth_rate = float(data.get("growthRate", 0))
+        customer_retention = float(data.get("customerRetention", 0))
+        geographic_reach = float(data.get("geographicReach", 0))
 
         # Default industry multiples
         industry_multiples = {
@@ -40,90 +38,58 @@ def valuate():
 
         # Adjust multiples based on optional fields
         adjustment = 0
-        if growth_rate:
+        if growth_rate > 10:
             adjustment += (growth_rate - 10) * 0.1  # Growth rate adjustment
-        if customer_retention:
+        if customer_retention > 80:
             adjustment += (customer_retention - 80) * 0.05  # Customer retention adjustment
-        if geographic_reach:
+        if geographic_reach > 0:
             adjustment += geographic_reach * 0.02  # Geographic reach adjustment
-        if recurring_revenue:
-            adjustment += (recurring_revenue / annual_revenue) * 2  # Bonus for recurring revenue
 
-        adjusted_multiple = multiple + adjustment
+        current_multiple = multiple + adjustment
 
         # Calculate valuation
-        valuation = ebitda * adjusted_multiple if ebitda else annual_revenue * 0.15 * adjusted_multiple
-
-        # Generate insights
-        insights = []
-
-        # General growth rate insights
-        if growth_rate:
-            if growth_rate > 15:
-                insights.append(f"Your high growth rate of {growth_rate}% is driving an increased valuation multiple.")
-            elif growth_rate < 5:
-                insights.append(f"A low growth rate of {growth_rate}% might reduce your valuation multiple.")
-
-        # Customer retention insights
-        if customer_retention:
-            if customer_retention > 90:
-                insights.append(f"Excellent customer retention ({customer_retention}%) boosts your valuation.")
-            elif customer_retention < 70:
-                insights.append(f"Customer retention at {customer_retention}% is below industry standards.")
-
-        # Geographic reach insights
-        if geographic_reach:
-            if geographic_reach > 10:
-                insights.append(f"Operating in {geographic_reach} states significantly enhances your valuation.")
-            else:
-                insights.append(f"Geographic reach in {geographic_reach} states provides moderate impact on valuation.")
-
-        # Recurring revenue insights
-        if recurring_revenue:
-            recurring_percentage = (recurring_revenue / annual_revenue) * 100 if annual_revenue else 0
-            insights.append(f"Recurring revenue contributes {recurring_percentage:.2f}% to your overall revenue, boosting valuation.")
-
-        # B2B Software-specific insights
-        if industry == "B2B Software":
-            insights.append("B2B software businesses often see high multiples due to scalability and recurring revenue.")
-            if b2b_subindustry:
-                # Sub-Industry specific insights
-                if b2b_subindustry == "SaaS":
-                    insights.append("SaaS businesses are valued highly for their recurring subscription revenue models.")
-                elif b2b_subindustry == "FinTech":
-                    insights.append("FinTech businesses attract strong valuations due to their disruptive potential in finance.")
-                elif b2b_subindustry == "MarTech":
-                    insights.append("MarTech businesses benefit from high demand for data-driven marketing solutions.")
-                elif b2b_subindustry == "HealthTech":
-                    insights.append("HealthTech businesses command high valuations due to their impact on healthcare innovation.")
+        valuation = ebitda * current_multiple if ebitda else annual_revenue * 0.15 * current_multiple
 
         # Improved scenarios for guidance
-        improved_scenario_1 = valuation * 1.2  # Example: Increase by 20%
-        improved_scenario_2 = valuation * 1.5  # Example: Increase by 50%
+        improved_multiple_1 = current_multiple + 1  # Example improvement for scenario 1
+        improved_multiple_2 = current_multiple + 2  # Example improvement for scenario 2
+
+        improved_valuation_1 = ebitda * improved_multiple_1 if ebitda else annual_revenue * 0.15 * improved_multiple_1
+        improved_valuation_2 = ebitda * improved_multiple_2 if ebitda else annual_revenue * 0.15 * improved_multiple_2
+
+        # Generate insights
+        insights = [
+            f"Your current EBITDA multiple is {current_multiple:.2f}x.",
+            f"Increasing your growth rate, customer retention, or geographic reach can improve your multiple.",
+        ]
 
         # Guidance for improvement
         guidance = [
             {
                 "scenario": "Improved Scenario 1",
-                "valuation": round(improved_scenario_1, 2),
-                "description": "Focus on increasing growth rate and customer retention to achieve a 20% higher valuation."
+                "valuation": round(improved_valuation_1, 2),
+                "multiple": round(improved_multiple_1, 2),
+                "description": "Increase growth rate by 10% and customer retention by 15% to achieve this multiple."
             },
             {
                 "scenario": "Improved Scenario 2",
-                "valuation": round(improved_scenario_2, 2),
-                "description": "Expand geographic reach and emphasize recurring revenue to achieve a 50% higher valuation."
+                "valuation": round(improved_valuation_2, 2),
+                "multiple": round(improved_multiple_2, 2),
+                "description": "Expand geographic reach by 5 states and improve customer retention by 20% to achieve this multiple."
             }
         ]
 
         # Return valuation, insights, and guidance
         return jsonify({
             "valuation": round(valuation, 2),
-            "insights": "<br>".join(insights) if insights else "No additional insights available.",
+            "currentMultiple": round(current_multiple, 2),
+            "insights": "<br>".join(insights),
             "guidance": guidance
         })
 
     except Exception as e:
         return jsonify({"error": f"An error occurred: {str(e)}"}), 400
+
 
 # Run the Flask app
 if __name__ == "__main__":
