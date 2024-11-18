@@ -10,12 +10,16 @@ def valuate():
         # Parse JSON request data
         data = request.json
         industry = data.get("industry")
-        annual_revenue = float(data.get("annualRevenue", 0))
-        ebitda = float(data.get("ebitda", 0))
-        multiple = data.get("multiple", None)
-        growth_rate = float(data.get("growthRate", 0))
-        customer_retention = float(data.get("customerRetention", 0))
-        geographic_reach = float(data.get("geographicReach", 0))
+        annual_revenue = float(data.get("annualRevenue", 0)) if data.get("annualRevenue") else 0
+        ebitda = float(data.get("ebitda", 0)) if data.get("ebitda") else 0
+        multiple = float(data.get("multiple", None)) if data.get("multiple") else None
+        growth_rate = float(data.get("growthRate", 0)) if data.get("growthRate") else 0
+        customer_retention = float(data.get("customerRetention", 0)) if data.get("customerRetention") else 0
+        geographic_reach = float(data.get("geographicReach", 0)) if data.get("geographicReach") else 0
+
+        # Ensure industry is provided
+        if not industry:
+            return jsonify({"error": "Industry is required"}), 400
 
         # Default industry multiples
         industry_multiples = {
