@@ -7,158 +7,140 @@
   <style>
     body {
       font-family: Arial, sans-serif;
+      background-color: #f9f9f9;
       margin: 0;
       padding: 0;
-      background: #f8f9fa;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 600px;
+      background: #fff;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+      text-align: center;
       color: #333;
     }
-
-    header {
-      background: #2c3e50;
-      color: #fff;
-      padding: 20px;
-      text-align: center;
-      font-size: 2em;
-      font-weight: bold;
-    }
-
-    .container {
-      max-width: 800px;
-      margin: 30px auto;
-      padding: 20px;
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    }
-
-    .form-group {
-      margin-bottom: 20px;
-    }
-
-    .form-group label {
+    label {
       display: block;
-      margin-bottom: 8px;
+      margin-bottom: 5px;
       font-weight: bold;
+      color: #555;
     }
-
-    .form-group input, .form-group select {
+    input, select, button {
       width: 100%;
       padding: 10px;
-      font-size: 1em;
+      margin-bottom: 15px;
       border: 1px solid #ccc;
-      border-radius: 5px;
+      border-radius: 4px;
     }
-
     button {
-      width: 100%;
-      background: #27ae60;
-      color: #fff;
-      font-size: 1.2em;
-      border: none;
-      border-radius: 5px;
-      padding: 12px;
+      background-color: #4caf50;
+      color: white;
+      font-size: 16px;
       cursor: pointer;
-      margin-top: 10px;
+      border: none;
     }
-
     button:hover {
-      background: #219150;
+      background-color: #45a049;
     }
-
-    #result, #insights {
+    .result, .insights {
+      display: none;
       margin-top: 20px;
       padding: 15px;
-      border-radius: 5px;
-      font-size: 1em;
+      border-radius: 4px;
+      background-color: #e8f5e9;
+      color: #333;
     }
-
-    #result {
-      background: #e3f9e5;
-      color: #2e7d32;
-    }
-
-    #insights {
-      background: #f8f9fa;
-      border: 1px solid #ddd;
-    }
-
-    footer {
-      text-align: center;
-      margin-top: 30px;
-      font-size: 0.9em;
-      color: #555;
+    .error {
+      display: none;
+      color: #d32f2f;
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
-  <header>
-    Advanced Business Valuation Tool
-  </header>
   <div class="container">
+    <h1>Advanced Business Valuation Tool</h1>
     <form id="valuation-form">
-      <div class="form-group">
-        <label for="industry">Industry</label>
-        <select id="industry" required>
-          <option value="" disabled selected>Select Industry</option>
-          <option value="HVAC - Commercial">HVAC - Commercial</option>
-          <option value="HVAC - Residential">HVAC - Residential</option>
-          <option value="Plumbing">Plumbing</option>
-          <option value="Roofing">Roofing</option>
-          <option value="Landscaping - Commercial">Landscaping - Commercial</option>
-          <option value="Landscaping - Residential">Landscaping - Residential</option>
-          <option value="Manufacturing">Manufacturing</option>
-          <option value="Insurance Agency - Personal Lines">Insurance Agency - Personal Lines</option>
-          <option value="Pest Control - Residential">Pest Control - Residential</option>
-          <option value="Veterinary Practice / Animal Hospital">Veterinary Practice / Animal Hospital</option>
-          <option value="B2B Software">B2B Software</option>
+      <label for="industry">Industry</label>
+      <select id="industry" required>
+        <option value="" disabled selected>Select an Industry</option>
+        <option value="HVAC - Commercial">HVAC - Commercial</option>
+        <option value="HVAC - Residential">HVAC - Residential</option>
+        <option value="Plumbing">Plumbing</option>
+        <option value="Roofing">Roofing</option>
+        <option value="Landscaping - Commercial">Landscaping - Commercial</option>
+        <option value="Landscaping - Residential">Landscaping - Residential</option>
+        <option value="Manufacturing">Manufacturing</option>
+        <option value="Insurance Agency - Personal Lines">Insurance Agency - Personal Lines</option>
+        <option value="Pest Control - Residential">Pest Control - Residential</option>
+        <option value="Veterinary Practice / Animal Hospital">Veterinary Practice / Animal Hospital</option>
+        <option value="B2B Software">B2B Software</option>
+      </select>
+
+      <div id="b2b-software-options" style="display: none;">
+        <label for="b2b-subindustry">B2B Sub-Industry</label>
+        <select id="b2b-subindustry">
+          <option value="" disabled selected>Select a Sub-Industry</option>
+          <option value="SaaS">SaaS</option>
+          <option value="FinTech">FinTech</option>
+          <option value="MarTech">MarTech</option>
+          <option value="HealthTech">HealthTech</option>
         </select>
       </div>
 
-      <div class="form-group">
-        <label for="annual-revenue">Annual Revenue ($)</label>
-        <input type="number" id="annual-revenue" placeholder="Enter annual revenue">
-      </div>
+      <label for="annual-revenue">Annual Revenue ($)</label>
+      <input type="number" id="annual-revenue" step="0.01" required>
 
-      <div class="form-group">
-        <label for="ebitda">EBITDA ($)</label>
-        <input type="number" id="ebitda" placeholder="Enter EBITDA">
-        <button type="button" id="calc-ebitda">Estimate EBITDA</button>
-      </div>
+      <label for="ebitda">EBITDA ($)</label>
+      <input type="number" id="ebitda" step="0.01">
+      <button type="button" id="calc-ebitda">Estimate EBITDA</button>
 
-      <div class="form-group">
-        <label for="growth-rate">Growth Rate (%)</label>
-        <input type="number" id="growth-rate" placeholder="Enter growth rate (optional)">
-      </div>
+      <label for="growth-rate">Growth Rate (%)</label>
+      <input type="number" id="growth-rate" placeholder="Optional">
 
-      <div class="form-group">
-        <label for="customer-retention">Customer Retention (%)</label>
-        <input type="number" id="customer-retention" placeholder="Enter customer retention (optional)">
-      </div>
+      <label for="customer-retention">Customer Retention (%)</label>
+      <input type="number" id="customer-retention" placeholder="Optional">
 
-      <div class="form-group">
-        <label for="geographic-reach">Geographic Reach (# of States)</label>
-        <input type="number" id="geographic-reach" placeholder="Enter number of states (optional)">
-      </div>
+      <label for="geographic-reach">Geographic Reach (# of States)</label>
+      <input type="number" id="geographic-reach" placeholder="Optional">
+
+      <label for="ebitda-multiple">EBITDA Multiple</label>
+      <input type="number" id="ebitda-multiple" step="0.01">
 
       <button type="submit">Calculate Valuation</button>
     </form>
-    <div id="result" style="display: none;"></div>
-    <div id="insights" style="display: none;"></div>
+
+    <div id="result" class="result"></div>
+    <div id="insights" class="insights"></div>
+    <div id="error" class="error">An error occurred. Please try again.</div>
   </div>
-  <footer>
-    Designed for modern entrepreneurs to unlock business potential.
-  </footer>
 
   <script>
+    document.getElementById("industry").addEventListener("change", (event) => {
+      const industry = event.target.value;
+      document.getElementById("b2b-software-options").style.display = industry === "B2B Software" ? "block" : "none";
+    });
+
     document.getElementById("valuation-form").addEventListener("submit", async (event) => {
       event.preventDefault();
 
       const industry = document.getElementById("industry").value;
+      const b2bSubIndustry = document.getElementById("b2b-subindustry").value || null;
       const annualRevenue = parseFloat(document.getElementById("annual-revenue").value) || 0;
       const ebitda = parseFloat(document.getElementById("ebitda").value) || 0;
       const growthRate = parseFloat(document.getElementById("growth-rate").value) || null;
       const customerRetention = parseFloat(document.getElementById("customer-retention").value) || null;
       const geographicReach = parseFloat(document.getElementById("geographic-reach").value) || null;
+      const multiple = parseFloat(document.getElementById("ebitda-multiple").value) || null;
 
       try {
         const response = await fetch("https://pest-control-valuation.onrender.com/api/valuate", {
@@ -168,11 +150,13 @@
           },
           body: JSON.stringify({
             industry,
+            b2bSubIndustry,
             annualRevenue,
             ebitda,
             growthRate,
             customerRetention,
             geographicReach,
+            multiple,
           }),
         });
 
@@ -184,8 +168,7 @@
         document.getElementById("insights").innerHTML = `<strong>Key Insights:</strong><br>${data.insights}`;
       } catch (error) {
         console.error("Error:", error);
-        document.getElementById("result").style.display = "block";
-        document.getElementById("result").innerHTML = "An error occurred. Please try again.";
+        document.getElementById("error").style.display = "block";
       }
     });
 
