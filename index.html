@@ -60,11 +60,7 @@
       color: #333;
     }
     .error {
-      display: none;
       color: #d32f2f;
-      margin-top: 20px;
-    }
-    canvas {
       margin-top: 20px;
     }
   </style>
@@ -87,7 +83,7 @@
       </select>
 
       <label for="annual-revenue">Annual Revenue ($)</label>
-      <input type="number" id="annual-revenue" placeholder="Enter Annual Revenue" required>
+      <input type="number" id="annual-revenue" placeholder="Enter Annual Revenue">
 
       <label for="ebitda">EBITDA ($)</label>
       <input type="number" id="ebitda" placeholder="Enter EBITDA">
@@ -108,133 +104,122 @@
       <label for="recurring-revenue">Recurring Revenue ($)</label>
       <input type="number" id="recurring-revenue" placeholder="Optional Recurring Revenue">
 
-
       <button type="submit">Calculate Valuation</button>
     </form>
 
     <div id="result" class="result"></div>
     <div id="insights" class="insights"></div>
     <div id="guidance" class="guidance"></div>
-    <div id="error" class="error">An error occurred. Please try again.</div>
+    <div id="error" class="error" style="display: none;">An error occurred. Please try again.</div>
 
+    <!-- Chart Container -->
     <canvas id="valuation-chart" width="400" height="200"></canvas>
   </div>
 
   <script>
-    let valuationChart = null;
+    let valuationChart;
 
+    // Initialize Chart.js
     function initializeChart() {
       const ctx = document.getElementById('valuation-chart').getContext('2d');
       valuationChart = new Chart(ctx, {
         type: 'bar',
         data: {
-          labels: ['Current Scenario', 'Improved Scenario 1', 'Improved Scenario 2'], // Dynamic labels
+          labels: ['Current Scenario', 'Improved Scenario 1', 'Improved Scenario 2'],
           datasets: [{
             label: 'Valuation ($)',
-            data: [0, 0, 0], // Dynamic data
-            backgroundColor: ['rgba(75, 192, 192, 0.2)', 'rgba(54, 162, 235, 0.2)', 'rgba(255, 206, 86, 0.2)'],
-            borderColor: ['rgba(75, 192, 192, 1)', 'rgba(54, 162, 235, 1)', 'rgba(255, 206, 86, 1)'],
-            borderWidth: 1,
+            data: [0, 0, 0], // Placeholder data
+            backgroundColor: [
+              'rgba(75, 192, 192, 0.2)',
+              'rgba(54, 162, 235, 0.2)',
+              'rgba(255, 206, 86, 0.2)'
+            ],
+            borderColor: [
+              'rgba(75, 192, 192, 1)',
+              'rgba(54, 162, 235, 1)',
+              'rgba(255, 206, 86, 1)'
+            ],
+            borderWidth: 1
           }]
         },
         options: {
           responsive: true,
-          plugins: {
-            tooltip: {
-              callbacks: {
-                label: function (context) {
-                  return `Valuation: $${context.raw.toLocaleString()}`;
-                },
-              },
-            },
-            datalabels: {
-              anchor: 'end',
-              align: 'top',
-              formatter: function (value, context) {
-                const multiples = ['X Multiple 1', 'X Multiple 2'];
-              },
-            },
-          },
           scales: {
             y: {
-              beginAtZero: true,
-            },
-          },
-        },
+              beginAtZero: true
+            }
+          }
+        }
       });
     }
-    
-    document.addEventListener('DOMContentLoaded', () => {
-    // Initialize the chart
-    initializeChart();
+
+    document.addEventListener('DOMContentLoaded', initializeChart);
 
     document.getElementById('valuation-form').addEventListener('submit', async (event) => {
-        event.preventDefault();
+      event.preventDefault();
 
-        // Get form values
-        const industry = document.getElementById('industry').value;
-        const annualRevenue = parseFloat(document.getElementById('annual-revenue').value) || 0;
-        const ebitda = parseFloat(document.getElementById('ebitda').value) || 0;
-        const growthRate = parseFloat(document.getElementById('growth-rate').value) || null;
-        const customerRetention = parseFloat(document.getElementById('customer-retention').value) || null;
-        const geographicReach = parseFloat(document.getElementById('geographic-reach').value) || null;
-        const multiple = parseFloat(document.getElementById('ebitda-multiple').value) || null;
-        const recurringRevenue = parseFloat(document.getElementById('recurring-revenue').value) || 0;
+      const industry = document.getElementById('industry').value;
+      const annualRevenue = parseFloat(document.getElementById('annual-revenue').value) || 0;
+      const ebitda = parseFloat(document.getElementById('ebitda').value) || 0;
+      const growthRate = parseFloat(document.getElementById('growth-rate').value) || null;
+      const customerRetention = parseFloat(document.getElementById('customer-retention').value) || null;
+      const geographicReach = parseFloat(document.getElementById('geographic-reach').value) || null;
+      const multiple = parseFloat(document.getElementById('ebitda-multiple').value) || null;
+      const recurringRevenue = parseFloat(document.getElementById('recurring-revenue').value) || 0;
 
-        try {
-            const response = await fetch('https://pest-control-valuation.onrender.com/api/valuate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    industry,
-                    annualRevenue,
-                    ebitda,
-                    growthRate,
-                    customerRetention,
-                    geographicReach,
-                    multiple,
-                    recurringRevenue,
-                }),
-            });
+      try {
+        const response = await fetch('https://pest-control-valuation.onrender.com/api/valuate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            industry,
+            annualRevenue,
+            ebitda,
+            growthRate,
+            customerRetention,
+            geographicReach,
+            multiple,
+            recurringRevenue
+          })
+        });
 
-            const data = await response.json();
+        const data = await response.json();
 
-            if (!response.ok) throw new Error(data.message || 'Unknown error');
+        if (!response.ok) throw new Error(data.error || 'Unknown error');
 
-            // Current valuation and multiple
-            const currentMultiple = data.currentMultiple;
-            const currentValuation = data.valuation;
+        // Update Chart.js Data
+        valuationChart.data.datasets[0].data = [
+          data.valuation,
+          data.guidance[0].valuation,
+          data.guidance[1].valuation
+        ];
+        valuationChart.update();
 
-            // Improved scenarios
-            const improvedScenario1 = data.guidance[0].valuation;
-            const improvedScenario2 = data.guidance[1].valuation;
-            const multipleScenario1 = data.guidance[0].multiple;
-            const multipleScenario2 = data.guidance[1].multiple;
-
-            // Display results
-            document.getElementById('result').innerHTML = `
-                <strong>Estimated Valuation:</strong> $${currentValuation.toLocaleString()} (${currentMultiple}x)
-            `;
-            document.getElementById('insights').innerHTML = `
-                <strong>Insights:</strong><br>${data.insights}
-            `;
-            document.getElementById('guidance').innerHTML = `
-                <strong>How to Improve Your Valuation</strong><br>
-                ${data.guidance.map(g => `<li>${g.description}</li>`).join('')}
-            `;
-        } catch (error) {
-            document.getElementById('error').textContent = error.message;
-            document.getElementById('error').style.display = 'block';
-        }
+        // Display Results
+        document.getElementById('result').innerHTML = `
+          <strong>Estimated Valuation:</strong> $${data.valuation.toLocaleString()} (${data.currentMultiple}x)
+        `;
+        document.getElementById('insights').innerHTML = `
+          <strong>Insights:</strong><br>${data.insights}
+        `;
+        document.getElementById('guidance').innerHTML = `
+          <strong>How to Improve Your Valuation:</strong>
+          <ul>
+            ${data.guidance.map(g => `<li>${g.description}</li>`).join('')}
+          </ul>
+        `;
+      } catch (error) {
+        document.getElementById('error').textContent = error.message;
+        document.getElementById('error').style.display = 'block';
+      }
     });
 
     document.getElementById('calc-ebitda').addEventListener('click', () => {
-        const annualRevenue = parseFloat(document.getElementById('annual-revenue').value) || 0;
-        const estimatedEBITDA = (annualRevenue * 0.15).toFixed(2);
-        document.getElementById('ebitda').value = estimatedEBITDA;
-        alert(`Estimated EBITDA is $${estimatedEBITDA}`);
+      const annualRevenue = parseFloat(document.getElementById('annual-revenue').value) || 0;
+      const estimatedEBITDA = (annualRevenue * 0.15).toFixed(2);
+      document.getElementById('ebitda').value = estimatedEBITDA;
+      alert(`Estimated EBITDA is $${estimatedEBITDA}`);
     });
-});
-    </script>
-  </body>
+  </script>
+</body>
 </html>
