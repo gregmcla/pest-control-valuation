@@ -98,12 +98,16 @@ def valuate():
             }
         ]
 
-        # Return valuation, insights, and guidance
-        return jsonify({
-            "valuation": round(valuation, 2),
-            "currentMultiple": round(current_multiple, 2),
-            "insights": "<br>".join(insights),
-            "guidance": guidance
+       # Return valuation, insights, and guidance
+       response_data = {
+           "valuation": round(valuation, 2),
+           "currentMultiple": round(current_multiple, 2),
+           "insights": "<br>".join(insights),
+           "guidance": guidance
+       }
+       print(f"DEBUG: Response Data: {response_data}")  # Log the response data
+       return jsonify(response_data) # Return valuation, insights, and guidance
+
         })
 
     except Exception as e:
