@@ -4,6 +4,7 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
+
 @app.route("/api/valuate", methods=["POST"])
 def valuate():
     try:
@@ -26,8 +27,6 @@ def valuate():
         recurring_revenue_percent = 0
         if annual_revenue > 0:
             recurring_revenue_percent = (recurring_revenue / annual_revenue) * 100
-        else:
-            recurring_revenue_percent = 0
 
         # Log debug information
         print(f"DEBUG: Annual Revenue: {annual_revenue}, Recurring Revenue: {recurring_revenue}, Recurring Revenue %: {recurring_revenue_percent}")
@@ -75,7 +74,6 @@ def valuate():
         improved_valuation_2 = ebitda * improved_multiple_2 if ebitda else annual_revenue * 0.15 * improved_multiple_2
 
         # Generate insights
-        recurring_revenue_percent = (recurring_revenue / annual_revenue) * 100 if annual_revenue else 0
         insights = [
             f"Your current EBITDA multiple is {current_multiple:.2f}x.",
             f"Recurring revenue contributes {recurring_revenue_percent:.2f}% of your total revenue, boosting your valuation multiple.",
@@ -98,17 +96,15 @@ def valuate():
             }
         ]
 
-       # Return valuation, insights, and guidance
-       response_data = {
-           "valuation": round(valuation, 2),
-           "currentMultiple": round(current_multiple, 2),
-           "insights": "<br>".join(insights),
-           "guidance": guidance
-       }
-       print(f"DEBUG: Response Data: {response_data}")  # Log the response data
-       return jsonify(response_data) # Return valuation, insights, and guidance
-
-        })
+        # Return valuation, insights, and guidance
+        response_data = {
+            "valuation": round(valuation, 2),
+            "currentMultiple": round(current_multiple, 2),
+            "insights": "<br>".join(insights),
+            "guidance": guidance
+        }
+        print(f"DEBUG: Response Data: {response_data}")  # Log the response data
+        return jsonify(response_data)  # Return valuation, insights, and guidance
 
     except Exception as e:
         return jsonify({"error": f"An error occurred: {str(e)}"}), 400
