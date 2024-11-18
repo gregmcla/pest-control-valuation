@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Business Valuation Tool</title>
   <style>
@@ -64,13 +65,16 @@
       color: #d32f2f;
       margin-top: 20px;
     }
+    canvas {
+      margin-top: 20px;
+    }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
   <div class="container">
     <h1>Business Valuation Tool</h1>
     <form id="valuation-form">
-      <!-- Industry Dropdown -->
       <label for="industry">Industry</label>
       <select id="industry" required>
         <option value="" disabled selected>Select an Industry</option>
@@ -83,7 +87,7 @@
         <option value="Manufacturing">Manufacturing</option>
       </select>
 
-      <!-- Sub-Industry Dropdown -->
+      <!-- Sub-Industry Dropdown (for B2B Software) -->
       <div id="b2b-software-options" style="display: none;">
         <label for="b2b-subindustry">B2B Sub-Industry</label>
         <select id="b2b-subindustry">
@@ -95,7 +99,6 @@
         </select>
       </div>
 
-      <!-- Input Fields -->
       <label for="annual-revenue">Annual Revenue ($)</label>
       <input type="number" id="annual-revenue" placeholder="Enter Annual Revenue" required>
 
@@ -114,22 +117,116 @@
       <label for="ebitda-multiple">EBITDA Multiple</label>
       <input type="number" id="ebitda-multiple" placeholder="Optional Multiple">
 
-      <!-- Submit Button -->
       <button type="submit">Calculate Valuation</button>
     </form>
 
-    <!-- Results Section -->
     <div id="result" class="result"></div>
     <div id="insights" class="insights"></div>
     <div id="error" class="error">An error occurred. Please try again.</div>
 
-    <!-- Save Scenario Button -->
-    <button id="save-scenario">Save Scenario</button>
+    <canvas id="valuation-chart" width="400" height="200"></canvas>
   </div>
 
-  <!-- Include Script -->
   <script>
-    // JavaScript code here
+    // Initialize the chart
+    let valuationChart = null;
+
+    function initializeChart() {
+      const ctx = document.getElementById('valuation-chart').getContext('2d');
+      valuationChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: [], // Dynamic labels
+          datasets: [{
+            label: 'Valuations',
+            data: [], // Dynamic data
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1,
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    }
+
+    function addChartData(valuation) {
+      if (!valuationChart) return; // Ensure the chart is initialized
+      valuationChart.data.labels.push('New Valuation'); // Add a new label
+      valuationChart.data.datasets[0].data.push(valuation); // Add the valuation data
+      valuationChart.update(); // Update the chart
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initializeChart(); // Initialize the chart on page load
+
+      // Show B2B Sub-Industry dropdown if B2B Software is selected
+      document.getElementById('industry').addEventListener('change', (event) => {
+        const industry = event.target.value;
+        const b2bOptions = document.getElementById('b2b-software-options');
+        if (industry === "B2B Software") {
+          b2bOptions.style.display = "block";
+        } else {
+          b2bOptions.style.display = "none";
+        }
+      });
+
+      document.getElementById('valuation-form').addEventListener('submit', async (event) => {
+        event.preventDefault(); // Prevent form refresh
+
+        // Get form values
+        const industry = document.getElementById('industry').value;
+        const b2bSubIndustry = document.getElementById('b2b-subindustry')?.value || null;
+        const annualRevenue = parseFloat(document.getElementById('annual-revenue').value) || 0;
+        const ebitda = parseFloat(document.getElementById('ebitda').value) || 0;
+        const growthRate = parseFloat(document.getElementById('growth-rate').value) || null;
+        const customerRetention = parseFloat(document.getElementById('customer-retention').value) || null;
+        const geographicReach = parseFloat(document.getElementById('geographic-reach').value) || null;
+        const multiple = parseFloat(document.getElementById('ebitda-multiple').value) || null;
+
+        try {
+          // Send data to the backend
+          const response = await fetch('https://pest-control-valuation.onrender.com/api/valuate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              industry,
+              b2bSubIndustry,
+              annualRevenue,
+              ebitda,
+              growthRate,
+              customerRetention,
+              geographicReach,
+              multiple,
+            }),
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) throw new Error(data.message || 'Unknown error');
+
+          // Display results
+          document.getElementById('result').style.display = 'block';
+          document.getElementById('result').innerHTML = `<strong>Estimated Valuation:</strong> $${data.valuation.toLocaleString()}`;
+          document.getElementById('insights').style.display = 'block';
+          document.getElementById('insights').innerHTML = `<strong>Insights:</strong><br>${data.insights}`;
+
+          // Update the chart
+          addChartData(data.valuation);
+
+        } catch (error) {
+          // Display error message
+          document.getElementById('error').textContent = error.message;
+          document.getElementById('error').style.display = 'block';
+        }
+      });
+    });
   </script>
 </body>
 </html>

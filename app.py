@@ -10,6 +10,7 @@ def valuate():
         # Parse JSON request data
         data = request.json
         industry = data.get("industry")
+        b2b_subindustry = data.get("b2bSubIndustry", None)
         annual_revenue = float(data.get("annualRevenue", 0))
         ebitda = float(data.get("ebitda", 0))
         multiple = data.get("multiple", None)
@@ -52,23 +53,41 @@ def valuate():
 
         # Generate insights
         insights = []
+
+        # General growth rate insights
         if growth_rate:
             if growth_rate > 15:
                 insights.append(f"Your high growth rate of {growth_rate}% is driving an increased valuation multiple.")
             elif growth_rate < 5:
                 insights.append(f"A low growth rate of {growth_rate}% might reduce your valuation multiple.")
+
+        # Customer retention insights
         if customer_retention:
             if customer_retention > 90:
                 insights.append(f"Excellent customer retention ({customer_retention}%) boosts your valuation.")
             elif customer_retention < 70:
                 insights.append(f"Customer retention at {customer_retention}% is below industry standards.")
+
+        # Geographic reach insights
         if geographic_reach:
             if geographic_reach > 10:
                 insights.append(f"Operating in {geographic_reach} states significantly enhances your valuation.")
             else:
                 insights.append(f"Geographic reach in {geographic_reach} states provides moderate impact on valuation.")
+
+        # B2B Software-specific insights
         if industry == "B2B Software":
             insights.append("B2B software businesses often see high multiples due to scalability and recurring revenue.")
+            if b2b_subindustry:
+                # Sub-Industry specific insights
+                if b2b_subindustry == "SaaS":
+                    insights.append("SaaS businesses are valued highly for their recurring subscription revenue models.")
+                elif b2b_subindustry == "FinTech":
+                    insights.append("FinTech businesses attract strong valuations due to their disruptive potential in finance.")
+                elif b2b_subindustry == "MarTech":
+                    insights.append("MarTech businesses benefit from high demand for data-driven marketing solutions.")
+                elif b2b_subindustry == "HealthTech":
+                    insights.append("HealthTech businesses command high valuations due to their impact on healthcare innovation.")
 
         # Return valuation and insights
         return jsonify({
