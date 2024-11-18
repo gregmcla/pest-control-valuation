@@ -13,8 +13,9 @@ def valuate():
     data = request.json
     annual_revenue = data.get('annual_revenue', 0)
     ebitda = data.get('ebitda', 0)
-    multiple = data.get('multiple', 5)
-    valuation = ebitda * multiple
+    industry = data.get('industry', '')
+    # Replace the following with your valuation logic
+    valuation = ebitda * 5
     return jsonify({'valuation': valuation})
 
 if __name__ == '__main__':
