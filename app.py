@@ -42,4 +42,4 @@ def valuate():
 
         return jsonify({"valuation": valuation, "insights": insights})
     except Exception as e:
-        return jsonify({"error": "Server Error", "details": str
+        return jsonify({"error": "Server Error", "details": str(e)})
