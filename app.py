@@ -12,6 +12,7 @@ def valuate():
         industry = data.get("industry")
         annual_revenue = float(data.get("annualRevenue", 0)) if data.get("annualRevenue") else 0
         ebitda = float(data.get("ebitda", 0)) if data.get("ebitda") else 0
+        recurring_revenue = float(data.get("recurringRevenue", 0)) if data.get("recurringRevenue") else 0
         multiple = float(data.get("multiple", None)) if data.get("multiple") else None
         growth_rate = float(data.get("growthRate", 0)) if data.get("growthRate") else 0
         customer_retention = float(data.get("customerRetention", 0)) if data.get("customerRetention") else 0
@@ -48,6 +49,8 @@ def valuate():
             adjustment += (customer_retention - 80) * 0.05  # Customer retention adjustment
         if geographic_reach > 0:
             adjustment += geographic_reach * 0.02  # Geographic reach adjustment
+        if recurring_revenue > 0:
+            adjustment += (recurring_revenue / annual_revenue) * 2  # Recurring revenue bonus
 
         current_multiple = multiple + adjustment
 
@@ -62,9 +65,11 @@ def valuate():
         improved_valuation_2 = ebitda * improved_multiple_2 if ebitda else annual_revenue * 0.15 * improved_multiple_2
 
         # Generate insights
+        recurring_revenue_percent = (recurring_revenue / annual_revenue) * 100 if annual_revenue else 0
         insights = [
             f"Your current EBITDA multiple is {current_multiple:.2f}x.",
-            f"Increasing your growth rate, customer retention, or geographic reach can improve your multiple.",
+            f"Recurring revenue contributes {recurring_revenue_percent:.2f}% of your total revenue, boosting your valuation multiple.",
+            f"Increasing your growth rate, customer retention, or geographic reach can further improve your multiple.",
         ]
 
         # Guidance for improvement
@@ -79,7 +84,7 @@ def valuate():
                 "scenario": "Improved Scenario 2",
                 "valuation": round(improved_valuation_2, 2),
                 "multiple": round(improved_multiple_2, 2),
-                "description": "Expand geographic reach by 5 states and improve customer retention by 20% to achieve this multiple."
+                "description": "Expand geographic reach by 5 states and improve recurring revenue by 20% to achieve this multiple."
             }
         ]
 
