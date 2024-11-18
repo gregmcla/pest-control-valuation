@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Business Valuation Tool</title>
+    <title>Enhanced Business Valuation Tool</title>
     <style>
         /* General Reset */
         * {
@@ -17,120 +17,78 @@
             background-color: #f4f4f4;
             color: #333;
             line-height: 1.6;
-        }
-
-        header {
-            background: linear-gradient(135deg, #1e1e1e, #4a4a4a);
-            color: white;
-            padding: 50px 20px;
-            text-align: center;
-            position: relative;
-        }
-
-        header h1 {
-            font-size: 2.5rem;
-            font-weight: bold;
-        }
-
-        header p {
-            margin-top: 10px;
-            font-size: 1.2rem;
-            opacity: 0.8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
         }
 
         .container {
-            max-width: 900px;
-            margin: 40px auto;
-            padding: 20px;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        h2 {
-            font-size: 1.8rem;
-            margin-bottom: 20px;
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px 30px;
+            width: 600px;
             text-align: center;
-            color: #1e1e1e;
         }
 
-        .form-group {
+        h1 {
+            font-size: 1.8rem;
+            color: #444;
             margin-bottom: 20px;
-            position: relative;
         }
 
         label {
-            display: block;
-            font-weight: bold;
+            font-size: 1rem;
             margin-bottom: 5px;
+            display: block;
+            text-align: left;
         }
 
-        input, select {
+        input, select, button {
             width: 100%;
-            padding: 15px;
-            font-size: 16px;
-            border: 2px solid #ccc;
-            border-radius: 8px;
-            transition: border 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        input:focus, select:focus {
-            border: 2px solid #4CAF50;
-            box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
-            outline: none;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
         }
 
         button {
-            display: block;
-            width: 100%;
-            padding: 15px;
-            font-size: 1rem;
-            font-weight: bold;
+            background-color: #007bff;
             color: white;
-            background: linear-gradient(135deg, #4CAF50, #2e7d32);
             border: none;
-            border-radius: 8px;
             cursor: pointer;
-            transition: background 0.3s ease, transform 0.2s ease;
+            font-weight: bold;
         }
 
         button:hover {
-            background: linear-gradient(135deg, #2e7d32, #1b5e20);
-            transform: scale(1.02);
+            background-color: #0056b3;
         }
 
-        #result {
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: #2e7d32;
-            margin-top: 20px;
-            text-align: center;
+        .result, .insights {
+            margin-top: 15px;
+            font-size: 1rem;
+            color: #333;
+            text-align: left;
         }
 
-        #insights {
-            margin-top: 40px;
-            padding: 20px;
-            background: #f1f8e9;
-            border-radius: 10px;
-            border-left: 6px solid #4CAF50;
-        }
-
-        #insights h3 {
-            color: #1b5e20;
-            margin-bottom: 15px;
+        .insights h3 {
+            margin-top: 15px;
+            font-size: 1.2rem;
+            color: #444;
         }
 
         footer {
-            margin-top: 50px;
-            text-align: center;
+            margin-top: 20px;
             font-size: 0.9rem;
             color: #777;
         }
 
         footer a {
-            color: #4CAF50;
+            color: #007bff;
             text-decoration: none;
-            font-weight: bold;
         }
 
         footer a:hover {
@@ -139,92 +97,131 @@
     </style>
 </head>
 <body>
-    <header>
-        <h1>Business Valuation Tool</h1>
-        <p>The smarter way to assess lower middle market businesses.</p>
-    </header>
     <div class="container">
-        <form id="valuationForm" onsubmit="return valuate(event);">
-            <h2>Enter Business Details</h2>
-            <div class="form-group">
-                <label for="industry">Industry</label>
-                <select id="industry" onchange="updateMultiple()">
-                    <option value="5" selected>HVAC - Commercial</option>
-                    <option value="4.5">HVAC - Residential</option>
-                    <option value="4">Plumbing</option>
-                    <option value="3.5">Roofing</option>
-                    <option value="4">Landscaping - Commercial</option>
-                    <option value="3">Landscaping - Residential</option>
-                    <option value="6">Manufacturing</option>
-                    <option value="3">Insurance Agency - Personal Lines</option>
-                    <option value="5">Pest Control - Residential</option>
-                    <option value="6">Veterinary Practice / Animal Hospital</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="annual_revenue">Annual Revenue ($)</label>
-                <input type="number" id="annual_revenue" required>
-            </div>
-            <div class="form-group">
-                <label for="ebitda">EBITDA ($)</label>
-                <input type="number" id="ebitda" required>
-            </div>
-            <div class="form-group">
-                <label for="multiple">EBITDA Multiple</label>
-                <input type="number" id="multiple" readonly>
-            </div>
+        <h1>Enhanced Business Valuation Tool</h1>
+        <form id="valuationForm">
+            <label for="industry">Industry</label>
+            <select id="industry">
+                <option value="5">HVAC - Commercial</option>
+                <option value="4.5">HVAC - Residential</option>
+                <option value="4.2">Plumbing</option>
+                <option value="3.8">Roofing</option>
+                <option value="4.0">Landscaping - Commercial</option>
+                <option value="3.6">Landscaping - Residential</option>
+                <option value="6.0">Manufacturing</option>
+                <option value="5.5">Insurance Agency - Personal Lines</option>
+                <option value="6.5">Pest Control - Residential</option>
+                <option value="7.0">Veterinary Practice / Animal Hospital</option>
+            </select>
+
+            <label for="annualRevenue">Annual Revenue ($)</label>
+            <input type="number" id="annualRevenue" placeholder="Enter annual revenue" required>
+
+            <label for="ebitda">EBITDA ($)</label>
+            <input type="number" id="ebitda" placeholder="Enter EBITDA" required>
+
+            <label for="employees">Number of Employees</label>
+            <input type="number" id="employees" placeholder="Enter number of employees" required>
+
+            <label for="grossProfit">Gross Profit ($)</label>
+            <input type="number" id="grossProfit" placeholder="Enter gross profit" required>
+
+            <label for="operatingExpenses">Operating Expenses ($)</label>
+            <input type="number" id="operatingExpenses" placeholder="Enter operating expenses" required>
+
+            <label for="growthRate">Annual Growth Rate (%)</label>
+            <input type="number" id="growthRate" placeholder="Enter growth rate" required>
+
+            <label for="multiple">EBITDA Multiple</label>
+            <input type="number" id="multiple" placeholder="Automatically filled" readonly>
+
             <button type="submit">Calculate Valuation</button>
         </form>
-        <div id="result"></div>
-        <div id="insights" style="display: none;">
-            <h3>Insights</h3>
-            <p id="growthSuggestion"></p>
-            <p id="marginAnalysis"></p>
-        </div>
+
+        <div id="result" class="result"></div>
+        <div id="insights" class="insights"></div>
+        <div id="error" class="error"></div>
+
+        <footer>
+            Designed with ❤️ by <a href="#">Your Name</a>
+        </footer>
     </div>
-    <footer>
-        <p>Designed with ❤️ by <a href="https://www.yourwebsite.com" target="_blank">Your Name</a></p>
-    </footer>
+
     <script>
-        window.onload = function () {
-            updateMultiple();
-        };
+        const form = document.getElementById("valuationForm");
+        const industry = document.getElementById("industry");
+        const annualRevenue = document.getElementById("annualRevenue");
+        const ebitda = document.getElementById("ebitda");
+        const employees = document.getElementById("employees");
+        const grossProfit = document.getElementById("grossProfit");
+        const operatingExpenses = document.getElementById("operatingExpenses");
+        const growthRate = document.getElementById("growthRate");
+        const multipleInput = document.getElementById("multiple");
+        const resultDiv = document.getElementById("result");
+        const insightsDiv = document.getElementById("insights");
+        const errorDiv = document.getElementById("error");
 
-        function updateMultiple() {
-            const industry = document.getElementById("industry");
-            const multiple = document.getElementById("multiple");
-            multiple.value = industry.value;
-        }
+        // Update multiple field when industry changes
+        industry.addEventListener("change", () => {
+            multipleInput.value = industry.value;
+        });
 
-        async function valuate(event) {
-            event.preventDefault();
-
-            const revenue = parseFloat(document.getElementById("annual_revenue").value);
-            const ebitda = parseFloat(document.getElementById("ebitda").value);
-            const multiple = parseFloat(document.getElementById("multiple").value);
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const multiple = parseFloat(industry.value);
+            const revenue = parseFloat(annualRevenue.value);
+            const ebitdaValue = parseFloat(ebitda.value);
+            const numEmployees = parseInt(employees.value);
+            const grossProfitValue = parseFloat(grossProfit.value);
+            const operatingExpensesValue = parseFloat(operatingExpenses.value);
+            const growthRateValue = parseFloat(growthRate.value);
 
             try {
-                const response = await fetch('https://pest-control-valuation.onrender.com/ape/valuate', {
+                const response = await fetch('https://pest-control-valuation.onrender.com/api/valuate', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
                         annual_revenue: revenue,
-                        ebitda: ebitda,
+                        ebitda: ebitdaValue,
                         multiple: multiple,
                     }),
                 });
 
-                if (!response.ok) throw new Error("Failed to fetch");
                 const data = await response.json();
 
-                document.getElementById("result").innerText = `Estimated Valuation: $${data.valuation.toLocaleString()}`;
+                if (response.ok) {
+                    const valuation = data.valuation;
+
+                    // Calculate additional metrics
+                    const revenuePerEmployee = revenue / numEmployees;
+                    const grossProfitMargin = (grossProfitValue / revenue) * 100;
+                    const operatingExpenseRatio = (operatingExpensesValue / revenue) * 100;
+                    const ebitdaMargin = (ebitdaValue / revenue) * 100;
+                    const growthImpact = valuation * (1 + growthRateValue / 100);
+
+                    resultDiv.textContent = `Valuation: $${valuation.toLocaleString()}`;
+
+                    insightsDiv.innerHTML = `
+                        <h3>Additional Insights:</h3>
+                        <p><strong>Revenue per Employee:</strong> $${revenuePerEmployee.toLocaleString()}</p>
+                        <p><strong>Gross Profit Margin:</strong> ${grossProfitMargin.toFixed(2)}%</p>
+                        <p><strong>Operating Expense Ratio:</strong> ${operatingExpenseRatio.toFixed(2)}%</p>
+                        <p><strong>EBITDA Margin:</strong> ${ebitdaMargin.toFixed(2)}%</p>
+                        <p><strong>Growth Impact on Valuation:</strong> $${growthImpact.toLocaleString()}</p>
+                    `;
+                    errorDiv.textContent = '';
+                } else {
+                    throw new Error(data.message || 'Something went wrong');
+                }
             } catch (error) {
-                document.getElementById("result").innerText = "An error occurred. Please try again.";
-                console.error("Error:", error);
+                errorDiv.textContent = 'An error occurred. Please try again.';
+                resultDiv.textContent = '';
+                insightsDiv.textContent = '';
+                console.error(error);
             }
-        }
+        });
     </script>
 </body>
 </html>
