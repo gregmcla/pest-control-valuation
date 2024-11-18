@@ -22,6 +22,16 @@ def valuate():
         if not industry:
             return jsonify({"error": "Industry is required"}), 400
 
+        # Calculate recurring revenue percentage
+        recurring_revenue_percent = 0
+        if annual_revenue > 0:
+            recurring_revenue_percent = (recurring_revenue / annual_revenue) * 100
+        else:
+            recurring_revenue_percent = 0
+
+        # Log debug information
+        print(f"DEBUG: Annual Revenue: {annual_revenue}, Recurring Revenue: {recurring_revenue}, Recurring Revenue %: {recurring_revenue_percent}")
+
         # Default industry multiples
         industry_multiples = {
             "HVAC - Commercial": 5,

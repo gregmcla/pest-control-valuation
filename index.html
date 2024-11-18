@@ -167,93 +167,65 @@
     document.addEventListener('DOMContentLoaded', () => {
       initializeChart();
     document.getElementById('valuation-form').addEventListener('submit', async (event) => {
-      event.preventDefault();
+    event.preventDefault();
 
-        // Get form values
-        const industry = document.getElementById('industry').value;
-        const annualRevenue = parseFloat(document.getElementById('annual-revenue').value) || 0;
-        const ebitda = parseFloat(document.getElementById('ebitda').value) || 0;
-        const growthRate = parseFloat(document.getElementById('growth-rate').value) || null;
-        const customerRetention = parseFloat(document.getElementById('customer-retention').value) || null;
-        const geographicReach = parseFloat(document.getElementById('geographic-reach').value) || null;
-        const multiple = parseFloat(document.getElementById('ebitda-multiple').value) || null;
+    // Get form values
+    const industry = document.getElementById('industry').value;
+    const annualRevenue = parseFloat(document.getElementById('annual-revenue').value) || 0;
+    const ebitda = parseFloat(document.getElementById('ebitda').value) || 0;
+    const growthRate = parseFloat(document.getElementById('growth-rate').value) || null;
+    const customerRetention = parseFloat(document.getElementById('customer-retention').value) || null;
+    const geographicReach = parseFloat(document.getElementById('geographic-reach').value) || null;
+    const multiple = parseFloat(document.getElementById('ebitda-multiple').value) || null;
+    const recurringRevenue = parseFloat(document.getElementById('recurring-revenue').value) || 0; // Add this line
 
-        try {
-          const response = await fetch('https://pest-control-valuation.onrender.com/api/valuate', {
+    try {
+        const response = await fetch('https://pest-control-valuation.onrender.com/api/valuate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              industry,
-              annualRevenue,
-              ebitda,
-              growthRate,
-              customerRetention,
-              geographicReach,
-              multiple,
+                industry,
+                annualRevenue,
+                ebitda,
+                growthRate,
+                customerRetention,
+                geographicReach,
+                multiple,
+                recurringRevenue, // Include recurring revenue in the payload
             }),
-          });
+        });
 
-          const data = await response.json();
+        const data = await response.json();
 
-          if (!response.ok) throw new Error(data.message || 'Unknown error');
+        if (!response.ok) throw new Error(data.message || 'Unknown error');
 
-          // Current valuation and multiple
-          const currentMultiple = data.currentMultiple;
-          const currentValuation = data.valuation;
+        // Current valuation and multiple
+        const currentMultiple = data.currentMultiple;
+        const currentValuation = data.valuation;
 
-          // Improved scenarios
-          const improvedScenario1 = data.guidance[0].valuation;
-          const improvedScenario2 = data.guidance[1].valuation;
-          const multipleScenario1 = data.guidance[0].multiple;
-          const multipleScenario2 = data.guidance[1].multiple;
+        // Improved scenarios
+        const improvedScenario1 = data.guidance[0].valuation;
+        const improvedScenario2 = data.guidance[1].valuation;
+        const multipleScenario1 = data.guidance[0].multiple;
+        const multipleScenario2 = data.guidance[1].multiple;
 
-          // Display results with multiples
-          document.getElementById('result').style.display = 'block';
-          document.getElementById('result').innerHTML = `
+        // Display results
+        document.getElementById('result').innerHTML = `
             <strong>Estimated Valuation:</strong> $${currentValuation.toLocaleString()} (${currentMultiple}x)
-          `;
-
-          // Display insights
-          document.getElementById('insights').style.display = 'block';
-          document.getElementById('insights').innerHTML = `
+        `;
+        document.getElementById('insights').innerHTML = `
             <strong>Insights:</strong><br>${data.insights}
-          `;
+        `;
+        document.getElementById('guidance').innerHTML = `
+            <strong>How to Improve Your Valuation</strong><br>
+            ${data.guidance.map(g => `<li>${g.description}</li>`).join('')}
+        `;
+    } catch (error) {
+        document.getElementById('error').textContent = error.message;
+        document.getElementById('error').style.display = 'block';
+    }
+});
 
-          // Display guidance
-          const guidance = `
-            <h3>How to Improve Your Valuation</h3>
-            <ul>
-              <li>
-                <strong>Scenario 1:</strong> Increase growth rate by 10% and customer retention by 15% to achieve a multiple of ${multipleScenario1}x,
-                resulting in a valuation of <strong>$${improvedScenario1.toLocaleString()}</strong>.
-              </li>
-              <li>
-                <strong>Scenario 2:</strong> Expand geographic reach by 5 states and improve recurring revenue by 20% to achieve a multiple of ${multipleScenario2}x,
-                resulting in a valuation of <strong>$${improvedScenario2.toLocaleString()}</strong>.
-              </li>
-            </ul>
-          `;
-          document.getElementById('guidance').style.display = 'block';
-          document.getElementById('guidance').innerHTML = guidance;
-
-          // Update the chart
-          valuationChart.data.labels = ['Current Scenario', 'Improved Scenario 1', 'Improved Scenario 2'];
-          valuationChart.data.datasets[0].data = [currentValuation, improvedScenario1, improvedScenario2];
-          valuationChart.update();
-
-        } catch (error) {
-          document.getElementById('error').textContent = error.message;
-          document.getElementById('error').style.display = 'block';
-        }
-      });
-
-      document.getElementById('calc-ebitda').addEventListener('click', () => {
-        const annualRevenue = parseFloat(document.getElementById('annual-revenue').value) || 0;
-        const estimatedEBITDA = (annualRevenue * 0.15).toFixed(2);
-        document.getElementById('ebitda').value = estimatedEBITDA;
-        alert(`Estimated EBITDA is $${estimatedEBITDA}`);
-      });
-    });
-  </script>
-</body>
+    </script>
+  </body>
 </html>
