@@ -168,7 +168,7 @@
       const recurringRevenue = parseFloat(document.getElementById('recurring-revenue').value) || 0;
 
       try {
-        const response = await fetch('https://pest-control-valuation.onrender.com/api/valuate', {
+        const response = await fetch('https://pest-control-valuation-1.onrender.com/api/valuate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
