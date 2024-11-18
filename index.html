@@ -17,7 +17,7 @@
       min-height: 100vh;
     }
     .container {
-      max-width: 600px;
+      max-width: 700px;
       background: #fff;
       border-radius: 8px;
       padding: 20px;
@@ -52,8 +52,7 @@
     button:hover {
       background-color: #45a049;
     }
-    .result, .insights {
-      display: none;
+    .result, .insights, .guidance {
       margin-top: 20px;
       padding: 15px;
       border-radius: 4px;
@@ -103,7 +102,11 @@
       <input type="number" id="annual-revenue" placeholder="Enter Annual Revenue" required>
 
       <label for="ebitda">EBITDA ($)</label>
-      <input type="number" id="ebitda" placeholder="Enter EBITDA" required>
+      <input type="number" id="ebitda" placeholder="Enter EBITDA">
+      <button type="button" id="calc-ebitda">Estimate EBITDA</button>
+
+      <label for="recurring-revenue">Recurring Revenue ($)</label>
+      <input type="number" id="recurring-revenue" placeholder="Optional Recurring Revenue">
 
       <label for="growth-rate">Growth Rate (%)</label>
       <input type="number" id="growth-rate" placeholder="Optional Growth Rate">
@@ -122,6 +125,7 @@
 
     <div id="result" class="result"></div>
     <div id="insights" class="insights"></div>
+    <div id="guidance" class="guidance"></div>
     <div id="error" class="error">An error occurred. Please try again.</div>
 
     <canvas id="valuation-chart" width="400" height="200"></canvas>
@@ -136,12 +140,12 @@
       valuationChart = new Chart(ctx, {
         type: 'bar',
         data: {
-          labels: [], // Dynamic labels
+          labels: ['Current Scenario', 'Improved Scenario 1', 'Improved Scenario 2'], // Dynamic labels
           datasets: [{
-            label: 'Valuations',
-            data: [], // Dynamic data
-            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-            borderColor: 'rgba(75, 192, 192, 1)',
+            label: 'Valuation ($)',
+            data: [0, 0, 0], // Dynamic data
+            backgroundColor: ['rgba(75, 192, 192, 0.2)', 'rgba(54, 162, 235, 0.2)', 'rgba(255, 206, 86, 0.2)'],
+            borderColor: ['rgba(75, 192, 192, 1)', 'rgba(54, 162, 235, 1)', 'rgba(255, 206, 86, 1)'],
             borderWidth: 1,
           }]
         },
@@ -156,11 +160,9 @@
       });
     }
 
-    function addChartData(valuation) {
-      if (!valuationChart) return; // Ensure the chart is initialized
-      valuationChart.data.labels.push('New Valuation'); // Add a new label
-      valuationChart.data.datasets[0].data.push(valuation); // Add the valuation data
-      valuationChart.update(); // Update the chart
+    function addChartData(currentValuation, improved1, improved2) {
+      valuationChart.data.datasets[0].data = [currentValuation, improved1, improved2];
+      valuationChart.update();
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -177,21 +179,27 @@
         }
       });
 
+      document.getElementById('calc-ebitda').addEventListener('click', () => {
+        const annualRevenue = parseFloat(document.getElementById('annual-revenue').value) || 0;
+        const estimatedEBITDA = (annualRevenue * 0.15).toFixed(2); // Example: 15% margin
+        document.getElementById('ebitda').value = estimatedEBITDA;
+        alert(`Estimated EBITDA is $${estimatedEBITDA}`);
+      });
+
       document.getElementById('valuation-form').addEventListener('submit', async (event) => {
         event.preventDefault(); // Prevent form refresh
 
-        // Get form values
         const industry = document.getElementById('industry').value;
         const b2bSubIndustry = document.getElementById('b2b-subindustry')?.value || null;
         const annualRevenue = parseFloat(document.getElementById('annual-revenue').value) || 0;
         const ebitda = parseFloat(document.getElementById('ebitda').value) || 0;
+        const recurringRevenue = parseFloat(document.getElementById('recurring-revenue').value) || null;
         const growthRate = parseFloat(document.getElementById('growth-rate').value) || null;
         const customerRetention = parseFloat(document.getElementById('customer-retention').value) || null;
         const geographicReach = parseFloat(document.getElementById('geographic-reach').value) || null;
         const multiple = parseFloat(document.getElementById('ebitda-multiple').value) || null;
 
         try {
-          // Send data to the backend
           const response = await fetch('https://pest-control-valuation.onrender.com/api/valuate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -200,6 +208,7 @@
               b2bSubIndustry,
               annualRevenue,
               ebitda,
+                           recurringRevenue,
               growthRate,
               customerRetention,
               geographicReach,
@@ -217,8 +226,23 @@
           document.getElementById('insights').style.display = 'block';
           document.getElementById('insights').innerHTML = `<strong>Insights:</strong><br>${data.insights}`;
 
+          // Generate improved scenarios for guidance
+          const improvedScenario1 = data.valuation * 1.2; // Example: Increase by 20%
+          const improvedScenario2 = data.valuation * 1.5; // Example: Increase by 50%
+
+          const guidance = `
+            <h3>How to Improve Your Valuation</h3>
+            <ul>
+              <li><strong>Scenario 1:</strong> Focus on increasing growth rate and customer retention.</li>
+              <li><strong>Scenario 2:</strong> Expand geographic reach and emphasize recurring revenue.</li>
+            </ul>
+            <p>Scenario 1 results in a valuation of <strong>$${improvedScenario1.toLocaleString()}</strong>. Scenario 2 results in a valuation of <strong>$${improvedScenario2.toLocaleString()}</strong>.</p>
+          `;
+          document.getElementById('guidance').style.display = 'block';
+          document.getElementById('guidance').innerHTML = guidance;
+
           // Update the chart
-          addChartData(data.valuation);
+          addChartData(data.valuation, improvedScenario1, improvedScenario2);
 
         } catch (error) {
           // Display error message

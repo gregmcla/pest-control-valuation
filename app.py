@@ -13,6 +13,7 @@ def valuate():
         b2b_subindustry = data.get("b2bSubIndustry", None)
         annual_revenue = float(data.get("annualRevenue", 0))
         ebitda = float(data.get("ebitda", 0))
+        recurring_revenue = float(data.get("recurringRevenue", 0))
         multiple = data.get("multiple", None)
         growth_rate = data.get("growthRate", None)
         customer_retention = data.get("customerRetention", None)
@@ -45,6 +46,8 @@ def valuate():
             adjustment += (customer_retention - 80) * 0.05  # Customer retention adjustment
         if geographic_reach:
             adjustment += geographic_reach * 0.02  # Geographic reach adjustment
+        if recurring_revenue:
+            adjustment += (recurring_revenue / annual_revenue) * 2  # Bonus for recurring revenue
 
         adjusted_multiple = multiple + adjustment
 
@@ -75,6 +78,11 @@ def valuate():
             else:
                 insights.append(f"Geographic reach in {geographic_reach} states provides moderate impact on valuation.")
 
+        # Recurring revenue insights
+        if recurring_revenue:
+            recurring_percentage = (recurring_revenue / annual_revenue) * 100 if annual_revenue else 0
+            insights.append(f"Recurring revenue contributes {recurring_percentage:.2f}% to your overall revenue, boosting valuation.")
+
         # B2B Software-specific insights
         if industry == "B2B Software":
             insights.append("B2B software businesses often see high multiples due to scalability and recurring revenue.")
@@ -89,10 +97,29 @@ def valuate():
                 elif b2b_subindustry == "HealthTech":
                     insights.append("HealthTech businesses command high valuations due to their impact on healthcare innovation.")
 
-        # Return valuation and insights
+        # Improved scenarios for guidance
+        improved_scenario_1 = valuation * 1.2  # Example: Increase by 20%
+        improved_scenario_2 = valuation * 1.5  # Example: Increase by 50%
+
+        # Guidance for improvement
+        guidance = [
+            {
+                "scenario": "Improved Scenario 1",
+                "valuation": round(improved_scenario_1, 2),
+                "description": "Focus on increasing growth rate and customer retention to achieve a 20% higher valuation."
+            },
+            {
+                "scenario": "Improved Scenario 2",
+                "valuation": round(improved_scenario_2, 2),
+                "description": "Expand geographic reach and emphasize recurring revenue to achieve a 50% higher valuation."
+            }
+        ]
+
+        # Return valuation, insights, and guidance
         return jsonify({
             "valuation": round(valuation, 2),
             "insights": "<br>".join(insights) if insights else "No additional insights available.",
+            "guidance": guidance
         })
 
     except Exception as e:
