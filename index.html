@@ -145,50 +145,72 @@
 
     // Fetch Function
     document.getElementById('valuation-form').addEventListener('submit', async (event) => {
-      event.preventDefault();
+  event.preventDefault();
 
-      const industry = document.getElementById('industry').value;
-      const annualRevenue = parseFloat(document.getElementById('annual-revenue').value) || 0;
-      const ebitda = parseFloat(document.getElementById('ebitda').value) || 0;
-      const ebitdaMultiple = parseFloat(document.getElementById('ebitda-multiple').value) || 0;
+  // Capture input values from form
+  const industry = document.getElementById('industry').value;
+  const b2bSubIndustry = document.getElementById('b2b-subindustry')?.value || null;
+  const annualRevenue = parseFloat(document.getElementById('annual-revenue').value) || 0;
+  const ebitda = parseFloat(document.getElementById('ebitda').value) || 0;
+  const growthRate = parseFloat(document.getElementById('growth-rate').value) || null;
+  const customerRetention = parseFloat(document.getElementById('customer-retention').value) || null;
+  const geographicReach = parseFloat(document.getElementById('geographic-reach').value) || null;
+  const multiple = parseFloat(document.getElementById('ebitda-multiple').value) || null;
 
-      try {
-        const response = await fetch('https://https://pest-control-valuation.onrender.com', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ industry, annualRevenue, ebitda, ebitdaMultiple }),
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) throw new Error(data.message || 'Unknown error');
-
-        // Update results
-        document.getElementById('result').innerHTML = `<strong>Estimated Valuation:</strong> $${data.valuation.toLocaleString()}`;
-        document.getElementById('insights').innerHTML = `<strong>Insights:</strong><br>${data.insights}`;
-
-        // Update chart
-        valuationChart.data.labels.push('New Scenario');
-        valuationChart.data.datasets[0].data.push(data.valuation);
-        valuationChart.update();
-      } catch (error) {
-        document.getElementById('error').textContent = error.message;
-        document.getElementById('error').style.display = 'block';
-      }
+  try {
+    // Fetch request to backend API
+    const response = await fetch('https://pest-control-valuation.onrender.com/api/valuate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        industry,
+        b2bSubIndustry,
+        annualRevenue,
+        ebitda,
+        growthRate,
+        customerRetention,
+        geographicReach,
+        multiple,
+      }),
     });
 
-    // Save Scenario
-    document.getElementById('save-scenario').addEventListener('click', () => {
-      const scenarioData = {
+    const data = await response.json();
+
+    if (!response.ok) throw new Error(data.message || 'Unknown error');
+
+    // Update results on the page
+    document.getElementById('result').innerHTML = `<strong>Estimated Valuation:</strong> $${data.valuation.toLocaleString()}`;
+    document.getElementById('insights').innerHTML = `<strong>Insights:</strong><br>${data.insights}`;
+
+    // Update chart with new valuation
+    valuationChart.data.labels.push('New Scenario');
+    valuationChart.data.datasets[0].data.push(data.valuation);
+    valuationChart.update();
+
+  } catch (error) {
+    // Display error message
+    document.getElementById('error').textContent = error.message;
+    document.getElementById('error').style.display = 'block';
+  }
+}); // End of 'submit' event listener for valuation form
+
+// Save Scenario functionality
+document.getElementById('save-scenario').addEventListener('click', () => {
+    const scenarioData = {
         industry: document.getElementById('industry').value,
+        b2bSubIndustry: document.getElementById('b2b-subindustry')?.value || null,
         annualRevenue: document.getElementById('annual-revenue').value,
         ebitda: document.getElementById('ebitda').value,
-        ebitdaMultiple: document.getElementById('ebitda-multiple').value,
-      };
+        growthRate: document.getElementById('growth-rate').value,
+        customerRetention: document.getElementById('customer-retention').value,
+        geographicReach: document.getElementById('geographic-reach').value,
+        multiple: document.getElementById('ebitda-multiple').value,
+    };
 
-      localStorage.setItem('scenario', JSON.stringify(scenarioData));
-      alert('Scenario saved!');
-    });
-  </script>
+    // Save data to local storage
+    localStorage.setItem('scenario', JSON.stringify(scenarioData));
+    alert('Scenario saved!');
+});
+</script>
 </body>
 </html>
