@@ -1,80 +1,78 @@
-k<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Business Valuation Tool</title>
+  <title>Advanced Business Valuation Tool</title>
   <style>
     body {
-      font-family: 'Arial', sans-serif;
-      background-color: #f4f4f4;
+      font-family: Arial, sans-serif;
       margin: 0;
       padding: 0;
-      color: #333;
+      background: linear-gradient(to bottom, #1a1a2e, #16213e);
+      color: #f5f5f5;
+      text-align: center;
     }
     header {
-      background-color: #2c3e50;
-      color: white;
       padding: 20px 10px;
-      text-align: center;
-      font-size: 1.8em;
+      background-color: #0f3460;
+      color: #fff;
+      font-size: 2em;
       font-weight: bold;
+      text-shadow: 2px 2px 2px #222;
     }
     .container {
       max-width: 800px;
-      margin: 20px auto;
+      margin: 40px auto;
       padding: 20px;
-      background: white;
+      background: #1a1a2e;
       border-radius: 10px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
     }
     .form-group {
-      margin-bottom: 15px;
+      margin-bottom: 20px;
+      text-align: left;
     }
     .form-group label {
       display: block;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
       font-weight: bold;
+      font-size: 1.1em;
     }
     .form-group select, .form-group input {
       width: 100%;
       padding: 10px;
-      border: 1px solid #ccc;
+      border: none;
       border-radius: 5px;
       font-size: 1em;
+      background: #f5f5f5;
+      color: #333;
     }
     button {
       width: 100%;
-      background-color: #27ae60;
+      padding: 15px;
+      background-color: #e94560;
       color: white;
-      border: none;
-      padding: 10px;
       font-size: 1.2em;
+      border: none;
       cursor: pointer;
       border-radius: 5px;
       margin-top: 10px;
     }
     button:hover {
-      background-color: #219150;
+      background-color: #e02247;
     }
-    #result {
+    #result, #insights {
       margin-top: 20px;
-      padding: 15px;
-      border-radius: 5px;
-      background-color: #e3f9e5;
-      color: #2e7d32;
-    }
-    #insights {
-      margin-top: 20px;
-      padding: 15px;
-      border-radius: 5px;
-      background-color: #f5f5f5;
-      color: #333;
+      padding: 20px;
+      border-radius: 10px;
+      background-color: #0f3460;
+      color: white;
+      text-align: left;
     }
     footer {
-      text-align: center;
       margin-top: 30px;
-      color: #777;
+      color: #aaa;
       font-size: 0.9em;
     }
   </style>
@@ -107,10 +105,9 @@ k<!DOCTYPE html>
         <select id="b2b-subindustry">
           <option value="" disabled selected>Select Sub-Industry</option>
           <option value="SaaS">SaaS</option>
-          <option value="Enterprise Tools">Enterprise Tools</option>
-          <option value="Fintech">Fintech</option>
-          <option value="Marketing Tools">Marketing Tools</option>
-          <option value="E-commerce Tools">E-commerce Tools</option>
+          <option value="FinTech">FinTech</option>
+          <option value="MarTech">MarTech</option>
+          <option value="HealthTech">HealthTech</option>
         </select>
       </div>
       <div class="form-group">
@@ -119,14 +116,11 @@ k<!DOCTYPE html>
       </div>
       <div class="form-group">
         <label for="ebitda">EBITDA ($)</label>
-        <input type="number" id="ebitda" placeholder="Enter EBITDA">
+        <input type="number" id="ebitda" placeholder="Enter EBITDA (leave blank to estimate)">
       </div>
       <div class="form-group">
         <label for="ebitda-multiple">EBITDA Multiple</label>
         <input type="number" id="ebitda-multiple" placeholder="Enter multiple (if known)">
-      </div>
-      <div id="ebitda-calc" class="form-group">
-        <button type="button" id="calc-ebitda">Calculate EBITDA</button>
       </div>
       <button type="submit">Calculate Valuation</button>
     </form>
@@ -134,7 +128,7 @@ k<!DOCTYPE html>
     <div id="insights" style="display: none;"></div>
   </div>
   <footer>
-    Designed with ❤️ for modern entrepreneurs.
+    Powered by Advanced Analytics™ | Designed for Modern Entrepreneurs
   </footer>
   <script>
     document.getElementById("industry").addEventListener("change", (event) => {
@@ -165,16 +159,8 @@ k<!DOCTYPE html>
         document.getElementById("insights").innerHTML = `<strong>Key Insights:</strong><br>${data.insights}`;
       } catch (error) {
         console.error("Error:", error);
-        document.getElementById("result").style.display = "block";
-        document.getElementById("result").innerHTML = "An error occurred. Please try again.";
+        alert("An error occurred while calculating valuation.");
       }
-    });
-
-    document.getElementById("calc-ebitda").addEventListener("click", () => {
-      const annualRevenue = parseFloat(document.getElementById("annual-revenue").value) || 0;
-      const estimatedEBITDA = (annualRevenue * 0.15).toFixed(2);
-      document.getElementById("ebitda").value = estimatedEBITDA;
-      alert(`Estimated EBITDA is $${estimatedEBITDA}`);
     });
   </script>
 </body>
