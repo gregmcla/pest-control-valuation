@@ -4,42 +4,76 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-@app.route('/api/valuate', methods=['POST'])
+@app.route("/api/valuate", methods=["POST"])
 def valuate():
-    try:
-        data = request.json
-        industry = data.get("industry")
-        b2b_subindustry = data.get("b2bSubIndustry")
-        annual_revenue = data.get("annualRevenue", 0)
-        ebitda = data.get("ebitda", None)
-        multiple = data.get("multiple", None)
+    data = request.json
+    industry = data.get("industry")
+    annual_revenue = data.get("annualRevenue", 0)
+    ebitda = data.get("ebitda", 0)
+    multiple = data.get("multiple", None)
+    growth_rate = data.get("growthRate", None)
+    customer_retention = data.get("customerRetention", None)
+    geographic_reach = data.get("geographicReach", None)
 
-        if ebitda is None:
-            ebitda = annual_revenue * 0.15
+    # Default industry multiples
+    industry_multiples = {
+        "HVAC - Commercial": 5,
+        "HVAC - Residential": 4.5,
+        "Plumbing": 4,
+        "Roofing": 3.5,
+        "Landscaping - Commercial": 3,
+        "Landscaping - Residential": 2.8,
+        "Manufacturing": 6,
+        "Insurance Agency - Personal Lines": 7,
+        "Pest Control - Residential": 6.5,
+        "Veterinary Practice / Animal Hospital": 8,
+        "B2B Software": 10,
+    }
 
-        if multiple is None:
-            multiples = {
-                "HVAC - Commercial": 5,
-                "HVAC - Residential": 4.5,
-                "Plumbing": 4.2,
-                "Roofing": 4.8,
-                "Landscaping - Commercial": 3.8,
-                "Landscaping - Residential": 3.5,
-                "Manufacturing": 6,
-                "Insurance Agency - Personal Lines": 4,
-                "Pest Control - Residential": 5,
-                "Veterinary Practice / Animal Hospital": 6.5,
-                "B2B Software": 10,
-            }
-            multiple = multiples.get(industry, 5)
+    # Use default multiple if not provided
+    if not multiple:
+        multiple = industry_multiples.get(industry, 5)
 
-        valuation = ebitda * multiple
+    # Adjust multiples based on optional fields
+    adjustment = 0
+    if growth_rate:
+        adjustment += (growth_rate - 10) * 0.1  # Growth rate adjustment
+    if customer_retention:
+        adjustment += (customer_retention - 80) * 0.05  # Customer retention adjustment
+    if geographic_reach:
+        adjustment += geographic_reach * 0.02  # Geographic reach adjustment
 
-        insights = f"The EBITDA multiple used for {industry} is {multiple}. For this industry, the valuation reflects a competitive market analysis."
+    adjusted_multiple = multiple + adjustment
 
-        if industry == "B2B Software" and b2b_subindustry:
-            insights += f" Sub-industry chosen: {b2b_subindustry}. Valuation accounts for unique SaaS or FinTech growth metrics."
+    # Calculate valuation
+    valuation = ebitda * adjusted_multiple if ebitda else annual_revenue * 0.15 * adjusted_multiple
 
-        return jsonify({"valuation": valuation, "insights": insights})
-    except Exception as e:
-        return jsonify({"error": "Server Error", "details": str(e)})
+    # Generate insights
+    insights = []
+    if growth_rate:
+        if growth_rate > 15:
+            insights.append(f"Your high growth rate of {growth_rate}% is driving an increased valuation multiple.")
+        elif growth_rate < 5:
+            insights.append(f"A low growth rate of {growth_rate}% might reduce your valuation multiple.")
+    if customer_retention:
+        if customer_retention > 90:
+            insights.append(f"Excellent customer retention ({customer_retention}%) boosts your valuation.")
+        elif customer_retention < 70:
+            insights.append(f"Customer retention at {customer_retention}% is below industry standards.")
+    if geographic_reach:
+        if geographic_reach > 10:
+            insights.append(f"Operating in {geographic_reach} states significantly enhances your valuation.")
+        else:
+            insights.append(f"Geographic reach in {geographic_reach} states provides moderate impact on valuation.")
+    if industry == "B2B Software":
+        insights.append("B2B software businesses often see high multiples due to scalability and recurring revenue.")
+
+    insights = "<br>".join(insights)
+
+    return jsonify({
+        "valuation": round(valuation, 2),
+        "insights": insights or "No additional insights available."
+    })
+
+if __name__ == "__main__":
+    app.run(debug=True)
