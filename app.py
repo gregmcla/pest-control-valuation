@@ -1,8 +1,8 @@
 from flask import Flask, request, jsonify
-from flask_cors import CORS  # Ensure CORS is enabled
+from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)  # Allow cross-origin requests
+CORS(app, resources={r"/api/*": {"origins": "https://pest-control-valuation-1.onrender.com"}})
 
 @app.route('/')
 def home():
@@ -19,4 +19,3 @@ def valuate():
 
 if __name__ == '__main__':
     app.run(debug=True)
-
