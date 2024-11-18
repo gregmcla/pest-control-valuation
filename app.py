@@ -1,8 +1,10 @@
-from flask import Flask, request, jsonify
 from flask_cors import CORS
+from flask import Flask, request, jsonify
 
 app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": "https://pest-control-valuation-1.onrender.com"}})
+
+# Enable CORS and allow the frontend's URL
+CORS(app, resources={r"/*": {"origins": "https://pest-control-valuation-1.onrender.com"}})
 
 @app.route('/')
 def home():
@@ -13,9 +15,8 @@ def valuate():
     data = request.json
     annual_revenue = data.get('annual_revenue', 0)
     ebitda = data.get('ebitda', 0)
-    industry = data.get('industry', '')
-    # Example valuation logic
-    valuation = ebitda * 5
+    multiple = data.get('multiple', 1)
+    valuation = ebitda * multiple
     return jsonify({'valuation': valuation})
 
 if __name__ == '__main__':
