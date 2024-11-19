@@ -177,7 +177,8 @@
 
         if (!response.ok) throw new Error('Failed to fetch valuation data.');
 
-        const data = await response.json();
+        const text = await response.text();
+        const data = text ? JSON.parse(text) : {};
 
         // Update Chart.js Data
         valuationChart.data.datasets[0].data = [
