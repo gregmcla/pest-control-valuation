@@ -4,7 +4,6 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-
 @app.route("/api/valuate", methods=["POST"])
 def valuate():
     try:
@@ -115,7 +114,6 @@ def valuate():
 
     except Exception as e:
         return jsonify({"error": f"An error occurred: {str(e)}"}), 400
-
 
 # Run the Flask app
 if __name__ == "__main__":

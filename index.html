@@ -193,7 +193,7 @@
 
         // Display Results
         document.getElementById('result').innerHTML = `
-          <strong>Estimated Valuation:</strong> $${data.valuation.toLocaleString()} (${data.currentMultiple}x)
+          <strong>Estimated Valuation:</strong> $${data.valuation ? data.valuation.toLocaleString() : 'N/A'} (${data.currentMultiple}x)
         `;
         document.getElementById('insights').innerHTML = `
           <strong>Insights:</strong><br>${data.insights}
