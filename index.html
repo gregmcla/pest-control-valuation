@@ -180,11 +180,14 @@
         const text = await response.text();
         const data = text ? JSON.parse(text) : {};
 
+        // Ensure guidance data is available
+        const guidance = data.guidance || [{ valuation: 0 }, { valuation: 0 }];
+
         // Update Chart.js Data
         valuationChart.data.datasets[0].data = [
           data.valuation,
-          data.guidance[0].valuation,
-          data.guidance[1].valuation
+          guidance[0].valuation,
+          guidance[1].valuation
         ];
         valuationChart.update();
 
@@ -197,7 +200,7 @@
         `;
         document.getElementById('guidance').innerHTML = `
           <strong>How to Improve Your Valuation:</strong>
-          <ul>${data.guidance.map(g => `<li>${g.description}</li>`).join('')}</ul>
+          <ul>${guidance.map(g => `<li>${g.description}</li>`).join('')}</ul>
         `;
       } catch (error) {
         document.getElementById('error').textContent = error.message;
