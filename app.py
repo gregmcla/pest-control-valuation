@@ -4,7 +4,11 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-@app.route("/api/valuate", methods=["POST"])
+@app.route("/", methods=["GET"])
+def home():
+    return jsonify({"message": "The valuation API is running."})
+
+@app.route("/https://pest-control-valuation.onrender.com/api/valuate", methods=["POST"])
 def valuate():
     try:
         # Ensure the request content type is JSON
@@ -29,10 +33,14 @@ def valuate():
         if not industry:
             return jsonify({"error": "Industry is required"}), 400
 
+        # Validate numeric fields
+        if annual_revenue < 0 or ebitda < 0 or recurring_revenue < 0:
+            return jsonify({"error": "Revenue values must be non-negative."}), 400
+
         # Calculate recurring revenue percentage
-        recurring_revenue_percent = 0
-        if annual_revenue > 0:
-            recurring_revenue_percent = (recurring_revenue / annual_revenue) * 100
+        if annual_revenue == 0:
+            return jsonify({"error": "Annual revenue cannot be zero if recurring revenue is provided."}), 400
+        recurring_revenue_percent = (recurring_revenue / annual_revenue) * 100
 
         # Log debug information
         print(f"DEBUG: Annual Revenue: {annual_revenue}, Recurring Revenue: {recurring_revenue}, Recurring Revenue %: {recurring_revenue_percent}")
@@ -73,8 +81,8 @@ def valuate():
         valuation = ebitda * current_multiple if ebitda else annual_revenue * 0.15 * current_multiple
 
         # Improved scenarios for guidance
-        improved_multiple_1 = current_multiple + 1  # Example improvement for scenario 1
-        improved_multiple_2 = current_multiple + 2  # Example improvement for scenario 2
+        improved_multiple_1 = current_multiple + 1
+        improved_multiple_2 = current_multiple + 2
 
         improved_valuation_1 = ebitda * improved_multiple_1 if ebitda else annual_revenue * 0.15 * improved_multiple_1
         improved_valuation_2 = ebitda * improved_multiple_2 if ebitda else annual_revenue * 0.15 * improved_multiple_2
@@ -109,13 +117,13 @@ def valuate():
             "insights": "<br>".join(insights),
             "guidance": guidance
         }
-        print(f"DEBUG: Response Data: {response_data}")  # Log the response data
-        return jsonify(response_data)  # Return valuation, insights, and guidance
+        print(f"DEBUG: Response Data: {response_data}")
+        return jsonify(response_data)
 
     except Exception as e:
-        return jsonify({"error": f"An error occurred: {str(e)}"}), 400
+        print(f"ERROR: {str(e)}")
+        return jsonify({"error": "An internal server error occurred."}), 500
 
-# Run the Flask app
 if __name__ == "__main__":
     import os
     app.run(host="0.0.0.0", port=int(os.getenv("PORT", 5000)))
