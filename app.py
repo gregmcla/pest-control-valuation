@@ -8,8 +8,15 @@ CORS(app)
 @app.route("/api/valuate", methods=["POST"])
 def valuate():
     try:
+        # Ensure the request content type is JSON
+        if not request.is_json:
+            return jsonify({"error": "Invalid content type, must be application/json"}), 400
+
         # Parse JSON request data
-        data = request.json
+        data = request.get_json()
+        if data is None:
+            return jsonify({"error": "Invalid JSON input"}), 400
+
         industry = data.get("industry")
         annual_revenue = float(data.get("annualRevenue", 0)) if data.get("annualRevenue") else 0
         ebitda = float(data.get("ebitda", 0)) if data.get("ebitda") else 0
