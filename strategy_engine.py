@@ -202,3 +202,39 @@ class StrategyEngine:
             })
             
         return areas
+
+    def _calculate_best_case(self, data: dict) -> dict:
+        """Calculate best case scenario"""
+        revenue = float(data.get("annualRevenue", 0))
+        growth_rate = float(data.get("growthRate", 10))
+        return {
+            "revenue": revenue * 1.5,
+            "growth_rate": min(growth_rate * 1.5, 50),
+            "margin": min(float(data.get("ebitda", 0)) / revenue * 1.3, 35),
+            "timeline": "2-3 years",
+            "probability": "25%"
+        }
+
+    def _calculate_expected_case(self, data: dict) -> dict:
+        """Calculate expected case scenario"""
+        revenue = float(data.get("annualRevenue", 0))
+        growth_rate = float(data.get("growthRate", 10))
+        return {
+            "revenue": revenue * 1.2,
+            "growth_rate": min(growth_rate * 1.2, 30),
+            "margin": min(float(data.get("ebitda", 0)) / revenue * 1.15, 25),
+            "timeline": "12-18 months",
+            "probability": "60%"
+        }
+
+    def _calculate_worst_case(self, data: dict) -> dict:
+        """Calculate worst case scenario"""
+        revenue = float(data.get("annualRevenue", 0))
+        growth_rate = float(data.get("growthRate", 10))
+        return {
+            "revenue": revenue * 0.9,
+            "growth_rate": growth_rate * 0.5,
+            "margin": (float(data.get("ebitda", 0)) / revenue) * 0.8,
+            "timeline": "12 months",
+            "probability": "15%"
+        }

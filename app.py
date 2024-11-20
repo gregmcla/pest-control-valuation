@@ -1,6 +1,6 @@
 import os
 from flask import Flask, request, jsonify
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 import logging
@@ -323,10 +323,14 @@ except Exception as e:
 def valuate():
     """Main valuation endpoint with enhanced error handling and debugging"""
     logging.info("Received valuation request")
+    """Main valuation endpoint with enhanced error handling and debugging"""
+    logging.info("Received valuation request")
     
     # Handle preflight requests
     if request.method == "OPTIONS":
         response = jsonify({"status": "ok"})
+        response.headers.add("Access-Control-Allow-Methods", "POST, OPTIONS")
+        response.headers.add("Access-Control-Allow-Headers", "Content-Type")
         return response
 
     try:
@@ -633,17 +637,17 @@ def handle_server_error(error):
 
 @app.after_request
 def after_request(response):
-    """Enhanced security headers"""
-    # Existing headers
+    """Add security and CORS headers"""
     response.headers.update({
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        'Access-Control-Allow-Credentials': 'true',
         'X-Content-Type-Options': 'nosniff',
         'X-Frame-Options': 'DENY',
         'X-XSS-Protection': '1; mode=block',
         'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
-        'Content-Security-Policy': "default-src 'self' https:; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:;",
-        'Permissions-Policy': 'geolocation=(), microphone=()',
-        'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
-        'Pragma': 'no-cache'
+        'Content-Security-Policy': "default-src 'self' https:; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:;"
     })
     return response
 
