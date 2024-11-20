@@ -13,6 +13,7 @@ from ai_analysis import ValuationAI
 from competitive_analysis import CompetitiveAnalysis
 from strategy_engine import StrategyEngine
 from dotenv import load_dotenv
+import gc
 
 load_dotenv()  # Load environment variables
 
@@ -292,16 +293,20 @@ def handle_exception(e):
     return response
 
 def initialize_components():
-    """Initialize components with error handling"""
+    """Initialize components with memory management"""
     try:
         MODEL_CACHE_DIR = os.getenv('MODEL_CACHE_DIR', '/tmp/models')
         os.makedirs(MODEL_CACHE_DIR, exist_ok=True)
         
-        return (
-            ValuationAI(model_cache_dir=MODEL_CACHE_DIR),
-            CompetitiveAnalysis(),
-            StrategyEngine()
-        )
+        # Initialize one at a time
+        ai = ValuationAI(model_cache_dir=MODEL_CACHE_DIR)
+        gc.collect()
+        comp = CompetitiveAnalysis()
+        gc.collect()
+        strat = StrategyEngine()
+        gc.collect()
+        
+        return ai, comp, strat
     except Exception as e:
         logging.error(f"Error initializing components: {e}")
         raise RuntimeError("Failed to initialize required components")
@@ -341,13 +346,18 @@ def valuate():
         validate_input(data)
         logging.info("Input validation passed")
 
+        # Process in chunks to manage memory
         metrics = calculate_metrics(data)
-        logging.info(f"Calculated metrics: {metrics}")
-
-        # Add AI analysis
+        gc.collect()
+        
         market_trends = ai_analyzer.analyze_market_trends(data["industry"])
+        gc.collect()
+        
         competitive_position = competitive_analyzer.analyze_market_position(metrics, market_trends)
+        gc.collect()
+        
         strategy = strategy_engine.generate_recommendations(data, competitive_position)
+        gc.collect()
         
         adjustments = calculate_adjustments(metrics)
         logging.info(f"Calculated adjustments: {adjustments}")

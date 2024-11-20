@@ -2,6 +2,7 @@ from transformers import pipeline
 import yfinance as yf
 import pandas as pd
 from typing import Dict, List
+import gc  # Add garbage collection
 
 INDUSTRY_TICKERS = {
     "SaaS": ["CRM", "MSFT", "WDAY", "NOW"],
@@ -14,22 +15,21 @@ INDUSTRY_TICKERS = {
 
 class ValuationAI:
     def __init__(self, model_cache_dir='/tmp/models'):
-        """Initialize with model caching"""
+        """Initialize with lightweight models"""
         try:
+            # Use smaller models
             self.sentiment_analyzer = pipeline(
                 "sentiment-analysis",
                 model="distilbert-base-uncased-finetuned-sst-2-english",
-                cache_dir=model_cache_dir
+                cache_dir=model_cache_dir,
+                model_kwargs={"low_cpu_mem_usage": True}
             )
-            self.zero_shot_classifier = pipeline(
-                "zero-shot-classification",
-                model="facebook/bart-large-mnli",
-                cache_dir=model_cache_dir
-            )
+            # Remove zero-shot classifier to save memory
+            self.zero_shot_classifier = None
+            gc.collect()  # Force garbage collection
         except Exception as e:
             print(f"Warning: Using fallback mode due to model loading error: {e}")
             self.sentiment_analyzer = self._fallback_sentiment
-            self.zero_shot_classifier = self._fallback_classifier
 
     def _fallback_sentiment(self, text):
         """Fallback sentiment analysis when model fails"""
@@ -40,16 +40,26 @@ class ValuationAI:
         return {"labels": labels, "scores": [1.0/len(labels)]*len(labels)}
 
     def analyze_market_trends(self, industry: str) -> Dict:
-        """Analyze market trends for given industry"""
-        tickers = INDUSTRY_TICKERS.get(industry, [])
-        market_data = self._get_market_data(tickers)
-        
-        return {
-            "market_sentiment": self._analyze_sentiment(industry),
-            "growth_potential": self._predict_growth(market_data),
-            "risk_factors": self._identify_risks(industry),
-            "opportunities": self._find_opportunities(market_data, industry)
-        }
+        """Analyze market trends with memory optimization"""
+        try:
+            tickers = INDUSTRY_TICKERS.get(industry, [])[:2]  # Limit to 2 tickers
+            market_data = self._get_market_data(tickers)
+            
+            result = {
+                "market_sentiment": self._analyze_sentiment(industry),
+                "growth_potential": self._predict_growth(market_data),
+                "risk_factors": self._identify_risks(industry)[:3],  # Limit risks
+                "opportunities": self._find_opportunities(market_data, industry)[:2]  # Limit opportunities
+            }
+            
+            # Clean up
+            del market_data
+            gc.collect()
+            
+            return result
+        except Exception as e:
+            print(f"Error in market analysis: {e}")
+            return self._get_fallback_analysis()
 
     def _get_market_data(self, tickers: List[str]) -> pd.DataFrame:
         """Fetch market data for analysis"""
