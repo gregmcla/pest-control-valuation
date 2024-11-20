@@ -36,7 +36,21 @@ INDUSTRY_BENCHMARKS = {
 }
 
 INDUSTRY_MULTIPLES = {
-    # ...existing industry multiples...
+    "SaaS": Decimal("8.5"),
+    "IT Consulting": Decimal("7.0"),
+    "Custom Software": Decimal("6.5"),
+    "Medical Practice": Decimal("6.0"),
+    "Home Healthcare": Decimal("5.5"),
+    "Diagnostic Center": Decimal("6.2"),
+    "Industrial Manufacturing": Decimal("5.8"),
+    "Specialty Manufacturing": Decimal("6.0"),
+    "Food Manufacturing": Decimal("5.5"),
+    "Plumbing": Decimal("4.5"),
+    "Electrical": Decimal("4.7"),
+    "HVAC": Decimal("4.8"),
+    "Roofing": Decimal("4.3"),
+    "Pest Control": Decimal("5.5"),
+    "Landscaping": Decimal("4.4")
 }
 
 class ValidationError(Exception):
@@ -63,6 +77,10 @@ def calculate_metrics(data: Dict) -> Dict:
         revenue = Decimal(str(data["annualRevenue"]))
         ebitda = Decimal(str(data.get("ebitda", revenue * Decimal("0.15"))))
         retention = Decimal(str(data.get("customerRetention", 0)))
+        industry = data.get("industry")
+        
+        if industry not in INDUSTRY_MULTIPLES:
+            logging.warning(f"Unknown industry: {industry}, using default multiple")
         
         return {
             "revenue": revenue,
@@ -71,7 +89,8 @@ def calculate_metrics(data: Dict) -> Dict:
             "retention_rate": retention,
             "growth_rate": Decimal(str(data.get("growthRate", 0))),
             "geographic_reach": Decimal(str(data.get("geographicReach", 0))),
-            "recurring_revenue_pct": calculate_recurring_revenue_percentage(data)
+            "recurring_revenue_pct": calculate_recurring_revenue_percentage(data),
+            "industry": industry
         }
     except (ValueError, InvalidOperation) as e:
         raise ValidationError(f"Invalid numeric value: {str(e)}")
@@ -185,15 +204,20 @@ def valuate():
         validate_input(data)
         
         metrics = calculate_metrics(data)
+        logging.debug(f"Calculated metrics: {metrics}")
+        
         adjustments = calculate_adjustments(metrics)
-        insights = generate_detailed_insights(data, metrics)
+        logging.debug(f"Calculated adjustments: {adjustments}")
+        
+        valuation = calculate_valuation(metrics, adjustments)
+        logging.debug(f"Calculated valuation: {valuation}")
         
         response_data = {
-            "valuation": calculate_valuation(metrics, adjustments),
-            "metrics": metrics,
-            "insights": insights,
-            "adjustments": adjustments,
-            "scenarios": generate_enhanced_scenarios(metrics, adjustments),
+            "valuation": float(valuation),  # Convert Decimal to float for JSON
+            "currentMultiple": float(sum(adjustments.values())),
+            "metrics": {k: float(v) if isinstance(v, Decimal) else v for k, v in metrics.items()},
+            "adjustments": {k: float(v) for k, v in adjustments.items()},
+            "scenarios": generate_enhanced_scenarios(valuation, sum(adjustments.values()), metrics),
             "industryComparison": generate_industry_comparison(data, metrics)
         }
         
@@ -201,13 +225,11 @@ def valuate():
         return jsonify(response_data)
 
     except ValidationError as ve:
+        logging.error(f"Validation error: {str(ve)}")
         return jsonify({"error": str(ve), "type": "validation_error"}), 400
-    except ValueError as ve:
-        logging.error(f"Value Error: {str(ve)}\n{traceback.format_exc()}")
-        return jsonify({"error": f"Invalid number format: {str(ve)}"}), 400
     except Exception as e:
         logging.error(f"Unexpected error: {str(e)}\n{traceback.format_exc()}")
-        return jsonify({"error": "Internal server error", "type": "server_error"}), 500
+        return jsonify({"error": str(e), "type": "server_error"}), 500
 
 def calculate_adjustments(metrics: Dict) -> Dict[str, Decimal]:
     """Calculate all valuation adjustments"""
@@ -221,9 +243,14 @@ def calculate_adjustments(metrics: Dict) -> Dict[str, Decimal]:
 
 def calculate_valuation(metrics: Dict, adjustments: Dict) -> Decimal:
     """Calculate final valuation with all adjustments"""
-    base_multiple = Decimal(str(INDUSTRY_MULTIPLES.get(metrics["industry"], "5.0")))
-    adjusted_multiple = base_multiple + sum(adjustments.values())
-    return (metrics["ebitda"] * adjusted_multiple).quantize(Decimal("0.01"))
+    try:
+        base_multiple = INDUSTRY_MULTIPLES.get(metrics["industry"], Decimal("5.0"))
+        adjusted_multiple = base_multiple + sum(adjustments.values())
+        valuation = metrics["ebitda"] * adjusted_multiple
+        return valuation.quantize(Decimal("0.01"))
+    except Exception as e:
+        logging.error(f"Valuation calculation error: {str(e)}")
+        raise ValueError("Error calculating valuation")
 
 def analyze_market_position(data: Dict, metrics: Dict) -> Dict:
     """Analyze market position and competitive standing"""
