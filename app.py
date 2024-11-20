@@ -1,3 +1,4 @@
+import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from flask_limiter import Limiter
@@ -10,6 +11,10 @@ from datetime import datetime
 
 # Initialize Flask app and configure logging first
 app = Flask(__name__)
+
+# Get port from environment variable (Render sets this automatically)
+port = int(os.environ.get("PORT", 5000))
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -311,7 +316,7 @@ def valuate():
             "metrics": {k: float(v) if isinstance(v, Decimal) else v for k, v in metrics.items()},
             "adjustments": {k: float(v) for k, v in adjustments.items()},
             "scenarios": generate_enhanced_scenarios(valuation, sum(adjustments.values()), metrics),
-            "industryComparison": generate_industry_comparison(metrics["industry"], metrics)
+            "industryComparison": generate_industry_comparison(data["industry"], metrics)  # Fixed this line
         }
         
         # Add CORS headers to the response
@@ -538,16 +543,16 @@ def calculate_recurring_revenue_percentage(data: Dict) -> Decimal:
     
     return (recurring / revenue * 100).quantize(Decimal("0.01"))
 
-def generate_industry_comparison(data: Dict, metrics: Dict) -> Dict:
+def generate_industry_comparison(industry: str, metrics: Dict) -> Dict:
     """Generate detailed industry comparison"""
-    industry = data["industry"]
     return {
-        "industryAvgMultiple": INDUSTRY_MULTIPLES.get(industry, 5.0),
+        "industryAvgMultiple": float(INDUSTRY_MULTIPLES.get(industry, 5.0)),  # Convert to float for JSON
         "peerComparison": {
             "growth": compare_to_peers(metrics["growth_rate"], "growth_rate"),
             "margin": compare_to_peers(metrics["ebitda_margin"], "margin"),
             "retention": compare_to_peers(metrics["retention_rate"], "retention")
-        }
+        },
+        "recommendations": generate_market_recommendations(metrics)
     }
 
 @app.errorhandler(ApiError)
@@ -571,4 +576,4 @@ def handle_server_error(error):
     return response
 
 if __name__ == "__main__":
-    app.run(debug=False, host='0.0.0.0', port=5000)
+    app.run(debug=False, host='0.0.0.0', port=port)
