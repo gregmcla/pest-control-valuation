@@ -371,23 +371,25 @@ def analyze_metrics(data, adjustments):
 
 def generate_enhanced_scenarios(valuation, current_multiple, metrics):
     """Enhanced version of scenario generation"""
+    valuation = Decimal(str(valuation))
+    current_multiple = Decimal(str(current_multiple))
     return [
         {
             "name": "Current",
-            "valuation": valuation,
-            "multiple": current_multiple,
+            "valuation": float(valuation),  # Convert to float for JSON
+            "multiple": float(current_multiple),
             "description": "Based on current performance"
         },
         {
             "name": "Optimized",
-            "valuation": valuation * 1.3,
-            "multiple": current_multiple + 1.0,
+            "valuation": float(valuation * Decimal("1.3")),
+            "multiple": float(current_multiple + Decimal("1.0")),
             "description": "With improved metrics"
         },
         {
             "name": "Best Case",
-            "valuation": valuation * 1.5,
-            "multiple": current_multiple + 1.5,
+            "valuation": float(valuation * Decimal("1.5")),
+            "multiple": float(current_multiple + Decimal("1.5")),
             "description": "With all metrics at industry best"
         }
     ]
