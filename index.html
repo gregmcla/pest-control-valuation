@@ -108,6 +108,15 @@
       <label for="recurring-revenue">Recurring Revenue ($)</label>
       <input type="number" id="recurring-revenue" placeholder="Optional Recurring Revenue">
 
+      <label for="business-age">Years in Business</label>
+      <input type="number" id="business-age" placeholder="Number of Years">
+
+      <label for="employee-count">Number of Employees</label>
+      <input type="number" id="employee-count" placeholder="Employee Count">
+
+      <label for="market-share">Market Share in Service Area (%)</label>
+      <input type="number" id="market-share" placeholder="Estimated Market Share">
+
       <button type="submit">Calculate Valuation</button>
     </form>
 
@@ -182,43 +191,81 @@
         }
 
         const data = JSON.parse(responseText);
-        console.log('Parsed data:', data);
-
-        if (data.error) {
-          throw new Error(data.error);
-        }
-
-        // Update display
+        
+        // Enhanced results display
         document.getElementById('result').innerHTML = `
-          <strong>Estimated Valuation:</strong> $${data.valuation.toLocaleString()}<br>
-          <strong>Current Multiple:</strong> ${data.currentMultiple}x
+          <h2>Valuation Summary</h2>
+          <div class="valuation-summary">
+            <div class="primary-metric">
+              <strong>Enterprise Value:</strong> $${data.valuation.toLocaleString()}<br>
+              <strong>Multiple:</strong> ${data.currentMultiple}x EBITDA
+            </div>
+            <div class="industry-comparison">
+              <h3>Industry Comparison</h3>
+              <p>Industry Average Multiple: ${data.industryComparison.industryAvgMultiple}x</p>
+              <p>Your Multiple: ${data.currentMultiple}x</p>
+              <p>Percentile: ${data.industryComparison.percentileBenchmark}</p>
+            </div>
+          </div>
         `;
-        
-        // Display insights
-        const insightsList = data.insights.map(insight => `<li>${insight}</li>`).join('');
-        document.getElementById('insights').innerHTML = `
-          <strong>Key Insights:</strong>
-          <ul>${insightsList}</ul>
-        `;
-        
-        // Display guidance
-        const guidanceHtml = data.guidance.map((scenario, index) => `
-          <div>
-            <h3>Scenario ${index + 1}: ${scenario.description}</h3>
-            <p>Potential Valuation: $${scenario.valuation.toLocaleString()}</p>
-            <strong>Recommended Actions:</strong>
-            <ul>${scenario.actions.map(action => `<li>${action}</li>`).join('')}</ul>
+
+        // Enhanced insights display
+        const insightsHtml = data.insights.map(insight => `
+          <div class="insight-card ${insight.status.toLowerCase()}">
+            <h4>${insight.category}</h4>
+            <p>Status: ${insight.status}</p>
+            <p>Impact: ${insight.impact}</p>
+            <h5>Recommendations:</h5>
+            <ul>${insight.recommendations.map(rec => `<li>${rec}</li>`).join('')}</ul>
           </div>
         `).join('');
-        document.getElementById('guidance').innerHTML = guidanceHtml;
-        
-        // Update chart
-        valuationChart.data.datasets[0].data = [
-          data.valuation,
-          data.guidance[0].valuation,
-          data.guidance[1].valuation
-        ];
+        document.getElementById('insights').innerHTML = insightsHtml;
+
+        // Enhanced scenarios display
+        const scenariosHtml = data.scenarios.map(scenario => `
+          <div class="scenario-card">
+            <h3>${scenario.name}</h3>
+            <p class="scenario-value">$${scenario.valuation.toLocaleString()}</p>
+            <p>Multiple: ${scenario.multiple}x</p>
+            <p>${scenario.description}</p>
+            ${scenario.requirements ? `
+              <h4>Requirements:</h4>
+              <ul>${scenario.requirements.map(req => `<li>${req}</li>`).join('')}</ul>
+            ` : ''}
+          </div>
+        `).join('');
+        document.getElementById('guidance').innerHTML = scenariosHtml;
+
+        // Update existing chart
+        valuationChart.data.labels = data.scenarios.map(s => s.name);
+        valuationChart.data.datasets[0].data = data.scenarios.map(s => s.valuation);
         valuationChart.update();
+
+        // Add second chart for metrics comparison
+        if (!metricsChart) {
+          initializeMetricsChart(data.metrics);
+        }
+
+        // Update the metrics display section
+        const metricsHtml = Object.entries(data.metrics).map(([key, metric]) => `
+          <div class="metric-card ${metric.impact.toLowerCase()}">
+            <h4>${key.charAt(0).toUpperCase() + key.slice(1)}</h4>
+            <p>Score: ${metric.score.toFixed(2)}</p>
+            <p>Impact: ${metric.impact}</p>
+            <p>Benchmark: ${metric.benchmark}</p>
+            <p>Recommendation: ${metric.recommendation}</p>
+          </div>
+        `).join('');
+        document.getElementById('metrics').innerHTML = metricsHtml;
+
+        // Add premium breakdown section
+        const adjustmentsHtml = Object.entries(data.adjustments).map(([key, value]) => `
+          <div class="adjustment-item">
+            <span>${key.replace('_', ' ').toUpperCase()}:</span>
+            <span>${value > 0 ? '+' : ''}${value.toFixed(2)}x</span>
+          </div>
+        `).join('');
+        document.getElementById('adjustments').innerHTML = adjustmentsHtml;
 
       } catch (error) {
         console.error('Error:', error);
@@ -237,6 +284,13 @@
 
     // Initialize the chart on page load
     document.addEventListener('DOMContentLoaded', initializeChart);
+
+    // Add new initialization function for metrics chart
+    function initializeMetricsChart(metrics) {
+      const ctx = document.createElement('canvas');
+      document.getElementById('charts-container').appendChild(ctx);
+      // ... create new chart implementation
+    }
   </script>
 </body>
 </html>
