@@ -28,25 +28,18 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 
-# Update CORS configuration to fix multiple headers issue
-CORS(app, resources={
-    r"/*": {
-        "origins": ["https://pest-control-valuation-1.onrender.com", "https://pest-control-valuation.onrender.com"],
-        "methods": ["GET", "POST", "OPTIONS"],
-        "allow_headers": ["Content-Type", "Authorization", "Accept"],
-        "expose_headers": ["Content-Type"],
-        "supports_credentials": True,
-        "max_age": 600
-    }
-})
+# Update CORS configuration to use allowed origins from environment
+ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS', 'https://pest-control-valuation-1.onrender.com').split(',')
 
-@app.after_request
-def after_request(response):
-    """Ensure CORS headers are set"""
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
-    return response
+# Update CORS configuration to be more permissive
+CORS(app, 
+     resources={r"/*": {
+         "origins": "*",  # Allow all origins in development
+         "methods": ["GET", "POST", "OPTIONS"],
+         "allow_headers": ["Content-Type", "Authorization"],
+         "max_age": 600,
+         "supports_credentials": True
+     }})
 
 # Configure rate limiter
 RATE_LIMIT = os.getenv('API_RATE_LIMIT', '50/hour')
@@ -321,20 +314,11 @@ except Exception as e:
 @limiter.limit("50 per hour")
 def valuate():
     """Main valuation endpoint with enhanced error handling and debugging"""
-    # Add debug logging
     logging.info("Received valuation request")
-    logging.info(f"Request method: {request.method}")
-    logging.info(f"Request headers: {request.headers}")
     
     # Handle preflight requests
     if request.method == "OPTIONS":
         response = jsonify({"status": "ok"})
-        response.headers.update({
-            "Access-Control-Allow-Origin": request.headers.get("Origin", "*"),
-            "Access-Control-Allow-Methods": "POST, OPTIONS",
-            "Access-Control-Allow-Headers": "Content-Type, Accept",
-            "Access-Control-Max-Age": "600"
-        })
         return response
 
     try:
@@ -379,10 +363,7 @@ def valuate():
             "strategicPlan": strategy
         }
         
-        # Add CORS headers to the response
-        response = jsonify(response_data)
-        response.headers["Access-Control-Allow-Origin"] = request.headers.get("Origin", "*")
-        return response
+        return jsonify(response_data)
 
     except ApiError as e:
         logging.error(f"API error: {str(e)}")
@@ -635,5 +616,27 @@ def handle_server_error(error):
     response.status_code = 500
     return response
 
+@app.after_request
+def after_request(response):
+    """Add security headers"""
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'DENY'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+    response.headers['Content-Security-Policy'] = "default-src 'self'"
+    # Add CORS headers
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
+    return response
+
 if __name__ == "__main__":
-    app.run(debug=False, host='0.0.0.0', port=port)
+    # Production settings
+    app.config['JSON_SORT_KEYS'] = False  # Better performance
+    app.config['PROPAGATE_EXCEPTIONS'] = True
+    app.run(
+        host='0.0.0.0',
+        port=port,
+        debug=False,  # Ensure debug is False in production
+        threaded=True
+    )
