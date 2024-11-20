@@ -88,6 +88,8 @@ def valuate():
         industry_avg_multiple = industry_multiples.get(data["industry"], 5.0)
         percentile = "Top 25%" if adjusted_multiple > industry_avg_multiple else "Bottom 75%"
         
+        insights = generate_detailed_insights(data, INDUSTRY_BENCHMARKS)
+        
         response_data = {
             "valuation": round(valuation, 2),
             "currentMultiple": round(adjusted_multiple, 2),
@@ -97,7 +99,8 @@ def valuate():
             "industryComparison": {
                 "industryAvgMultiple": industry_avg_multiple,
                 "percentileBenchmark": percentile
-            }
+            },
+            "insights": insights  # Add insights to the response
         }
 
         logging.info(f"Sending response: {response_data}")

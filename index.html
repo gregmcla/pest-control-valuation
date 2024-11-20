@@ -209,46 +209,9 @@
           </div>
         `;
 
-        // Enhanced insights display
-        const insightsHtml = data.insights.map(insight => `
-          <div class="insight-card ${insight.status.toLowerCase()}">
-            <h4>${insight.category}</h4>
-            <p>Status: ${insight.status}</p>
-            <p>Impact: ${insight.impact}</p>
-            <h5>Recommendations:</h5>
-            <ul>${insight.recommendations.map(rec => `<li>${rec}</li>`).join('')}</ul>
-          </div>
-        `).join('');
-        document.getElementById('insights').innerHTML = insightsHtml;
-
-        // Enhanced scenarios display
-        const scenariosHtml = data.scenarios.map(scenario => `
-          <div class="scenario-card">
-            <h3>${scenario.name}</h3>
-            <p class="scenario-value">$${scenario.valuation.toLocaleString()}</p>
-            <p>Multiple: ${scenario.multiple}x</p>
-            <p>${scenario.description}</p>
-            ${scenario.requirements ? `
-              <h4>Requirements:</h4>
-              <ul>${scenario.requirements.map(req => `<li>${req}</li>`).join('')}</ul>
-            ` : ''}
-          </div>
-        `).join('');
-        document.getElementById('guidance').innerHTML = scenariosHtml;
-
-        // Update existing chart
-        valuationChart.data.labels = data.scenarios.map(s => s.name);
-        valuationChart.data.datasets[0].data = data.scenarios.map(s => s.valuation);
-        valuationChart.update();
-
-        // Add second chart for metrics comparison
-        if (!metricsChart) {
-          initializeMetricsChart(data.metrics);
-        }
-
-        // Update the metrics display section
-        const metricsHtml = Object.entries(data.metrics).map(([key, metric]) => `
-          <div class="metric-card ${metric.impact.toLowerCase()}">
+        // Update metrics display
+        const metricsHtml = Object.entries(data.metrics || {}).map(([key, metric]) => `
+          <div class="metric-card">
             <h4>${key.charAt(0).toUpperCase() + key.slice(1)}</h4>
             <p>Score: ${metric.score.toFixed(2)}</p>
             <p>Impact: ${metric.impact}</p>
@@ -256,16 +219,25 @@
             <p>Recommendation: ${metric.recommendation}</p>
           </div>
         `).join('');
-        document.getElementById('metrics').innerHTML = metricsHtml;
+        document.getElementById('insights').innerHTML = metricsHtml;
 
-        // Add premium breakdown section
-        const adjustmentsHtml = Object.entries(data.adjustments).map(([key, value]) => `
-          <div class="adjustment-item">
-            <span>${key.replace('_', ' ').toUpperCase()}:</span>
-            <span>${value > 0 ? '+' : ''}${value.toFixed(2)}x</span>
+        // Update scenarios display
+        const scenariosHtml = (data.scenarios || []).map(scenario => `
+          <div class="scenario-card">
+            <h3>${scenario.name}</h3>
+            <p class="scenario-value">$${scenario.valuation.toLocaleString()}</p>
+            <p>Multiple: ${scenario.multiple}x</p>
+            <p>${scenario.description}</p>
           </div>
         `).join('');
-        document.getElementById('adjustments').innerHTML = adjustmentsHtml;
+        document.getElementById('guidance').innerHTML = scenariosHtml;
+
+        // Update chart
+        if (valuationChart) {
+          valuationChart.data.labels = data.scenarios.map(s => s.name);
+          valuationChart.data.datasets[0].data = data.scenarios.map(s => s.valuation);
+          valuationChart.update();
+        }
 
       } catch (error) {
         console.error('Error:', error);
