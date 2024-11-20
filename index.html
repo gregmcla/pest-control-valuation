@@ -5,67 +5,70 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Business Valuation Tool</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary-color: #2c3e50;
-      --accent-color: #3498db;
-      --success-color: #2ecc71;
-      --warning-color: #f1c40f;
-      --error-color: #e74c3c;
-      --text-color: #333;
-      --border-radius: 8px;
-      --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      --transition: all 0.3s ease;
+      --primary-color: #2563eb;
+      --primary-dark: #1d4ed8;
+      --success-color: #059669;
+      --warning-color: #d97706;
+      --error-color: #dc2626;
+      --surface-color: #ffffff;
+      --background-color: #f8fafc;
+      --text-primary: #1e293b;
+      --text-secondary: #64748b;
+      --border-radius: 12px;
+      --box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     body {
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--background-color);
+      color: var(--text-primary);
       margin: 0;
-      padding: 10px;
-      min-height: 100vh;
+      padding: 0;
+      line-height: 1.5;
     }
 
     .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      background: white;
+      max-width: 1280px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    .dashboard {
+      display: grid;
+      gap: 1.5rem;
+      grid-template-columns: 300px 1fr;
+      align-items: start;
+    }
+
+    .sidebar {
+      background: var(--surface-color);
+      padding: 1.5rem;
       border-radius: var(--border-radius);
       box-shadow: var(--box-shadow);
-      padding: 1rem;
+      position: sticky;
+      top: 2rem;
     }
 
-    .app-header {
-      text-align: center;
-      padding: 1rem;
-      margin-bottom: 2rem;
-      border-bottom: 2px solid var(--accent-color);
-    }
-
-    .form-container {
-      max-width: 800px;
-      margin: 0 auto;
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 1rem;
+    .main-content {
+      background: var(--surface-color);
+      padding: 1.5rem;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
     }
 
     .form-group {
-      background: #f8f9fa;
-      padding: 1rem;
-      border-radius: var(--border-radius);
-      transition: var(--transition);
-    }
-
-    .form-group:hover {
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 1.25rem;
     }
 
     .form-group label {
-      font-size: 0.9rem;
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-primary);
       margin-bottom: 0.5rem;
     }
 
@@ -73,143 +76,102 @@
       position: relative;
     }
 
-    .input-wrapper input,
-    .input-wrapper select {
+    input, select {
       width: 100%;
-      padding: 0.75rem;
-      border: 1px solid #ddd;
-      border-radius: var(--border-radius);
-      font-size: 1rem;
+      padding: 0.75rem 1rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      transition: var(--transition);
+      background: #f8fafc;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    button {
+      width: 100%;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 0.5rem;
+      background: var(--primary-color);
+      color: white;
+      font-weight: 500;
+      font-size: 0.875rem;
+      cursor: pointer;
       transition: var(--transition);
     }
 
-    .results-container {
-      margin-top: 2rem;
-      padding: 1rem;
+    button:hover {
+      background: var(--primary-dark);
     }
 
     .results-grid {
       display: grid;
-      grid-template-columns: 1fr;
-      gap: 1rem;
-    }
-
-    .valuation-card {
-      background: white;
-      padding: 1.5rem;
-      border-radius: var(--border-radius);
-      box-shadow: var(--box-shadow);
-      text-align: center;
-    }
-
-    .valuation-amount {
-      font-size: 2rem;
-      color: var(--primary-color);
-      margin: 1rem 0;
-    }
-
-    .metrics-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1rem;
-      margin-top: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
     }
 
     .metric-card {
-      background: white;
-      padding: 1rem;
+      background: #f8fafc;
+      padding: 1.5rem;
       border-radius: var(--border-radius);
-      box-shadow: var(--box-shadow);
+      border: 1px solid #e2e8f0;
       transition: var(--transition);
     }
 
     .metric-card:hover {
       transform: translateY(-2px);
-    }
-
-    .charts-container {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 1rem;
-      margin-top: 2rem;
-    }
-
-    .chart-wrapper {
-      background: white;
-      padding: 1rem;
-      border-radius: var(--border-radius);
       box-shadow: var(--box-shadow);
     }
 
-    @media (min-width: 768px) {
-      .container {
-        padding: 2rem;
-      }
-
-      .results-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .charts-container {
-        grid-template-columns: repeat(2, 1fr);
-      }
+    .chart-container {
+      background: white;
+      padding: 1.5rem;
+      border-radius: var(--border-radius);
+      border: 1px solid #e2e8f0;
+      margin-top: 1.5rem;
     }
 
-    @media (max-width: 767px) {
-      .form-grid {
+    .value-highlight {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--primary-color);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    .badge-success { background: #ecfdf5; color: var(--success-color); }
+    .badge-warning { background: #fffbeb; color: var(--warning-color); }
+    .badge-error { background: #fee2e2; color: var(--error-color); }
+
+    @media (max-width: 1024px) {
+      .dashboard {
         grid-template-columns: 1fr;
       }
-
-      .valuation-amount {
-        font-size: 1.5rem;
+      
+      .sidebar {
+        position: static;
       }
-
-      .metric-card {
-        font-size: 0.9rem;
-      }
-    }
-
-    /* Enhanced Chart Styles */
-    .chart-wrapper {
-      position: relative;
-      height: 300px;
-    }
-
-    /* Loading State */
-    .loading {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(255,255,255,0.8);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-    }
-
-    /* Animations */
-    @keyframes slideIn {
-      from { transform: translateY(20px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-
-    .animated {
-      animation: slideIn 0.3s ease forwards;
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
   <div class="container">
-    <header class="app-header">
-      <h1>Business Valuation Tool</h1>
-    </header>
-
-    <div class="form-container">
-      <form id="valuation-form">
-        <div class="form-grid">
+    <div class="dashboard">
+      <aside class="sidebar">
+        <form id="valuation-form">
           <div class="form-group">
             <label for="industry">Industry</label>
             <select id="industry" required>
@@ -291,34 +253,32 @@
             <label for="market-share">Market Share in Service Area (%)</label>
             <input type="number" id="market-share" placeholder="Estimated Market Share">
           </div>
-        </div>
 
-        <button type="submit">Calculate Valuation</button>
-      </form>
+          <button type="submit">Calculate Valuation</button>
+        </form>
+      </aside>
+
+      <main class="main-content">
+        <div id="results" style="display: none;">
+          <div class="metric-card">
+            <h2>Valuation Summary</h2>
+            <div id="result"></div>
+          </div>
+
+          <div class="results-grid">
+            <div class="chart-container">
+              <canvas id="valuation-chart"></canvas>
+            </div>
+            <div class="chart-container">
+              <canvas id="metrics-chart"></canvas>
+            </div>
+          </div>
+
+          <div class="metrics-grid" id="insights"></div>
+          <div class="metrics-grid" id="guidance"></div>
+        </div>
+      </main>
     </div>
-
-    <div class="results-container" id="results" style="display: none;">
-      <div class="valuation-card animated">
-        <h2>Valuation Summary</h2>
-        <div id="result"></div>
-      </div>
-
-      <div class="charts-container">
-        <div class="chart-wrapper">
-          <canvas id="valuation-chart"></canvas>
-        </div>
-        <div class="chart-wrapper">
-          <canvas id="metrics-chart"></canvas>
-        </div>
-      </div>
-
-      <div class="metrics-grid">
-        <div id="insights"></div>
-        <div id="guidance"></div>
-      </div>
-    </div>
-
-    <div id="error" class="error-message"></div>
   </div>
 
   <script>
