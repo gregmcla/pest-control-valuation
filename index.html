@@ -563,18 +563,17 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'Origin': window.location.origin
+                    'Accept': 'application/json'
                 },
-                credentials: 'same-origin',
+                mode: 'cors',  // Add this line
+                credentials: 'omit',  // Change this from 'same-origin' to 'omit'
                 body: JSON.stringify(formData)
             });
 
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({
-                    error: 'Server error occurred'
-                }));
-                throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+                const errorText = await response.text();
+                console.error('Server response:', errorText);
+                throw new Error(errorText || `HTTP error! status: ${response.status}`);
             }
 
             const data = await response.json();

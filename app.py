@@ -15,20 +15,13 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 
-# Update the CORS configuration to allow requests from your deployed domain
+# Update CORS configuration to be more permissive
 CORS(app, resources={
     r"/*": {
-        "origins": [
-            "http://localhost:5000",
-            "http://localhost:3000",
-            "https://pest-control-valuation.onrender.com",
-            "https://pest-control-valuation-1.onrender.com"
-        ],
+        "origins": "*",  # Allow all origins temporarily for debugging
         "methods": ["GET", "POST", "OPTIONS"],
-        "allow_headers": ["Content-Type", "Authorization"],
-        "expose_headers": ["Content-Type"],
-        "supports_credentials": True,
-        "max_age": 600
+        "allow_headers": ["Content-Type", "Authorization", "Accept"],
+        "supports_credentials": False  # Change to False since we're using '*' for origins
     }
 })
 
@@ -278,14 +271,17 @@ def handle_exception(e):
 @app.route("/api/valuate", methods=["POST", "OPTIONS"])
 @limiter.limit("50 per hour")
 def valuate():
-    """Main valuation endpoint with enhanced error handling"""
+    """Main valuation endpoint with enhanced error handling and debugging"""
+    # Add debug logging
     logging.info("Received valuation request")
+    logging.info(f"Request method: {request.method}")
+    logging.info(f"Request headers: {request.headers}")
     
     # Handle preflight requests
     if request.method == "OPTIONS":
         response = jsonify({"status": "ok"})
         response.headers.add("Access-Control-Allow-Origin", "*")
-        response.headers.add("Access-Control-Allow-Headers", "Content-Type")
+        response.headers.add("Access-Control-Allow-Headers", "Content-Type, Accept")
         response.headers.add("Access-Control-Allow-Methods", "POST")
         return response
 
@@ -295,11 +291,19 @@ def valuate():
 
         data = request.get_json()
         logging.info(f"Request data: {data}")
-        
+
+        # Add data validation logging
         validate_input(data)
+        logging.info("Input validation passed")
+
         metrics = calculate_metrics(data)
+        logging.info(f"Calculated metrics: {metrics}")
+
         adjustments = calculate_adjustments(metrics)
+        logging.info(f"Calculated adjustments: {adjustments}")
+
         valuation = calculate_valuation(metrics, adjustments)
+        logging.info(f"Final valuation: {valuation}")
         
         response_data = {
             "valuation": float(valuation),
@@ -310,14 +314,17 @@ def valuate():
             "industryComparison": generate_industry_comparison(metrics["industry"], metrics)
         }
         
-        return jsonify(response_data)
+        # Add CORS headers to the response
+        response = jsonify(response_data)
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        return response
 
     except ApiError as e:
         logging.error(f"API error: {str(e)}")
         return jsonify({"error": e.message, "type": "api_error"}), e.status_code
     except Exception as e:
         logging.error(f"Unexpected error: {str(e)}\n{traceback.format_exc()}")
-        return jsonify({"error": "Internal server error", "type": "server_error"}), 500
+        return jsonify({"error": str(e), "type": "server_error"}), 500
 
 def calculate_adjustments(metrics: Dict) -> Dict[str, Decimal]:
     """Calculate all valuation adjustments"""
