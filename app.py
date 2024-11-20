@@ -47,9 +47,9 @@ def valuate():
         # Industry-specific base multiples (updated based on research)
         industry_multiples = {
             # Software and Technology Services
-            "SaaS Provider": 8.5,
+            "SaaS": 8.5,
             "IT Consulting": 7.0,
-            "Custom Software Development": 6.5,
+            "Custom Software": 6.5,
             
             # Healthcare Services
             "Medical Practice": 6.0,
@@ -61,40 +61,58 @@ def valuate():
             "Specialty Manufacturing": 6.0,
             "Food Manufacturing": 5.5,
             
-            # Business Services
-            "Consulting": 6.0,
-            "Staffing": 5.0,
-            "Facilities Management": 4.8,
-            
-            # Distribution and Wholesale
-            "Industrial Distribution": 5.2,
-            "Consumer Goods Wholesale": 4.8,
-            "Specialty Distribution": 5.0,
-            
-            # Legacy industries
-            "B2B Software": 7.0,
-            "Pest Control - Residential": 5.5,
-            "HVAC - Commercial": 5.2,
-            "HVAC - Residential": 4.8,
-            "Plumbing": 4.5,
-            "Roofing": 4.3,
-            
-            # Consumer Products
-            "Health and Beauty": 5.8,
-            "Household Goods": 5.2,
-            "Sporting Goods": 5.0,
-            
             # Financial Services
             "Insurance Agency": 6.5,
             "Financial Advisory": 7.0,
             "Accounting Services": 6.0,
             
-            # Construction and Contracting
-            "General Contractor": 4.5,
-            "Specialty Contractor": 4.8,
-            "Renovation Services": 4.3,
+            # Trades and Home Services
+            "Plumbing": 4.5,
+            "Electrical": 4.7,
+            "HVAC": 4.8,
+            "Roofing": 4.3,
+            "Pest Control": 5.5,
+            "Landscaping": 4.4,
             
-            # Add more industries as needed...
+            # Professional Services
+            "Legal": 6.5,
+            "Engineering": 6.0,
+            "Architectural": 5.8,
+            
+            # Consumer Products and Retail
+            "Health and Beauty": 5.8,
+            "E-Commerce": 6.0,
+            "Brick and Mortar": 4.5,
+            
+            # Transportation and Logistics
+            "Freight and Shipping": 5.0,
+            "Warehousing": 4.8,
+            "3PL": 5.2,
+            
+            # Marketing and Media
+            "Digital Marketing": 6.2,
+            "Creative Agency": 5.8,
+            "Content Production": 5.5,
+            
+            # Real Estate Services
+            "Property Management": 5.5,
+            "Real Estate Brokerage": 6.0,
+            "Real Estate Development": 6.5,
+            
+            # Education and Training
+            "Private Education": 5.8,
+            "Corporate Training": 5.5,
+            "E-Learning": 6.5,
+            
+            # Energy and Environmental
+            "Renewable Energy": 6.8,
+            "Environmental Consulting": 5.8,
+            "Energy Efficiency": 6.0,
+            
+            # Additional Services
+            "Moving and Storage": 4.5,
+            "Home Inspection": 4.8,
+            "Security Services": 5.2
         }
 
         base_multiple = industry_multiples.get(data["industry"], 5.0)

@@ -6,66 +6,151 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Business Valuation Tool</title>
   <style>
+    :root {
+      --primary-color: #2c3e50;
+      --accent-color: #3498db;
+      --success-color: #2ecc71;
+      --warning-color: #f1c40f;
+      --error-color: #e74c3c;
+      --text-color: #333;
+      --border-radius: 8px;
+      --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f9f9f9;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
       margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      padding: 20px;
       min-height: 100vh;
     }
+
     .container {
-      max-width: 700px;
-      background: #fff;
-      border-radius: 8px;
-      padding: 20px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      padding: 2rem;
     }
+
     h1 {
-      font-size: 24px;
-      margin-bottom: 20px;
+      color: var(--primary-color);
       text-align: center;
-      color: #333;
+      font-size: 2rem;
+      margin-bottom: 2rem;
+      border-bottom: 2px solid var(--accent-color);
+      padding-bottom: 1rem;
     }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
     label {
       display: block;
-      margin-bottom: 5px;
-      font-weight: bold;
-      color: #555;
+      margin-bottom: 0.5rem;
+      color: var(--primary-color);
+      font-weight: 500;
     }
-    input, select, button {
+
+    input, select {
       width: 100%;
-      padding: 10px;
-      margin-bottom: 15px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
+      padding: 0.75rem;
+      border: 1px solid #ddd;
+      border-radius: var(--border-radius);
+      font-size: 1rem;
+      transition: border-color 0.3s ease;
     }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+    }
+
     button {
-      background-color: #4caf50;
+      background: var(--accent-color);
       color: white;
-      font-size: 16px;
-      cursor: pointer;
+      padding: 1rem 2rem;
       border: none;
+      border-radius: var(--border-radius);
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      width: 100%;
+      margin-top: 1rem;
     }
+
     button:hover {
-      background-color: #45a049;
+      background: #2980b9;
     }
-    .result, .insights, .guidance {
-      margin-top: 20px;
-      padding: 15px;
-      border-radius: 4px;
-      background-color: #e8f5e9;
-      color: #333;
+
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
     }
-    .error {
-      display: none;
-      color: #d32f2f;
-      margin-top: 20px;
+
+    .card {
+      background: white;
+      border-radius: var(--border-radius);
+      padding: 1.5rem;
+      box-shadow: var(--box-shadow);
     }
+
+    .metric-card {
+      background: #f8f9fa;
+      border-radius: var(--border-radius);
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .metric-card h4 {
+      color: var (--primary-color);
+      margin-top: 0;
+    }
+
+    .scenario-card {
+      border: 1px solid #eee;
+      border-radius: var(--border-radius);
+      padding: 1rem;
+      margin-bottom: 1rem;
+      background: white;
+    }
+
+    .scenario-value {
+      font-size: 1.5rem;
+      color: var(--success-color);
+      font-weight: bold;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 1rem;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      button {
+        padding: 0.75rem 1.5rem;
+      }
+    }
+
+    /* Chart Styles */
     canvas {
-      margin-top: 20px;
+      max-width: 100%;
+      margin-top: 2rem;
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -74,77 +159,101 @@
   <div class="container">
     <h1>Business Valuation Tool</h1>
     <form id="valuation-form">
-      <label for="industry">Industry</label>
-      <select id="industry" required>
-        <option value="" disabled selected>Select an Industry</option>
-        <optgroup label="Software and Technology Services">
-          <option value="SaaS Provider">SaaS Provider</option>
-          <option value="IT Consulting">IT Consulting & Managed Services</option>
-          <option value="Custom Software Development">Custom Software Development</option>
-        </optgroup>
-        <optgroup label="Healthcare Services">
-          <option value="Medical Practice">Medical Practice</option>
-          <option value="Home Healthcare">Home Healthcare Provider</option>
-          <option value="Diagnostic Center">Diagnostic & Imaging Center</option>
-        </optgroup>
-        <optgroup label="Manufacturing">
-          <option value="Industrial Manufacturing">Industrial Manufacturing</option>
-          <option value="Specialty Manufacturing">Specialty Manufacturing</option>
-          <option value="Food Manufacturing">Food & Beverage Manufacturing</option>
-        </optgroup>
-        <optgroup label="Business Services">
-          <option value="Consulting">Consulting Firm</option>
-          <option value="Staffing">Staffing & Recruitment</option>
-          <option value="Facilities Management">Facilities Management</option>
-        </optgroup>
-        <optgroup label="Distribution and Wholesale">
-          <option value="Industrial Distribution">Industrial Distribution</option>
-          <option value="Consumer Goods Wholesale">Consumer Goods Wholesale</option>
-          <option value="Specialty Distribution">Specialty Distribution</option>
-        </optgroup>
-        <!-- ... Continue with other industry groups ... -->
-      </select>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="industry">Industry</label>
+          <select id="industry" required>
+            <option value="" disabled selected>Select an Industry</option>
+            <optgroup label="Software and Technology Services">
+              <option value="SaaS">SaaS Provider</option>
+              <option value="IT Consulting">IT Consulting & Managed Services</option>
+              <option value="Custom Software">Custom Software Development</option>
+            </optgroup>
+            <optgroup label="Healthcare Services">
+              <option value="Medical Practice">Medical Practice</option>
+              <option value="Home Healthcare">Home Healthcare Provider</option>
+              <option value="Diagnostic Center">Diagnostic & Imaging Center</option>
+            </optgroup>
+            <optgroup label="Manufacturing">
+              <option value="Industrial Manufacturing">Industrial Manufacturing</option>
+              <option value="Specialty Manufacturing">Specialty Manufacturing</option>
+              <option value="Food Manufacturing">Food & Beverage Manufacturing</option>
+            </optgroup>
+            <optgroup label="Trades and Home Services">
+              <option value="Plumbing">Plumbing Services</option>
+              <option value="Electrical">Electrical Services</option>
+              <option value="HVAC">HVAC Services</option>
+              <option value="Roofing">Roofing Services</option>
+              <option value="Pest Control">Pest Control Services</option>
+              <option value="Landscaping">Landscaping & Lawn Care</option>
+            </optgroup>
+            <!-- Continue with all other industry groups -->
+          </select>
+        </div>
 
-      <label for="annual-revenue">Annual Revenue ($)</label>
-      <input type="number" id="annual-revenue" placeholder="Enter Annual Revenue" required>
+        <div class="form-group">
+          <label for="annual-revenue">Annual Revenue ($)</label>
+          <input type="number" id="annual-revenue" placeholder="Enter Annual Revenue" required>
+        </div>
 
-      <label for="ebitda">EBITDA ($)</label>
-      <input type="number" id="ebitda" placeholder="Enter EBITDA">
-      <button type="button" id="calc-ebitda">Estimate EBITDA</button>
+        <div class="form-group">
+          <label for="ebitda">EBITDA ($)</label>
+          <input type="number" id="ebitda" placeholder="Enter EBITDA">
+          <button type="button" id="calc-ebitda">Estimate EBITDA</button>
+        </div>
 
-      <label for="growth-rate">Growth Rate (%)</label>
-      <input type="number" id="growth-rate" placeholder="Optional Growth Rate">
+        <div class="form-group">
+          <label for="growth-rate">Growth Rate (%)</label>
+          <input type="number" id="growth-rate" placeholder="Optional Growth Rate">
+        </div>
 
-      <label for="customer-retention">Customer Retention (%)</label>
-      <input type="number" id="customer-retention" placeholder="Optional Retention Rate">
+        <div class="form-group">
+          <label for="customer-retention">Customer Retention (%)</label>
+          <input type="number" id="customer-retention" placeholder="Optional Retention Rate">
+        </div>
 
-      <label for="geographic-reach">Geographic Reach (# of States)</label>
-      <input type="number" id="geographic-reach" placeholder="Optional Geographic Reach">
+        <div class="form-group">
+          <label for="geographic-reach">Geographic Reach (# of States)</label>
+          <input type="number" id="geographic-reach" placeholder="Optional Geographic Reach">
+        </div>
 
-      <label for="ebitda-multiple">EBITDA Multiple</label>
-      <input type="number" id="ebitda-multiple" placeholder="Optional Multiple">
+        <div class="form-group">
+          <label for="ebitda-multiple">EBITDA Multiple</label>
+          <input type="number" id="ebitda-multiple" placeholder="Optional Multiple">
+        </div>
 
-      <label for="recurring-revenue">Recurring Revenue ($)</label>
-      <input type="number" id="recurring-revenue" placeholder="Optional Recurring Revenue">
+        <div class="form-group">
+          <label for="recurring-revenue">Recurring Revenue ($)</label>
+          <input type="number" id="recurring-revenue" placeholder="Optional Recurring Revenue">
+        </div>
 
-      <label for="business-age">Years in Business</label>
-      <input type="number" id="business-age" placeholder="Number of Years">
+        <div class="form-group">
+          <label for="business-age">Years in Business</label>
+          <input type="number" id="business-age" placeholder="Number of Years">
+        </div>
 
-      <label for="employee-count">Number of Employees</label>
-      <input type="number" id="employee-count" placeholder="Employee Count">
+        <div class="form-group">
+          <label for="employee-count">Number of Employees</label>
+          <input type="number" id="employee-count" placeholder="Employee Count">
+        </div>
 
-      <label for="market-share">Market Share in Service Area (%)</label>
-      <input type="number" id="market-share" placeholder="Estimated Market Share">
+        <div class="form-group">
+          <label for="market-share">Market Share in Service Area (%)</label>
+          <input type="number" id="market-share" placeholder="Estimated Market Share">
+        </div>
+      </div>
 
       <button type="submit">Calculate Valuation</button>
     </form>
 
-    <div id="result" class="result"></div>
-    <div id="insights" class="insights"></div>
-    <div id="guidance" class="guidance"></div>
-    <div id="error" class="error">An error occurred. Please try again.</div>
+    <div class="results-grid">
+      <div class="card" id="result"></div>
+      <div class="card" id="insights"></div>
+      <div class="card" id="guidance"></div>
+    </div>
 
-    <canvas id="valuation-chart" width="400" height="200"></canvas>
+    <div id="error" class="error-message"></div>
+    <canvas id="valuation-chart"></canvas>
   </div>
 
   <script>
