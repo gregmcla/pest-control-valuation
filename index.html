@@ -164,6 +164,16 @@
         position: static;
       }
     }
+
+    .error-card {
+      background: #fee2e2;
+      border: 1px solid #ef4444;
+      color: #991b1b;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-radius: var(--border-radius);
+      display: none;
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -259,6 +269,10 @@
       </aside>
 
       <main class="main-content">
+        <div id="error-message" class="error-card" style="display: none;">
+          <div class="error-content"></div>
+        </div>
+
         <div id="results" style="display: none;">
           <div class="metric-card">
             <h2>Valuation Summary</h2>
@@ -311,7 +325,13 @@
     // Form submission handler
     document.getElementById('valuation-form').addEventListener('submit', async (event) => {
       event.preventDefault();
-      document.getElementById('error').style.display = 'none';
+      
+      const errorElement = document.getElementById('error-message');
+      const resultsElement = document.getElementById('results');
+      
+      // Hide error and results initially
+      errorElement.style.display = 'none';
+      resultsElement.style.display = 'none';
 
       const formData = {
         industry: document.getElementById('industry').value,
@@ -393,15 +413,14 @@
         }
 
         // Show results container
-        document.getElementById('results').style.display = 'block';
-        
-        // Scroll to results
-        document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+        resultsElement.style.display = 'block';
+        resultsElement.scrollIntoView({ behavior: 'smooth' });
 
       } catch (error) {
         console.error('Error:', error);
-        document.getElementById('error').textContent = error.message;
-        document.getElementById('error').style.display = 'block';
+        errorElement.querySelector('.error-content').textContent = error.message;
+        errorElement.style.display = 'block';
+        errorElement.scrollIntoView({ behavior: 'smooth' });
       }
     });
 
