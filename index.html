@@ -8,202 +8,163 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary-color: #2563eb;
-      --primary-dark: #1e40af;
-      --primary-light: #60a5fa;
-      --surface-dark: #1e293b;
+      --primary-color: #6366f1;
+      --primary-dark: #4f46e5;
+      --primary-light: #818cf8;
       --surface-light: #f8fafc;
+      --surface-dark: #1e293b;
       --success-color: #10b981;
       --warning-color: #f59e0b;
       --error-color: #ef4444;
       --text-primary: #0f172a;
       --text-secondary: #64748b;
-      --border-radius: 1rem;
-      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --border-radius: 0.75rem;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+      --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     body {
       font-family: 'Inter', sans-serif;
-      background: linear-gradient(135deg, var(--surface-light) 0%, #e2e8f0 100%);
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
       color: var(--text-primary);
       line-height: 1.6;
       min-height: 100vh;
       margin: 0;
-      padding: 2rem;
-    }
-
-    .container {
-      max-width: 1280px;
-      margin: 2rem auto;
-      padding: 0 1rem;
+      padding: 1rem;
     }
 
     .dashboard {
       display: grid;
-      gap: 2.5rem;
-      grid-template-columns: 380px 1fr;
-      align-items: start;
+      gap: 2rem;
+      grid-template-columns: 350px 1fr;
       max-width: 1440px;
-      margin: 0 auto;
+      margin: 1rem auto;
+      padding: 1rem;
     }
 
     .sidebar {
-      background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
-      padding: 2rem;
+      background: white;
+      padding: 1.5rem;
       border-radius: var(--border-radius);
-      box-shadow: var(--box-shadow);
+      box-shadow: var(--shadow-lg);
       position: sticky;
-      top: 2rem;
+      top: 1rem;
+      height: fit-content;
       border: 1px solid rgba(148, 163, 184, 0.1);
       backdrop-filter: blur(8px);
-      box-shadow: 
-        0 4px 6px -1px rgba(0, 0, 0, 0.1),
-        0 2px 4px -2px rgba(0, 0, 0, 0.05),
-        0 0 0 1px rgba(255, 255, 255, 0.1) inset;
     }
 
     .main-content {
-      background: rgba(255, 255, 255, 0.8);
-      padding: 1.5rem;
+      background: white;
+      padding: 2rem;
       border-radius: var(--border-radius);
-      box-shadow: var(--box-shadow);
-      border: 1px solid rgba(148, 163, 184, 0.1);
-      backdrop-filter: blur(8px);
-    }
-
-    .form-group {
-      margin-bottom: 1.5rem;
-    }
-
-    .form-group label {
-      display: block;
-      font-size: 0.875rem;
-      font-weight: 600;
-      color: var(--text-primary);
-      margin-bottom: 0.5rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .input-wrapper {
-      position: relative;
+      box-shadow: var(--shadow-md);
     }
 
     input, select {
       width: 100%;
       padding: 0.75rem 1rem;
-      border: 2px solid #e2e8f0;
-      border-radius: 0.75rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 0.5rem;
       font-size: 0.95rem;
       transition: var(--transition);
-      background: var(--background-color);
+      background: white;
     }
 
     input:focus, select:focus {
       outline: none;
-      border-color: var(--accent-color);
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      border-color: var(--primary-light);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
     }
 
     button {
       width: 100%;
-      padding: 1rem 2rem;
+      padding: 0.875rem 1.5rem;
       border: none;
-      border-radius: 0.75rem;
-      background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+      border-radius: 0.5rem;
+      background: var(--primary-color);
       color: white;
       font-weight: 600;
       font-size: 0.875rem;
       cursor: pointer;
       transition: var(--transition);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
       position: relative;
       overflow: hidden;
     }
 
-    button::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.1) 100%);
-      opacity: 0;
-      transition: var(--transition);
-    }
-
-    button:hover::after {
-      opacity: 1;
-    }
-
-    .results-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-      gap: 2rem;
-      margin-top: 2rem;
+    button:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
     }
 
     .metric-card {
       background: white;
       padding: 1.5rem;
       border-radius: var(--border-radius);
-      border: 1px solid rgba(148, 163, 184, 0.1);
-      transition: var(--transition);
-      box-shadow: 
-        0 4px 6px -1px rgba(0, 0, 0, 0.05),
-        0 2px 4px -2px rgba(0, 0, 0, 0.025);
-    }
-
-    .metric-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 
-        0 20px 25px -5px rgba(0, 0, 0, 0.1),
-        0 8px 10px -6px rgba(0, 0, 0, 0.05);
-    }
-
-    .metric-card h4 {
-      color: var(--text-primary);
-      font-size: 1.1rem;
-      margin-bottom: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .chart-container {
-      background: white;
-      padding: 2rem;
-      border-radius: var(--border-radius);
       border: 1px solid #e2e8f0;
-      margin-top: 1.5rem;
-      box-shadow: var(--box-shadow);
       transition: var(--transition);
-      box-shadow: 
-        0 4px 6px -1px rgba(0, 0, 0, 0.05),
-        0 2px 4px -2px rgba(0, 0, 0, 0.025);
     }
 
     .value-highlight {
-      font-size: 2rem;
+      font-size: 2.5rem;
       font-weight: 700;
-      color: var(--accent-color);
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
       margin: 1rem 0;
     }
 
     .badge {
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
       padding: 0.25rem 0.75rem;
       border-radius: 9999px;
       font-size: 0.75rem;
       font-weight: 500;
+      gap: 0.25rem;
     }
 
-    .badge-success { background: #ecfdf5; color: var(--success-color); }
-    .badge-warning { background: #fffbeb; color: var(--warning-color); }
-    .badge-error { background: #fee2e2; color: var(--error-color); }
+    .chart-container {
+      background: white;
+      padding: 1.5rem;
+      border-radius: var(--border-radius);
+      border: 1px solid #e2e8f0;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .loading-overlay {
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(4px);
+    }
+
+    .loading-spinner {
+      width: 2.5rem;
+      height: 2.5rem;
+      border: 3px solid var(--primary-light);
+      border-top: 3px solid var(--primary-color);
+    }
+
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .scenario-card {
+      background: white;
+      padding: 1.5rem;
+      border-radius: var(--border-radius);
+      border: 1px solid #e2e8f0;
+      transition: var(--transition);
+    }
+
+    .scenario-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
 
     @media (max-width: 1024px) {
       .dashboard {
@@ -215,127 +176,20 @@
       }
     }
 
-    .error-card {
-      background: #fee2e2;
-      border: 1px solid #ef4444;
-      color: #991b1b;
-      padding: 1rem;
-      margin-bottom: 1rem;
-      border-radius: var(--border-radius);
-      display: none;
-    }
-
-    .scenario-card {
-      background: var(--surface-color);
-      padding: 1.5rem;
-      border-radius: var(--border-radius);
-      border: 1px solid #e2e8f0;
-      transition: var(--transition);
-    }
-
-    .scenario-card:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--box-shadow);
-    }
-
-    .scenario-value {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--accent-color);
-    }
-
-    /* Enhanced loading state */
-    .loading-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(255, 255, 255, 0.9);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-      backdrop-filter: blur(8px);
-    }
-
-    .loading-spinner {
-      width: 3rem;
-      height: 3rem;
-      border: 3px solid var(--primary-light);
-      border-top: 3px solid var(--primary-color);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
+    /* Add smooth animations */
     @keyframes slideIn {
-      from { transform: translateY(1rem); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
+      from { 
+        transform: translateY(1rem);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
     }
 
     #results {
-      animation: slideIn 0.5s ease-out;
-    }
-
-    .valuation-summary {
-      text-align: center;
-      padding: 2rem;
-      background: linear-gradient(135deg, var(--surface-light) 0%, #ffffff 100%);
-      border-radius: var(--border-radius);
-    }
-
-    .metrics-detail {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1rem;
-      margin-top: 1.5rem;
-    }
-
-    .scenario-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 1.5rem;
-      margin-top: 2rem;
-    }
-
-    .metrics-list {
-      display: grid;
-      gap: 0.75rem;
-    }
-
-    .comparison-details {
-      display: grid;
-      gap: 1rem;
-    }
-
-    .peer-metrics {
-      background: var(--surface-light);
-      padding: 1rem;
-      border-radius: var(--border-radius);
-    }
-
-    .requirements {
-      margin-top: 1rem;
-      padding-top: 1rem;
-      border-top: 1px solid #e2e8f0;
-    }
-
-    .requirements ul {
-      margin: 0.5rem 0 0 1.25rem;
-      padding: 0;
-    }
-
-    .value-highlight {
-      font-size: 2.5rem;
-      font-weight: 700;
-      color: var(--primary-color);
-      margin: 1rem 0;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+      animation: slideIn 0.3s ease-out;
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -570,7 +424,7 @@
         }
     };
 
-    // Add API configuration
+    // Update API configuration with better error handling
     const API_CONFIG = {
         baseUrl: window.location.hostname === 'localhost' 
             ? 'http://localhost:5000'
@@ -578,10 +432,37 @@
         endpoints: {
             valuate: '/api/valuate',
             health: '/health'
+        },
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
         }
     };
 
-    // Form submission handler
+    // Add retry logic for API requests
+    async function makeApiRequest(endpoint, data, retries = 3) {
+        for (let i = 0; i < retries; i++) {
+            try {
+                const response = await fetch(`${API_CONFIG.baseUrl}${endpoint}`, {
+                    method: 'POST',
+                    headers: API_CONFIG.headers,
+                    body: JSON.stringify(data)
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+                }
+                
+                return await response.json();
+            } catch (error) {
+                if (i === retries - 1) throw error;
+                await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+            }
+        }
+    }
+
+    // Update the form submission handler
     document.getElementById('valuation-form').addEventListener('submit', async (event) => {
         event.preventDefault();
         const loadingOverlay = document.getElementById('loading-overlay');
@@ -592,83 +473,51 @@
             loadingOverlay.style.display = 'flex';
             errorElement.style.display = 'none';
             
-            const formData = {
-                industry: document.getElementById('industry').value,
-                annualRevenue: parseFloat(document.getElementById('annual-revenue').value) || 0,
-                ebitda: parseFloat(document.getElementById('ebitda').value) || 0,
-                growthRate: parseFloat(document.getElementById('growth-rate').value) || 0,
-                customerRetention: parseFloat(document.getElementById('customer-retention').value) || 0,
-                geographicReach: parseFloat(document.getElementById('geographic-reach').value) || 0,
-                recurringRevenue: parseFloat(document.getElementById('recurring-revenue').value) || 0,
-                businessAge: parseFloat(document.getElementById('business-age').value) || 0,
-                marketShare: parseFloat(document.getElementById('market-share').value) || 0
-            };
-
-            // Validate form data
+            const formData = getFormData();  // Extract form data collection to separate function
             const errors = validateForm(formData);
+            
             if (errors.length > 0) {
                 throw new Error(errors.join('\n'));
             }
 
-            const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.endpoints.valuate}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify(formData)
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Server error occurred');
-            }
-
-            const data = await response.json();
+            const data = await makeApiRequest(API_CONFIG.endpoints.valuate, formData);
             updateResults(data);
-            resultsElement.style.display = 'block';
-            resultsElement.scrollIntoView({ behavior: 'smooth' });
+            showResults(resultsElement);
 
         } catch (error) {
-            console.error('Error:', error);
-            errorElement.querySelector('.error-content').textContent = error.message;
-            errorElement.style.display = 'block';
-            errorElement.scrollIntoView({ behavior: 'smooth' });
+            handleError(error, errorElement);
         } finally {
             loadingOverlay.style.display = 'none';
         }
     });
 
-    function updateResults(data) {
-        // Update all results sections
-        document.getElementById('result').innerHTML = generateValuationSummary(data);
-        document.getElementById('key-metrics').innerHTML = generateKeyMetrics(data);
-        document.getElementById('industry-comparison').innerHTML = generateIndustryComparison(data);
-        document.getElementById('scenarios').innerHTML = generateScenarios(data);
-        updateCharts(data);
+    // Helper function to get form data
+    function getFormData() {
+        return {
+            industry: document.getElementById('industry').value,
+            annualRevenue: parseFloat(document.getElementById('annual-revenue').value) || 0,
+            ebitda: parseFloat(document.getElementById('ebitda').value) || 0,
+            growthRate: parseFloat(document.getElementById('growth-rate').value) || 0,
+            customerRetention: parseFloat(document.getElementById('customer-retention').value) || 0,
+            geographicReach: parseFloat(document.getElementById('geographic-reach').value) || 0,
+            recurringRevenue: parseFloat(document.getElementById('recurring-revenue').value) || 0,
+            businessAge: parseFloat(document.getElementById('business-age').value) || 0,
+            marketShare: parseFloat(document.getElementById('market-share').value) || 0
+        };
     }
 
-    // Add error handling for network issues
-    async function makeApiRequest(endpoint, data) {
-        try {
-            const response = await fetch(`${API_CONFIG.baseUrl}${endpoint}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify(data)
-            });
-            
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            
-            return await response.json();
-        } catch (error) {
-            console.error('API request failed:', error);
-            throw error;
-        }
+    // Helper function to show results
+    function showResults(resultsElement) {
+        resultsElement.style.display = 'block';
+        resultsElement.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Helper function to handle errors
+    function handleError(error, errorElement) {
+        console.error('Error:', error);
+        errorElement.querySelector('.error-content').textContent = error.message;
+        errorElement.style.display = 'block';
+        errorElement.scrollIntoView({ behavior: 'smooth' });
     }
 
     // EBITDA calculation handler
@@ -747,37 +596,83 @@
     }
 
     function generateKeyMetrics(data) {
+        // Access metrics from the correct location in the response
         const metrics = {
-            ebitdaMultiple: data.ebitdaMultiple || 0,
-            revenueMultiple: data.revenueMultiple || 0,
-            growthRate: data.growthRate || 0,
-            profitMargin: data.profitMargin || 0
+            ebitdaMultiple: data.currentMultiple || 0,
+            revenueMultiple: (data.valuation / (data.metrics?.revenue || 1)).toFixed(2) || 0,
+            growthRate: data.metrics?.growthRate || 0,
+            profitMargin: (data.metrics?.ebitda_margin) || 0,
+            customerRetention: data.metrics?.retention_rate || 0,
+            marketShare: data.metrics?.marketShare || 0
         };
 
         return `
             <div class="metrics-list">
                 <div>EBITDA Multiple: ${metrics.ebitdaMultiple.toFixed(2)}x</div>
-                <div>Revenue Multiple: ${metrics.revenueMultiple.toFixed(2)}x</div>
+                <div>Revenue Multiple: ${metrics.revenueMultiple}x</div>
                 <div>Growth Rate: ${metrics.growthRate.toFixed(1)}%</div>
                 <div>Profit Margin: ${metrics.profitMargin.toFixed(1)}%</div>
+                <div>Customer Retention: ${metrics.customerRetention.toFixed(1)}%</div>
+                <div>Market Share: ${metrics.marketShare.toFixed(1)}%</div>
             </div>`;
     }
 
     function generateIndustryComparison(data) {
+        // Access industry comparison data from the correct location
         const comparison = {
-            industryAvgMultiple: data.industryAvgMultiple || 0,
-            peerGroupRange: data.peerGroupRange || '3.0x - 5.0x',
-            marketPosition: data.marketPosition || 'Average'
+            industryAvgMultiple: data.industryComparison?.industryAvgMultiple || 0,
+            peerGroupRange: data.industryComparison?.peerComparison || '3.0x - 5.0x',
+            marketPosition: data.competitivePosition?.market_position?.rank || 'Average',
+            peerMetrics: data.industryComparison?.peerComparison || {}
         };
 
         return `
             <div class="comparison-details">
                 <div class="peer-metrics">
                     <div>Industry Average Multiple: ${comparison.industryAvgMultiple.toFixed(2)}x</div>
-                    <div>Peer Group Range: ${comparison.peerGroupRange}</div>
                     <div>Market Position: ${comparison.marketPosition}</div>
+                    <div class="peer-comparison">
+                        <div>Growth: <span class="badge badge-${getBadgeClass(comparison.peerMetrics.growth)}">${comparison.peerMetrics.growth || 'Average'}</span></div>
+                        <div>Margin: <span class="badge badge-${getBadgeClass(comparison.peerMetrics.margin)}">${comparison.peerMetrics.margin || 'Average'}</span></div>
+                        <div>Retention: <span class="badge badge-${getBadgeClass(comparison.peerMetrics.retention)}">${comparison.peerMetrics.retention || 'Average'}</span></div>
+                    </div>
                 </div>
             </div>`;
+    }
+
+    function updateCharts(data) {
+        // Update valuation chart with scenarios
+        const scenarios = data.scenarios || [
+            { name: 'Conservative', value: data.valuation * 0.8 || 0 },
+            { name: 'Base Case', value: data.valuation || 0 },
+            { name: 'Optimistic', value: data.valuation * 1.2 || 0 }
+        ];
+
+        valuationChart.data.labels = scenarios.map(s => s.name);
+        valuationChart.data.datasets[0].data = scenarios.map(s => s.value);
+        valuationChart.update();
+
+        // Update metrics chart with normalized values
+        const metrics = [
+            data.metrics?.growthRate || 0,
+            data.metrics?.ebitda_margin || 0,
+            data.metrics?.retention_rate || 0,
+            data.metrics?.geographic_reach || 0,
+            data.metrics?.marketShare || 0
+        ].map(value => Math.min((value / 20), 5));
+
+        metricsChart.data.datasets[0].data = metrics;
+        metricsChart.update();
+    }
+
+    function formatCurrency(value) {
+        // Ensure value is a number and handle any NaN cases
+        const num = Number(value) || 0;
+        return new Intl.NumberFormat('en-US', {
+            maximumFractionDigits: 0,
+            minimumFractionDigits: 0,
+            style: 'decimal'
+        }).format(num);
     }
 
     function generateScenarios(data) {
@@ -808,41 +703,6 @@
                 <div>${scenario.description}</div>
             </div>
         `).join('');
-    }
-
-    function updateCharts(data) {
-        // Update valuation chart
-        const scenarios = data.scenarios || [
-            { name: 'Conservative', value: data.valuation * 0.8 || 0 },
-            { name: 'Base Case', value: data.valuation || 0 },
-            { name: 'Optimistic', value: data.valuation * 1.2 || 0 }
-        ];
-
-        valuationChart.data.labels = scenarios.map(s => s.name);
-        valuationChart.data.datasets[0].data = scenarios.map(s => s.value);
-        valuationChart.update();
-
-        // Update metrics chart
-        const metrics = [
-            data.growthRate || 0,
-            data.profitMargin || 0,
-            data.customerRetention || 0,
-            data.geographicReach || 0,
-            data.marketShare || 0
-        ].map(value => (value / 20) || 0);
-
-        metricsChart.data.datasets[0].data = metrics;
-        metricsChart.update();
-    }
-
-    function formatCurrency(value) {
-        // Ensure value is a number and handle any NaN cases
-        const num = Number(value) || 0;
-        return new Intl.NumberFormat('en-US', {
-            maximumFractionDigits: 0,
-            minimumFractionDigits: 0,
-            style: 'decimal'
-        }).format(num);
     }
   </script>
 </body>

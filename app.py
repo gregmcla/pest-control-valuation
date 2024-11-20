@@ -40,6 +40,28 @@ CORS(app,
          "max_age": 600
      }})
 
+# Update CORS configuration to be more permissive
+CORS(app, 
+     resources={r"/*": {
+         "origins": ["http://localhost:3000", 
+                    "http://localhost:5000", 
+                    "https://pest-control-valuation.onrender.com",
+                    "https://pest-control-valuation-1.onrender.com"],
+         "methods": ["GET", "POST", "OPTIONS"],
+         "allow_headers": ["Content-Type", "Authorization", "X-Requested-With"],
+         "supports_credentials": False,  # Change to False since we're using credentials: 'omit'
+         "max_age": 600
+     }})
+
+# Update CORS configuration to be more permissive
+CORS(app, 
+     resources={r"/*": {
+         "origins": "*",  # Allow all origins in development
+         "methods": ["GET", "POST", "OPTIONS"],
+         "allow_headers": ["Content-Type", "Authorization", "X-Requested-With"],
+         "supports_credentials": False
+     }})
+
 # Configure rate limiter
 RATE_LIMIT = os.getenv('API_RATE_LIMIT', '50/hour')
 limiter = Limiter(
@@ -319,6 +341,7 @@ except Exception as e:
 # Update the valuate endpoint to include CORS headers
 @app.route("/api/valuate", methods=["POST", "OPTIONS"])
 @limiter.limit("50 per hour")
+@cross_origin()  # Add this decorator
 def valuate():
     """Main valuation endpoint with enhanced error handling and debugging"""
     logging.info("Received valuation request")
@@ -327,10 +350,7 @@ def valuate():
     
     # Handle preflight requests
     if request.method == "OPTIONS":
-        response = jsonify({"status": "ok"})
-        response.headers.add("Access-Control-Allow-Methods", "POST, OPTIONS")
-        response.headers.add("Access-Control-Allow-Headers", "Content-Type")
-        return response
+        return handle_preflight()
 
     try:
         if not request.is_json:
@@ -345,6 +365,8 @@ def valuate():
 
         # Process in chunks to manage memory
         metrics = calculate_metrics(data)
+        if not metrics["revenue"] or not metrics["ebitda"]:
+            raise ApiError("Invalid revenue or EBITDA values")
         gc.collect()
         
         market_trends = ai_analyzer.analyze_market_trends(data["industry"])
@@ -382,6 +404,13 @@ def valuate():
     except Exception as e:
         logging.error(f"Unexpected error: {str(e)}\n{traceback.format_exc()}")
         return jsonify({"error": str(e), "type": "server_error"}), 500
+
+def handle_preflight():
+    """Handle CORS preflight requests"""
+    response = jsonify({"status": "ok"})
+    response.headers.add("Access-Control-Allow-Methods", "POST, OPTIONS")
+    response.headers.add("Access-Control-Allow-Headers", "Content-Type")
+    return response
 
 def calculate_adjustments(metrics: Dict) -> Dict[str, Decimal]:
     """Calculate all valuation adjustments"""
@@ -640,11 +669,24 @@ def after_request(response):
     response.headers.update({
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-        'Access-Control-Allow-Credentials': 'true'
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+        'Access-Control-Allow-Credentials': 'true',
+        'Access-Control-Max-Age': '3600'
     })
     return response
 
+@app.after_request
+def after_request(response):
+    """Add security and CORS headers to all responses"""
+    origin = request.headers.get('Origin', '*')
+    response.headers.update({
+        'Access-Control-Allow-Origin': origin,
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+        'Access-Control-Allow-Credentials': 'false',
+        'Access-Control-Max-Age': '3600'
+    })
+    return response
 
 if __name__ == "__main__":
     # Production settings
