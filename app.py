@@ -46,13 +46,55 @@ def valuate():
 
         # Industry-specific base multiples (updated based on research)
         industry_multiples = {
+            # Software and Technology Services
+            "SaaS Provider": 8.5,
+            "IT Consulting": 7.0,
+            "Custom Software Development": 6.5,
+            
+            # Healthcare Services
+            "Medical Practice": 6.0,
+            "Home Healthcare": 5.5,
+            "Diagnostic Center": 6.2,
+            
+            # Manufacturing
+            "Industrial Manufacturing": 5.8,
+            "Specialty Manufacturing": 6.0,
+            "Food Manufacturing": 5.5,
+            
+            # Business Services
+            "Consulting": 6.0,
+            "Staffing": 5.0,
+            "Facilities Management": 4.8,
+            
+            # Distribution and Wholesale
+            "Industrial Distribution": 5.2,
+            "Consumer Goods Wholesale": 4.8,
+            "Specialty Distribution": 5.0,
+            
+            # Legacy industries
             "B2B Software": 7.0,
             "Pest Control - Residential": 5.5,
             "HVAC - Commercial": 5.2,
             "HVAC - Residential": 4.8,
             "Plumbing": 4.5,
             "Roofing": 4.3,
-            "Manufacturing": 5.8
+            
+            # Consumer Products
+            "Health and Beauty": 5.8,
+            "Household Goods": 5.2,
+            "Sporting Goods": 5.0,
+            
+            # Financial Services
+            "Insurance Agency": 6.5,
+            "Financial Advisory": 7.0,
+            "Accounting Services": 6.0,
+            
+            # Construction and Contracting
+            "General Contractor": 4.5,
+            "Specialty Contractor": 4.8,
+            "Renovation Services": 4.3,
+            
+            # Add more industries as needed...
         }
 
         base_multiple = industry_multiples.get(data["industry"], 5.0)

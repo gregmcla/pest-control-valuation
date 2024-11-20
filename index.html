@@ -77,13 +77,32 @@
       <label for="industry">Industry</label>
       <select id="industry" required>
         <option value="" disabled selected>Select an Industry</option>
-        <option value="B2B Software">B2B Software</option>
-        <option value="Pest Control - Residential">Pest Control - Residential</option>
-        <option value="HVAC - Commercial">HVAC - Commercial</option>
-        <option value="HVAC - Residential">HVAC - Residential</option>
-        <option value="Plumbing">Plumbing</option>
-        <option value="Roofing">Roofing</option>
-        <option value="Manufacturing">Manufacturing</option>
+        <optgroup label="Software and Technology Services">
+          <option value="SaaS Provider">SaaS Provider</option>
+          <option value="IT Consulting">IT Consulting & Managed Services</option>
+          <option value="Custom Software Development">Custom Software Development</option>
+        </optgroup>
+        <optgroup label="Healthcare Services">
+          <option value="Medical Practice">Medical Practice</option>
+          <option value="Home Healthcare">Home Healthcare Provider</option>
+          <option value="Diagnostic Center">Diagnostic & Imaging Center</option>
+        </optgroup>
+        <optgroup label="Manufacturing">
+          <option value="Industrial Manufacturing">Industrial Manufacturing</option>
+          <option value="Specialty Manufacturing">Specialty Manufacturing</option>
+          <option value="Food Manufacturing">Food & Beverage Manufacturing</option>
+        </optgroup>
+        <optgroup label="Business Services">
+          <option value="Consulting">Consulting Firm</option>
+          <option value="Staffing">Staffing & Recruitment</option>
+          <option value="Facilities Management">Facilities Management</option>
+        </optgroup>
+        <optgroup label="Distribution and Wholesale">
+          <option value="Industrial Distribution">Industrial Distribution</option>
+          <option value="Consumer Goods Wholesale">Consumer Goods Wholesale</option>
+          <option value="Specialty Distribution">Specialty Distribution</option>
+        </optgroup>
+        <!-- ... Continue with other industry groups ... -->
       </select>
 
       <label for="annual-revenue">Annual Revenue ($)</label>
