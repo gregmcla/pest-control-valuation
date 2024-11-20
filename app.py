@@ -5,9 +5,16 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 import logging
 import traceback
+import sys
 from decimal import Decimal, InvalidOperation
 from typing import Dict, List, Union
 from datetime import datetime
+from ai_analysis import ValuationAI
+from competitive_analysis import CompetitiveAnalysis
+from strategy_engine import StrategyEngine
+from dotenv import load_dotenv
+
+load_dotenv()  # Load environment variables
 
 # Initialize Flask app and configure logging first
 app = Flask(__name__)
@@ -21,20 +28,32 @@ logging.basicConfig(
 )
 
 # Update CORS configuration to be more permissive
+ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS', '*').split(',')
 CORS(app, resources={
     r"/*": {
-        "origins": "*",  # Allow all origins temporarily for debugging
+        "origins": ["*"],  # Allow all origins in development
         "methods": ["GET", "POST", "OPTIONS"],
         "allow_headers": ["Content-Type", "Authorization", "Accept"],
-        "supports_credentials": False  # Change to False since we're using '*' for origins
+        "expose_headers": ["Content-Type"],
+        "supports_credentials": False,
+        "send_wildcard": True
     }
 })
 
+@app.after_request
+def after_request(response):
+    """Ensure CORS headers are set"""
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    return response
+
 # Configure rate limiter
+RATE_LIMIT = os.getenv('API_RATE_LIMIT', '50/hour')
 limiter = Limiter(
     app=app,
     key_func=get_remote_address,
-    default_limits=["200 per day", "50 per hour"],
+    default_limits=[RATE_LIMIT],
     storage_uri="memory://"  # Use in-memory storage for simplicity
 )
 
@@ -272,6 +291,27 @@ def handle_exception(e):
     response.status_code = 500
     return response
 
+def initialize_components():
+    """Initialize components with error handling"""
+    try:
+        MODEL_CACHE_DIR = os.getenv('MODEL_CACHE_DIR', '/tmp/models')
+        os.makedirs(MODEL_CACHE_DIR, exist_ok=True)
+        
+        return (
+            ValuationAI(model_cache_dir=MODEL_CACHE_DIR),
+            CompetitiveAnalysis(),
+            StrategyEngine()
+        )
+    except Exception as e:
+        logging.error(f"Error initializing components: {e}")
+        raise RuntimeError("Failed to initialize required components")
+
+try:
+    ai_analyzer, competitive_analyzer, strategy_engine = initialize_components()
+except Exception as e:
+    logging.error(f"Critical initialization error: {e}")
+    sys.exit(1)
+
 # Update the valuate endpoint to include CORS headers
 @app.route("/api/valuate", methods=["POST", "OPTIONS"])
 @limiter.limit("50 per hour")
@@ -304,6 +344,11 @@ def valuate():
         metrics = calculate_metrics(data)
         logging.info(f"Calculated metrics: {metrics}")
 
+        # Add AI analysis
+        market_trends = ai_analyzer.analyze_market_trends(data["industry"])
+        competitive_position = competitive_analyzer.analyze_market_position(metrics, market_trends)
+        strategy = strategy_engine.generate_recommendations(data, competitive_position)
+        
         adjustments = calculate_adjustments(metrics)
         logging.info(f"Calculated adjustments: {adjustments}")
 
@@ -316,7 +361,10 @@ def valuate():
             "metrics": {k: float(v) if isinstance(v, Decimal) else v for k, v in metrics.items()},
             "adjustments": {k: float(v) for k, v in adjustments.items()},
             "scenarios": generate_enhanced_scenarios(valuation, sum(adjustments.values()), metrics),
-            "industryComparison": generate_industry_comparison(data["industry"], metrics)  # Fixed this line
+            "industryComparison": generate_industry_comparison(data["industry"], metrics),  # Fixed this line
+            "marketAnalysis": market_trends,
+            "competitivePosition": competitive_position,
+            "strategicPlan": strategy
         }
         
         # Add CORS headers to the response

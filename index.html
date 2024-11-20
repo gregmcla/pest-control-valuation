@@ -699,6 +699,36 @@
                 return 'error';
         }
     }
-</script>
+
+    // Add new chart types
+    const charts = {
+      valuationTrend: {
+        type: 'line',
+        data: {
+          labels: ['Current', '1 Year', '3 Years', '5 Years'],
+          datasets: [{
+            label: 'Projected Value ($M)',
+            borderColor: 'rgba(37, 99, 235, 1)',
+            fill: true
+          }]
+        }
+      },
+      industryComparison: {
+        type: 'radar',
+        data: {
+          labels: ['Revenue', 'Growth', 'Margin', 'Market Share', 'Risk Profile']
+        }
+      },
+      peerBenchmark: {
+        type: 'scatter',
+        data: {
+          datasets: [{
+            label: 'Industry Peers',
+            backgroundColor: 'rgba(99, 102, 241, 0.5)'
+          }]
+        }
+      }
+    }
+  </script>
 </body>
 </html>
