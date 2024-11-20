@@ -8,27 +8,28 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary-color: #0f172a;
-      --primary-light: #1e293b;
-      --accent-color: #3b82f6;
-      --accent-light: #60a5fa;
+      --primary-color: #2563eb;
+      --primary-dark: #1e40af;
+      --primary-light: #60a5fa;
+      --surface-dark: #1e293b;
+      --surface-light: #f8fafc;
       --success-color: #10b981;
       --warning-color: #f59e0b;
       --error-color: #ef4444;
-      --surface-color: #ffffff;
-      --background-color: #f8fafc;
       --text-primary: #0f172a;
-      --text-secondary: #475569;
-      --border-radius: 16px;
-      --box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-      --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      --text-secondary: #64748b;
+      --border-radius: 1rem;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     body {
       font-family: 'Inter', sans-serif;
-      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      background: linear-gradient(135deg, var(--surface-light) 0%, #e2e8f0 100%);
       color: var(--text-primary);
       line-height: 1.6;
+      min-height: 100vh;
+      margin: 0;
+      padding: 2rem;
     }
 
     .container {
@@ -39,25 +40,35 @@
 
     .dashboard {
       display: grid;
-      gap: 2rem;
+      gap: 2.5rem;
       grid-template-columns: 380px 1fr;
       align-items: start;
+      max-width: 1440px;
+      margin: 0 auto;
     }
 
     .sidebar {
-      background: var(--surface-color);
+      background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
       padding: 2rem;
       border-radius: var(--border-radius);
       box-shadow: var(--box-shadow);
       position: sticky;
       top: 2rem;
+      border: 1px solid rgba(148, 163, 184, 0.1);
+      backdrop-filter: blur(8px);
+      box-shadow: 
+        0 4px 6px -1px rgba(0, 0, 0, 0.1),
+        0 2px 4px -2px rgba(0, 0, 0, 0.05),
+        0 0 0 1px rgba(255, 255, 255, 0.1) inset;
     }
 
     .main-content {
-      background: var(--surface-color);
+      background: rgba(255, 255, 255, 0.8);
       padding: 1.5rem;
       border-radius: var(--border-radius);
       box-shadow: var(--box-shadow);
+      border: 1px solid rgba(148, 163, 184, 0.1);
+      backdrop-filter: blur(8px);
     }
 
     .form-group {
@@ -83,7 +94,7 @@
       width: 100%;
       padding: 0.75rem 1rem;
       border: 2px solid #e2e8f0;
-      border-radius: 12px;
+      border-radius: 0.75rem;
       font-size: 0.95rem;
       transition: var(--transition);
       background: var(--background-color);
@@ -99,8 +110,8 @@
       width: 100%;
       padding: 1rem 2rem;
       border: none;
-      border-radius: 12px;
-      background: var(--accent-color);
+      border-radius: 0.75rem;
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
       color: white;
       font-weight: 600;
       font-size: 0.875rem;
@@ -108,30 +119,49 @@
       transition: var(--transition);
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      position: relative;
+      overflow: hidden;
     }
 
-    button:hover {
-      background: var(--accent-light);
+    button::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.1) 100%);
+      opacity: 0;
+      transition: var(--transition);
+    }
+
+    button:hover::after {
+      opacity: 1;
     }
 
     .results-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 1.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 2rem;
       margin-top: 2rem;
     }
 
     .metric-card {
-      background: var(--surface-color);
+      background: white;
       padding: 1.5rem;
       border-radius: var(--border-radius);
-      border: 1px solid #e2e8f0;
+      border: 1px solid rgba(148, 163, 184, 0.1);
       transition: var(--transition);
+      box-shadow: 
+        0 4px 6px -1px rgba(0, 0, 0, 0.05),
+        0 2px 4px -2px rgba(0, 0, 0, 0.025);
     }
 
     .metric-card:hover {
       transform: translateY(-2px);
-      box-shadow: var(--box-shadow);
+      box-shadow: 
+        0 20px 25px -5px rgba(0, 0, 0, 0.1),
+        0 8px 10px -6px rgba(0, 0, 0, 0.05);
     }
 
     .metric-card h4 {
@@ -144,12 +174,16 @@
     }
 
     .chart-container {
-      background: var(--surface-color);
+      background: white;
       padding: 2rem;
       border-radius: var(--border-radius);
       border: 1px solid #e2e8f0;
       margin-top: 1.5rem;
       box-shadow: var(--box-shadow);
+      transition: var(--transition);
+      box-shadow: 
+        0 4px 6px -1px rgba(0, 0, 0, 0.05),
+        0 2px 4px -2px rgba(0, 0, 0, 0.025);
     }
 
     .value-highlight {
@@ -222,13 +256,14 @@
       justify-content: center;
       align-items: center;
       z-index: 1000;
+      backdrop-filter: blur(8px);
     }
 
     .loading-spinner {
-      width: 50px;
-      height: 50px;
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid var(--accent-color);
+      width: 3rem;
+      height: 3rem;
+      border: 3px solid var(--primary-light);
+      border-top: 3px solid var(--primary-color);
       border-radius: 50%;
       animation: spin 1s linear infinite;
     }
@@ -236,6 +271,15 @@
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
+    }
+
+    @keyframes slideIn {
+      from { transform: translateY(1rem); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    #results {
+      animation: slideIn 0.5s ease-out;
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -489,10 +533,17 @@
 
     // EBITDA estimation handler
     document.getElementById('calc-ebitda').addEventListener('click', () => {
-      const annualRevenue = parseFloat(document.getElementById('annual-revenue').value) || 0;
-      const estimatedEBITDA = (annualRevenue * 0.15).toFixed(2);
-      document.getElementById('ebitda').value = estimatedEBITDA;
-      alert(`Estimated EBITDA is $${estimatedEBITDA}`);
+      const annualRevenue = parseFloat(document.getElementById('annual-revenue').value);
+      if (isNaN(annualRevenue) || annualRevenue <= 0) {
+        alert('Please enter a valid annual revenue value first');
+        return;
+      }
+      const estimatedEBITDA = (annualRevenue * 0.15);
+      document.getElementById('ebitda').value = estimatedEBITDA.toFixed(2);
+      alert(`Estimated EBITDA is $${estimatedEBITDA.toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      })}`);
     });
 
     // Initialize the chart on page load
