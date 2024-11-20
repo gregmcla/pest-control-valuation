@@ -15,13 +15,14 @@
       --text-color: #333;
       --border-radius: 8px;
       --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s ease;
     }
 
     body {
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
       background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
       margin: 0;
-      padding: 20px;
+      padding: 10px;
       min-height: 100vh;
     }
 
@@ -31,229 +32,293 @@
       background: white;
       border-radius: var(--border-radius);
       box-shadow: var(--box-shadow);
-      padding: 2rem;
+      padding: 1rem;
     }
 
-    h1 {
-      color: var(--primary-color);
+    .app-header {
       text-align: center;
-      font-size: 2rem;
+      padding: 1rem;
       margin-bottom: 2rem;
       border-bottom: 2px solid var(--accent-color);
-      padding-bottom: 1rem;
+    }
+
+    .form-container {
+      max-width: 800px;
+      margin: 0 auto;
     }
 
     .form-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 1.5rem;
-      margin-bottom: 2rem;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
     }
 
     .form-group {
-      margin-bottom: 1rem;
+      background: #f8f9fa;
+      padding: 1rem;
+      border-radius: var(--border-radius);
+      transition: var(--transition);
     }
 
-    label {
-      display: block;
+    .form-group:hover {
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .form-group label {
+      font-size: 0.9rem;
       margin-bottom: 0.5rem;
-      color: var(--primary-color);
-      font-weight: 500;
     }
 
-    input, select {
+    .input-wrapper {
+      position: relative;
+    }
+
+    .input-wrapper input,
+    .input-wrapper select {
       width: 100%;
       padding: 0.75rem;
       border: 1px solid #ddd;
       border-radius: var(--border-radius);
       font-size: 1rem;
-      transition: border-color 0.3s ease;
+      transition: var(--transition);
     }
 
-    input:focus, select:focus {
-      outline: none;
-      border-color: var(--accent-color);
-      box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
-    }
-
-    button {
-      background: var(--accent-color);
-      color: white;
-      padding: 1rem 2rem;
-      border: none;
-      border-radius: var(--border-radius);
-      font-size: 1rem;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-      width: 100%;
-      margin-top: 1rem;
-    }
-
-    button:hover {
-      background: #2980b9;
+    .results-container {
+      margin-top: 2rem;
+      padding: 1rem;
     }
 
     .results-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 1.5rem;
-      margin-top: 2rem;
+      grid-template-columns: 1fr;
+      gap: 1rem;
     }
 
-    .card {
+    .valuation-card {
       background: white;
-      border-radius: var(--border-radius);
       padding: 1.5rem;
+      border-radius: var(--border-radius);
       box-shadow: var(--box-shadow);
+      text-align: center;
+    }
+
+    .valuation-amount {
+      font-size: 2rem;
+      color: var(--primary-color);
+      margin: 1rem 0;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
     }
 
     .metric-card {
-      background: #f8f9fa;
-      border-radius: var(--border-radius);
-      padding: 1rem;
-      margin-bottom: 1rem;
-    }
-
-    .metric-card h4 {
-      color: var (--primary-color);
-      margin-top: 0;
-    }
-
-    .scenario-card {
-      border: 1px solid #eee;
-      border-radius: var(--border-radius);
-      padding: 1rem;
-      margin-bottom: 1rem;
       background: white;
+      padding: 1rem;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      transition: var(--transition);
     }
 
-    .scenario-value {
-      font-size: 1.5rem;
-      color: var(--success-color);
-      font-weight: bold;
+    .metric-card:hover {
+      transform: translateY(-2px);
     }
 
-    @media (max-width: 768px) {
+    .charts-container {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .chart-wrapper {
+      background: white;
+      padding: 1rem;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+    }
+
+    @media (min-width: 768px) {
       .container {
-        padding: 1rem;
+        padding: 2rem;
       }
 
+      .results-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .charts-container {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 767px) {
       .form-grid {
         grid-template-columns: 1fr;
       }
 
-      button {
-        padding: 0.75rem 1.5rem;
+      .valuation-amount {
+        font-size: 1.5rem;
+      }
+
+      .metric-card {
+        font-size: 0.9rem;
       }
     }
 
-    /* Chart Styles */
-    canvas {
-      max-width: 100%;
-      margin-top: 2rem;
+    /* Enhanced Chart Styles */
+    .chart-wrapper {
+      position: relative;
+      height: 300px;
+    }
+
+    /* Loading State */
+    .loading {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255,255,255,0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    /* Animations */
+    @keyframes slideIn {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .animated {
+      animation: slideIn 0.3s ease forwards;
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
   <div class="container">
-    <h1>Business Valuation Tool</h1>
-    <form id="valuation-form">
-      <div class="form-grid">
-        <div class="form-group">
-          <label for="industry">Industry</label>
-          <select id="industry" required>
-            <option value="" disabled selected>Select an Industry</option>
-            <optgroup label="Software and Technology Services">
-              <option value="SaaS">SaaS Provider</option>
-              <option value="IT Consulting">IT Consulting & Managed Services</option>
-              <option value="Custom Software">Custom Software Development</option>
-            </optgroup>
-            <optgroup label="Healthcare Services">
-              <option value="Medical Practice">Medical Practice</option>
-              <option value="Home Healthcare">Home Healthcare Provider</option>
-              <option value="Diagnostic Center">Diagnostic & Imaging Center</option>
-            </optgroup>
-            <optgroup label="Manufacturing">
-              <option value="Industrial Manufacturing">Industrial Manufacturing</option>
-              <option value="Specialty Manufacturing">Specialty Manufacturing</option>
-              <option value="Food Manufacturing">Food & Beverage Manufacturing</option>
-            </optgroup>
-            <optgroup label="Trades and Home Services">
-              <option value="Plumbing">Plumbing Services</option>
-              <option value="Electrical">Electrical Services</option>
-              <option value="HVAC">HVAC Services</option>
-              <option value="Roofing">Roofing Services</option>
-              <option value="Pest Control">Pest Control Services</option>
-              <option value="Landscaping">Landscaping & Lawn Care</option>
-            </optgroup>
-            <!-- Continue with all other industry groups -->
-          </select>
+    <header class="app-header">
+      <h1>Business Valuation Tool</h1>
+    </header>
+
+    <div class="form-container">
+      <form id="valuation-form">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="industry">Industry</label>
+            <select id="industry" required>
+              <option value="" disabled selected>Select an Industry</option>
+              <optgroup label="Software and Technology Services">
+                <option value="SaaS">SaaS Provider</option>
+                <option value="IT Consulting">IT Consulting & Managed Services</option>
+                <option value="Custom Software">Custom Software Development</option>
+              </optgroup>
+              <optgroup label="Healthcare Services">
+                <option value="Medical Practice">Medical Practice</option>
+                <option value="Home Healthcare">Home Healthcare Provider</option>
+                <option value="Diagnostic Center">Diagnostic & Imaging Center</option>
+              </optgroup>
+              <optgroup label="Manufacturing">
+                <option value="Industrial Manufacturing">Industrial Manufacturing</option>
+                <option value="Specialty Manufacturing">Specialty Manufacturing</option>
+                <option value="Food Manufacturing">Food & Beverage Manufacturing</option>
+              </optgroup>
+              <optgroup label="Trades and Home Services">
+                <option value="Plumbing">Plumbing Services</option>
+                <option value="Electrical">Electrical Services</option>
+                <option value="HVAC">HVAC Services</option>
+                <option value="Roofing">Roofing Services</option>
+                <option value="Pest Control">Pest Control Services</option>
+                <option value="Landscaping">Landscaping & Lawn Care</option>
+              </optgroup>
+              <!-- Continue with all other industry groups -->
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="annual-revenue">Annual Revenue ($)</label>
+            <input type="number" id="annual-revenue" placeholder="Enter Annual Revenue" required>
+          </div>
+
+          <div class="form-group">
+            <label for="ebitda">EBITDA ($)</label>
+            <input type="number" id="ebitda" placeholder="Enter EBITDA">
+            <button type="button" id="calc-ebitda">Estimate EBITDA</button>
+          </div>
+
+          <div class="form-group">
+            <label for="growth-rate">Growth Rate (%)</label>
+            <input type="number" id="growth-rate" placeholder="Optional Growth Rate">
+          </div>
+
+          <div class="form-group">
+            <label for="customer-retention">Customer Retention (%)</label>
+            <input type="number" id="customer-retention" placeholder="Optional Retention Rate">
+          </div>
+
+          <div class="form-group">
+            <label for="geographic-reach">Geographic Reach (# of States)</label>
+            <input type="number" id="geographic-reach" placeholder="Optional Geographic Reach">
+          </div>
+
+          <div class="form-group">
+            <label for="ebitda-multiple">EBITDA Multiple</label>
+            <input type="number" id="ebitda-multiple" placeholder="Optional Multiple">
+          </div>
+
+          <div class="form-group">
+            <label for="recurring-revenue">Recurring Revenue ($)</label>
+            <input type="number" id="recurring-revenue" placeholder="Optional Recurring Revenue">
+          </div>
+
+          <div class="form-group">
+            <label for="business-age">Years in Business</label>
+            <input type="number" id="business-age" placeholder="Number of Years">
+          </div>
+
+          <div class="form-group">
+            <label for="employee-count">Number of Employees</label>
+            <input type="number" id="employee-count" placeholder="Employee Count">
+          </div>
+
+          <div class="form-group">
+            <label for="market-share">Market Share in Service Area (%)</label>
+            <input type="number" id="market-share" placeholder="Estimated Market Share">
+          </div>
         </div>
 
-        <div class="form-group">
-          <label for="annual-revenue">Annual Revenue ($)</label>
-          <input type="number" id="annual-revenue" placeholder="Enter Annual Revenue" required>
-        </div>
+        <button type="submit">Calculate Valuation</button>
+      </form>
+    </div>
 
-        <div class="form-group">
-          <label for="ebitda">EBITDA ($)</label>
-          <input type="number" id="ebitda" placeholder="Enter EBITDA">
-          <button type="button" id="calc-ebitda">Estimate EBITDA</button>
-        </div>
+    <div class="results-container" id="results" style="display: none;">
+      <div class="valuation-card animated">
+        <h2>Valuation Summary</h2>
+        <div id="result"></div>
+      </div>
 
-        <div class="form-group">
-          <label for="growth-rate">Growth Rate (%)</label>
-          <input type="number" id="growth-rate" placeholder="Optional Growth Rate">
+      <div class="charts-container">
+        <div class="chart-wrapper">
+          <canvas id="valuation-chart"></canvas>
         </div>
-
-        <div class="form-group">
-          <label for="customer-retention">Customer Retention (%)</label>
-          <input type="number" id="customer-retention" placeholder="Optional Retention Rate">
-        </div>
-
-        <div class="form-group">
-          <label for="geographic-reach">Geographic Reach (# of States)</label>
-          <input type="number" id="geographic-reach" placeholder="Optional Geographic Reach">
-        </div>
-
-        <div class="form-group">
-          <label for="ebitda-multiple">EBITDA Multiple</label>
-          <input type="number" id="ebitda-multiple" placeholder="Optional Multiple">
-        </div>
-
-        <div class="form-group">
-          <label for="recurring-revenue">Recurring Revenue ($)</label>
-          <input type="number" id="recurring-revenue" placeholder="Optional Recurring Revenue">
-        </div>
-
-        <div class="form-group">
-          <label for="business-age">Years in Business</label>
-          <input type="number" id="business-age" placeholder="Number of Years">
-        </div>
-
-        <div class="form-group">
-          <label for="employee-count">Number of Employees</label>
-          <input type="number" id="employee-count" placeholder="Employee Count">
-        </div>
-
-        <div class="form-group">
-          <label for="market-share">Market Share in Service Area (%)</label>
-          <input type="number" id="market-share" placeholder="Estimated Market Share">
+        <div class="chart-wrapper">
+          <canvas id="metrics-chart"></canvas>
         </div>
       </div>
 
-      <button type="submit">Calculate Valuation</button>
-    </form>
-
-    <div class="results-grid">
-      <div class="card" id="result"></div>
-      <div class="card" id="insights"></div>
-      <div class="card" id="guidance"></div>
+      <div class="metrics-grid">
+        <div id="insights"></div>
+        <div id="guidance"></div>
+      </div>
     </div>
 
     <div id="error" class="error-message"></div>
-    <canvas id="valuation-chart"></canvas>
   </div>
 
   <script>
@@ -367,6 +432,12 @@
           valuationChart.update();
         }
 
+        // Show results container
+        document.getElementById('results').style.display = 'block';
+        
+        // Scroll to results
+        document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+
       } catch (error) {
         console.error('Error:', error);
         document.getElementById('error').textContent = error.message;
@@ -390,6 +461,54 @@
       const ctx = document.createElement('canvas');
       document.getElementById('charts-container').appendChild(ctx);
       // ... create new chart implementation
+    }
+
+    // Enhanced chart options
+    const chartOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom'
+        },
+        tooltip: {
+          backgroundColor: 'rgba(0,0,0,0.8)',
+          padding: 12,
+          titleFont: { size: 14 },
+          bodyFont: { size: 13 }
+        }
+      },
+      animation: {
+        duration: 1000,
+        easing: 'easeInOutQuart'
+      }
+    };
+
+    // Initialize metrics chart
+    function initializeMetricsChart() {
+      const ctx = document.getElementById('metrics-chart').getContext('2d');
+      return new Chart(ctx, {
+        type: 'radar',
+        data: {
+          labels: ['Growth', 'Profitability', 'Retention', 'Market Reach', 'Size'],
+          datasets: [{
+            label: 'Company Metrics',
+            data: [0, 0, 0, 0, 0],
+            backgroundColor: 'rgba(52, 152, 219, 0.2)',
+            borderColor: 'rgba(52, 152, 219, 1)',
+            pointBackgroundColor: 'rgba(52, 152, 219, 1)'
+          }]
+        },
+        options: {
+          ...chartOptions,
+          scales: {
+            r: {
+              beginAtZero: true,
+              max: 5
+            }
+          }
+        }
+      });
     }
   </script>
 </body>
