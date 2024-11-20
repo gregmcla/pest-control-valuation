@@ -28,16 +28,15 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 
-# Update CORS configuration to be more permissive
-ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS', '*').split(',')
+# Update CORS configuration to fix multiple headers issue
 CORS(app, resources={
     r"/*": {
-        "origins": ["*"],  # Allow all origins in development
+        "origins": ["https://pest-control-valuation-1.onrender.com", "https://pest-control-valuation.onrender.com"],
         "methods": ["GET", "POST", "OPTIONS"],
         "allow_headers": ["Content-Type", "Authorization", "Accept"],
         "expose_headers": ["Content-Type"],
-        "supports_credentials": False,
-        "send_wildcard": True
+        "supports_credentials": True,
+        "max_age": 600
     }
 })
 
@@ -330,9 +329,12 @@ def valuate():
     # Handle preflight requests
     if request.method == "OPTIONS":
         response = jsonify({"status": "ok"})
-        response.headers.add("Access-Control-Allow-Origin", "*")
-        response.headers.add("Access-Control-Allow-Headers", "Content-Type, Accept")
-        response.headers.add("Access-Control-Allow-Methods", "POST")
+        response.headers.update({
+            "Access-Control-Allow-Origin": request.headers.get("Origin", "*"),
+            "Access-Control-Allow-Methods": "POST, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Accept",
+            "Access-Control-Max-Age": "600"
+        })
         return response
 
     try:
@@ -379,7 +381,7 @@ def valuate():
         
         # Add CORS headers to the response
         response = jsonify(response_data)
-        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers["Access-Control-Allow-Origin"] = request.headers.get("Origin", "*")
         return response
 
     except ApiError as e:

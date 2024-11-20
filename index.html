@@ -565,15 +565,20 @@
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 },
-                mode: 'cors',  // Add this line
-                credentials: 'omit',  // Change this from 'same-origin' to 'omit'
+                mode: 'cors',
+                credentials: 'include',  // Change from 'omit' to 'include'
                 body: JSON.stringify(formData)
             });
 
             if (!response.ok) {
-                const errorText = await response.text();
-                console.error('Server response:', errorText);
-                throw new Error(errorText || `HTTP error! status: ${response.status}`);
+                let errorMessage;
+                try {
+                    const errorData = await response.json();
+                    errorMessage = errorData.error || 'Server error occurred';
+                } catch {
+                    errorMessage = `HTTP error! status: ${response.status}`;
+                }
+                throw new Error(errorMessage);
             }
 
             const data = await response.json();
