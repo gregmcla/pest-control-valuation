@@ -1,15 +1,36 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 import logging
 import traceback
 from decimal import Decimal, InvalidOperation
 from typing import Dict, List, Union
-import json
-from datetime import datetime  # Add missing import
+from datetime import datetime
 
+# Initialize Flask app and configure logging first
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})  # Allow all origins for testing
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+
+# Configure CORS
+CORS(app, resources={
+    r"/*": {
+        "origins": ["http://localhost:5000", "https://your-production-domain.com"],
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"]
+    }
+})
+
+# Configure rate limiter
+limiter = Limiter(
+    app=app,
+    key_func=get_remote_address,
+    default_limits=["200 per day", "50 per hour"],
+    storage_uri="memory://"  # Use in-memory storage for simplicity
+)
 
 # Enhanced industry benchmarks with more detailed metrics
 INDUSTRY_BENCHMARKS = {
@@ -226,46 +247,48 @@ def generate_market_recommendations(metrics: Dict) -> List[str]:
 def home():
     return jsonify({"message": "The valuation API is running."})
 
-# Update the main route with enhanced error handling
+@app.route("/health", methods=["GET"])
+def health_check():
+    """Health check endpoint"""
+    return jsonify({
+        "status": "healthy",
+        "timestamp": datetime.utcnow().isoformat()
+    })
+
 @app.route("/api/valuate", methods=["POST"])
+@limiter.limit("50 per hour")
 def valuate():
+    """Main valuation endpoint with enhanced error handling"""
     logging.info("Received valuation request")
     try:
         if not request.is_json:
-            raise ValidationError("Request must be JSON")
+            raise ApiError("Request must be JSON")
 
         data = request.get_json()
         logging.info(f"Request data: {data}")
         
         validate_input(data)
-        
         metrics = calculate_metrics(data)
-        logging.debug(f"Calculated metrics: {metrics}")
-        
         adjustments = calculate_adjustments(metrics)
-        logging.debug(f"Calculated adjustments: {adjustments}")
-        
         valuation = calculate_valuation(metrics, adjustments)
-        logging.debug(f"Calculated valuation: {valuation}")
         
         response_data = {
-            "valuation": float(valuation),  # Convert Decimal to float for JSON
+            "valuation": float(valuation),
             "currentMultiple": float(sum(adjustments.values())),
             "metrics": {k: float(v) if isinstance(v, Decimal) else v for k, v in metrics.items()},
             "adjustments": {k: float(v) for k, v in adjustments.items()},
             "scenarios": generate_enhanced_scenarios(valuation, sum(adjustments.values()), metrics),
-            "industryComparison": generate_industry_comparison(data, metrics)
+            "industryComparison": generate_industry_comparison(metrics["industry"], metrics)
         }
         
-        logging.info(f"Sending response: {response_data}")
         return jsonify(response_data)
 
-    except ValidationError as ve:
-        logging.error(f"Validation error: {str(ve)}")
-        return jsonify({"error": str(ve), "type": "validation_error"}), 400
+    except ApiError as e:
+        logging.error(f"API error: {str(e)}")
+        return jsonify({"error": e.message, "type": "api_error"}), e.status_code
     except Exception as e:
         logging.error(f"Unexpected error: {str(e)}\n{traceback.format_exc()}")
-        return jsonify({"error": str(e), "type": "server_error"}), 500
+        return jsonify({"error": "Internal server error", "type": "server_error"}), 500
 
 def calculate_adjustments(metrics: Dict) -> Dict[str, Decimal]:
     """Calculate all valuation adjustments"""
@@ -511,88 +534,5 @@ def handle_server_error(error):
     response.status_code = 500
     return response
 
-# Add rate limiting
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
-
-limiter = Limiter(
-    app=app,
-    key_func=get_remote_address,
-    default_limits=["200 per day", "50 per hour"]
-)
-
-# Remove the duplicate valuate route and keep only this enhanced version
-@app.route("/api/valuate", methods=["POST"])
-@limiter.limit("50 per hour")
-def valuate():
-    """Main valuation endpoint with enhanced error handling"""
-    logging.info("Received valuation request")
-    try:
-        if not request.is_json:
-            raise ApiError("Request must be JSON")
-
-        data = request.get_json()
-        logging.info(f"Request data: {data}")
-        
-        validate_input(data)
-        metrics = calculate_metrics(data)
-        adjustments = calculate_adjustments(metrics)
-        valuation = calculate_valuation(metrics, adjustments)
-        
-        response_data = {
-            "valuation": float(valuation),
-            "currentMultiple": float(sum(adjustments.values())),
-            "metrics": {k: float(v) if isinstance(v, Decimal) else v for k, v in metrics.items()},
-            "adjustments": {k: float(v) for k, v in adjustments.items()},
-            "scenarios": generate_enhanced_scenarios(valuation, sum(adjustments.values()), metrics),
-            "industryComparison": generate_industry_comparison(metrics["industry"], metrics)
-        }
-        
-        return jsonify(response_data)
-
-    except ApiError as e:
-        logging.error(f"API error: {str(e)}")
-        return jsonify({"error": e.message, "type": "api_error"}), e.status_code
-    except Exception as e:
-        logging.error(f"Unexpected error: {str(e)}\n{traceback.format_exc()}")
-        return jsonify({"error": "Internal server error", "type": "server_error"}), 500
-
-# Update the industry comparison function
-def generate_industry_comparison(industry: str, metrics: Dict) -> Dict:
-    """Generate detailed industry comparison"""
-    return {
-        "industryAvgMultiple": float(INDUSTRY_MULTIPLES.get(industry, 5.0)),
-        "peerComparison": {
-            "growth": compare_to_peers(metrics["growth_rate"], "growth_rate"),
-            "margin": compare_to_peers(metrics["ebitda_margin"], "margin"),
-            "retention": compare_to_peers(metrics["retention_rate"], "retention")
-        },
-        "recommendations": generate_market_recommendations(metrics)
-    }
-
-# Add health check endpoint
-@app.route("/health", methods=["GET"])
-def health_check():
-    """Health check endpoint"""
-    return jsonify({
-        "status": "healthy",
-        "timestamp": datetime.utcnow().isoformat()
-    })
-
 if __name__ == "__main__":
-    # Configure logging
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    )
-    
-    # Add CORS configuration
-    CORS(app, resources={
-        r"/*": {
-            "origins": ["http://localhost:5000", "https://your-production-domain.com"],
-            "methods": ["GET", "POST"],
-            "allow_headers": ["Content-Type"]
-        }
-    })
-    
     app.run(debug=False, host='0.0.0.0', port=5000)
