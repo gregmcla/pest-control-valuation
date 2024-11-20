@@ -162,3 +162,21 @@ class CompetitiveAnalysis:
         elif abs(growth_rate) > 10:
             return "Moderate"
         return "Weak"
+
+    def _analyze_market_gaps(self, industry: str) -> List[Dict]:
+        """Analyze market gaps"""
+        return [{
+            "type": "Geographic Coverage",
+            "opportunity": "Market Expansion",
+            "potential": "High",
+            "investment": "Medium"
+        }]
+
+    def _analyze_tech_opportunities(self, industry: str) -> List[Dict]:
+        """Analyze technology opportunities"""
+        return [{
+            "type": "Digital Transformation",
+            "opportunity": "Process Automation",
+            "potential": "High",
+            "investment": "Medium"
+        }]

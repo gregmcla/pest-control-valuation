@@ -62,11 +62,14 @@ class ValuationAI:
             return self._get_fallback_analysis()
 
     def _get_market_data(self, tickers: List[str]) -> pd.DataFrame:
-        """Fetch market data for analysis"""
+        """Fetch market data with enhanced error handling"""
         if not tickers:
             return pd.DataFrame()
         try:
-            return yf.download(tickers, period="1y")['Adj Close']
+            df = yf.download(tickers, period="1y", progress=False)['Adj Close']
+            if df.empty:
+                raise ValueError("No market data available")
+            return df
         except Exception as e:
             print(f"Error fetching market data: {e}")
             return pd.DataFrame()

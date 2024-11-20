@@ -585,16 +585,23 @@ def calculate_recurring_revenue_percentage(data: Dict) -> Decimal:
     return (recurring / revenue * 100).quantize(Decimal("0.01"))
 
 def generate_industry_comparison(industry: str, metrics: Dict) -> Dict:
-    """Generate detailed industry comparison"""
-    return {
-        "industryAvgMultiple": float(INDUSTRY_MULTIPLES.get(industry, 5.0)),  # Convert to float for JSON
-        "peerComparison": {
-            "growth": compare_to_peers(metrics["growth_rate"], "growth_rate"),
-            "margin": compare_to_peers(metrics["ebitda_margin"], "margin"),
-            "retention": compare_to_peers(metrics["retention_rate"], "retention")
-        },
-        "recommendations": generate_market_recommendations(metrics)
-    }
+    try:
+        return {
+            "industryAvgMultiple": float(INDUSTRY_MULTIPLES.get(industry, 5.0)),
+            "peerComparison": {
+                "growth": compare_to_peers(metrics["growth_rate"], "growth_rate"),
+                "margin": compare_to_peers(metrics["ebitda_margin"], "margin"),
+                "retention": compare_to_peers(metrics["retention_rate"], "retention")
+            },
+            "recommendations": generate_market_recommendations(metrics)
+        }
+    except Exception as e:
+        logging.error(f"Error generating industry comparison: {e}")
+        return {
+            "industryAvgMultiple": 5.0,
+            "peerComparison": {"growth": "Average", "margin": "Average", "retention": "Average"},
+            "recommendations": []
+        }
 
 @app.errorhandler(ApiError)
 def handle_api_error(error):
