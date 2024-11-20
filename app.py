@@ -15,12 +15,20 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 
-# Configure CORS
+# Update the CORS configuration to allow requests from your deployed domain
 CORS(app, resources={
     r"/*": {
-        "origins": ["http://localhost:5000", "https://your-production-domain.com"],
+        "origins": [
+            "http://localhost:5000",
+            "http://localhost:3000",
+            "https://pest-control-valuation.onrender.com",
+            "https://pest-control-valuation-1.onrender.com"
+        ],
         "methods": ["GET", "POST", "OPTIONS"],
-        "allow_headers": ["Content-Type", "Authorization"]
+        "allow_headers": ["Content-Type", "Authorization"],
+        "expose_headers": ["Content-Type"],
+        "supports_credentials": True,
+        "max_age": 600
     }
 })
 
@@ -255,11 +263,32 @@ def health_check():
         "timestamp": datetime.utcnow().isoformat()
     })
 
-@app.route("/api/valuate", methods=["POST"])
+# Add CORS error handler
+@app.errorhandler(Exception)
+def handle_exception(e):
+    """Handle all exceptions and ensure CORS headers are set"""
+    response = jsonify({
+        "error": str(e),
+        "type": "server_error"
+    })
+    response.status_code = 500
+    return response
+
+# Update the valuate endpoint to include CORS headers
+@app.route("/api/valuate", methods=["POST", "OPTIONS"])
 @limiter.limit("50 per hour")
 def valuate():
     """Main valuation endpoint with enhanced error handling"""
     logging.info("Received valuation request")
+    
+    # Handle preflight requests
+    if request.method == "OPTIONS":
+        response = jsonify({"status": "ok"})
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add("Access-Control-Allow-Headers", "Content-Type")
+        response.headers.add("Access-Control-Allow-Methods", "POST")
+        return response
+
     try:
         if not request.is_json:
             raise ApiError("Request must be JSON")

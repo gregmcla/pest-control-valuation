@@ -563,13 +563,18 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Accept': 'application/json'
+                    'Accept': 'application/json',
+                    'Origin': window.location.origin
                 },
+                credentials: 'same-origin',
                 body: JSON.stringify(formData)
             });
 
             if (!response.ok) {
-                throw new Error(`Server error: ${await response.text()}`);
+                const errorData = await response.json().catch(() => ({
+                    error: 'Server error occurred'
+                }));
+                throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
             }
 
             const data = await response.json();
@@ -611,7 +616,8 @@
 
         } catch (error) {
             console.error('Error:', error);
-            errorElement.querySelector('.error-content').textContent = error.message;
+            errorElement.querySelector('.error-content').textContent = 
+                error.message || 'Failed to connect to the server. Please try again.';
             errorElement.style.display = 'block';
             errorElement.scrollIntoView({ behavior: 'smooth' });
         }
