@@ -2,48 +2,34 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 @app.route("/", methods=["GET"])
 def home():
     return jsonify({"message": "The valuation API is running."})
 
-@app.route("/https://pest-control-valuation.onrender.com/api/valuate", methods=["POST"])
+@app.route("/api/valuate", methods=["POST"])  # Fixed route
 def valuate():
     try:
-        # Ensure the request content type is JSON
         if not request.is_json:
-            return jsonify({"error": "Invalid content type, must be application/json"}), 400
+            return jsonify({"error": "Invalid content type"}), 400
 
-        # Parse JSON request data
         data = request.get_json()
-        if data is None:
-            return jsonify({"error": "Invalid JSON input"}), 400
-
-        industry = data.get("industry")
-        annual_revenue = float(data.get("annualRevenue", 0)) if data.get("annualRevenue") else 0
-        ebitda = float(data.get("ebitda", 0)) if data.get("ebitda") else 0
-        recurring_revenue = float(data.get("recurringRevenue", 0)) if data.get("recurringRevenue") else 0
-        multiple = float(data.get("multiple", None)) if data.get("multiple") else None
-        growth_rate = float(data.get("growthRate", 0)) if data.get("growthRate") else 0
-        customer_retention = float(data.get("customerRetention", 0)) if data.get("customerRetention") else 0
-        geographic_reach = float(data.get("geographicReach", 0)) if data.get("geographicReach") else 0
-
-        # Ensure industry is provided
-        if not industry:
+        
+        # Required fields validation
+        if not data.get("industry"):
             return jsonify({"error": "Industry is required"}), 400
+        if not data.get("annualRevenue"):
+            return jsonify({"error": "Annual revenue is required"}), 400
 
-        # Validate numeric fields
-        if annual_revenue < 0 or ebitda < 0 or recurring_revenue < 0:
-            return jsonify({"error": "Revenue values must be non-negative."}), 400
-
-        # Calculate recurring revenue percentage
-        if annual_revenue == 0:
-            return jsonify({"error": "Annual revenue cannot be zero if recurring revenue is provided."}), 400
-        recurring_revenue_percent = (recurring_revenue / annual_revenue) * 100
-
-        # Log debug information
-        print(f"DEBUG: Annual Revenue: {annual_revenue}, Recurring Revenue: {recurring_revenue}, Recurring Revenue %: {recurring_revenue_percent}")
+        # Extract and convert data with safe defaults
+        industry = data["industry"]
+        annual_revenue = float(data["annualRevenue"])
+        ebitda = float(data.get("ebitda", annual_revenue * 0.15))
+        recurring_revenue = float(data.get("recurringRevenue", 0))
+        growth_rate = float(data.get("growthRate", 0))
+        customer_retention = float(data.get("customerRetention", 0))
+        geographic_reach = float(data.get("geographicReach", 0))
 
         # Default industry multiples
         industry_multiples = {
@@ -60,70 +46,43 @@ def valuate():
             "B2B Software": 10,
         }
 
-        # Use default multiple if not provided
-        if not multiple:
-            multiple = industry_multiples.get(industry, 5)
+        # Calculate the multiple and valuation
+        base_multiple = industry_multiples.get(industry, 5)
+        adjustments = sum([
+            0.1 * max(0, growth_rate - 10),
+            0.05 * max(0, customer_retention - 80),
+            0.02 * geographic_reach,
+            2 * (recurring_revenue / annual_revenue if annual_revenue > 0 else 0)
+        ])
 
-        # Adjust multiples based on optional fields
-        adjustment = 0
-        if growth_rate > 10:
-            adjustment += (growth_rate - 10) * 0.1  # Growth rate adjustment
-        if customer_retention > 80:
-            adjustment += (customer_retention - 80) * 0.05  # Customer retention adjustment
-        if geographic_reach > 0:
-            adjustment += geographic_reach * 0.02  # Geographic reach adjustment
-        if recurring_revenue > 0:
-            adjustment += (recurring_revenue / annual_revenue) * 2  # Recurring revenue bonus
+        current_multiple = base_multiple + adjustments
+        valuation = ebitda * current_multiple
 
-        current_multiple = multiple + adjustment
-
-        # Calculate valuation
-        valuation = ebitda * current_multiple if ebitda else annual_revenue * 0.15 * current_multiple
-
-        # Improved scenarios for guidance
+        # Calculate improved scenarios
         improved_multiple_1 = current_multiple + 1
         improved_multiple_2 = current_multiple + 2
-
-        improved_valuation_1 = ebitda * improved_multiple_1 if ebitda else annual_revenue * 0.15 * improved_multiple_1
-        improved_valuation_2 = ebitda * improved_multiple_2 if ebitda else annual_revenue * 0.15 * improved_multiple_2
-
-        # Generate insights
-        insights = [
-            f"Your current EBITDA multiple is {current_multiple:.2f}x.",
-            f"Recurring revenue contributes {recurring_revenue_percent:.2f}% of your total revenue, boosting your valuation multiple.",
-            f"Increasing your growth rate, customer retention, or geographic reach can further improve your multiple.",
-        ]
-
-        # Guidance for improvement
-        guidance = [
-            {
-                "scenario": "Improved Scenario 1",
-                "valuation": round(improved_valuation_1, 2),
-                "multiple": round(improved_multiple_1, 2),
-                "description": "Increase growth rate by 10% and customer retention by 15% to achieve this multiple."
-            },
-            {
-                "scenario": "Improved Scenario 2",
-                "valuation": round(improved_valuation_2, 2),
-                "multiple": round(improved_multiple_2, 2),
-                "description": "Expand geographic reach by 5 states and improve recurring revenue by 20% to achieve this multiple."
-            }
-        ]
-
-        # Return valuation, insights, and guidance
+        
         response_data = {
             "valuation": round(valuation, 2),
             "currentMultiple": round(current_multiple, 2),
-            "insights": "<br>".join(insights),
-            "guidance": guidance
+            "insights": f"Current multiple: {current_multiple:.1f}x<br>Industry baseline: {base_multiple:.1f}x<br>Total adjustments: +{adjustments:.1f}x",
+            "guidance": [
+                {
+                    "valuation": round(ebitda * improved_multiple_1, 2),
+                    "description": f"Increase growth rate and retention to achieve {improved_multiple_1:.1f}x multiple"
+                },
+                {
+                    "valuation": round(ebitda * improved_multiple_2, 2),
+                    "description": f"Expand reach and recurring revenue to achieve {improved_multiple_2:.1f}x multiple"
+                }
+            ]
         }
-        print(f"DEBUG: Response Data: {response_data}")
+        
         return jsonify(response_data)
 
     except Exception as e:
-        print(f"ERROR: {str(e)}")
-        return jsonify({"error": "An internal server error occurred."}), 500
+        print(f"Error: {str(e)}")
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    import os
-    app.run(host="0.0.0.0", port=int(os.getenv("PORT", 5000)))
+    app.run(host="0.0.0.0", port=5000, debug=True)

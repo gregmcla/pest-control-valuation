@@ -150,6 +150,9 @@
     document.getElementById('valuation-form').addEventListener('submit', async (event) => {
       event.preventDefault();
 
+      // Reset error display
+      document.getElementById('error').style.display = 'none';
+
       const industry = document.getElementById('industry').value;
       const annualRevenue = parseFloat(document.getElementById('annual-revenue').value) || 0;
       const ebitda = parseFloat(document.getElementById('ebitda').value) || 0;
@@ -177,32 +180,45 @@
 
         if (!response.ok) throw new Error('Failed to fetch valuation data.');
 
-        const text = await response.text();
-        const data = text ? JSON.parse(text) : {};
+        const data = await response.json();
 
-        // Ensure guidance data is available
-        const guidance = data.guidance || [{ valuation: 0 }, { valuation: 0 }];
+        if (!data) throw new Error('No data received from server');
 
-        // Update Chart.js Data
-        valuationChart.data.datasets[0].data = [
-          data.valuation,
-          guidance[0].valuation,
-          guidance[1].valuation
+        // Format the valuation number with proper commas and decimals
+        const formattedValuation = data.valuation ? 
+          Number(data.valuation).toLocaleString(undefined, {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+          }) : 'N/A';
+
+        const formattedMultiple = data.currentMultiple ? 
+          Number(data.currentMultiple).toFixed(1) : 'N/A';
+
+        // Update Chart with null checks
+        const chartData = [
+          data.valuation || 0,
+          data.guidance?.[0]?.valuation || 0,
+          data.guidance?.[1]?.valuation || 0
         ];
+        
+        valuationChart.data.datasets[0].data = chartData;
         valuationChart.update();
 
-        // Display Results
+        // Display Results with null checks
         document.getElementById('result').innerHTML = `
-          <strong>Estimated Valuation:</strong> $${data.valuation ? data.valuation.toLocaleString() : 'N/A'} (${data.currentMultiple}x)
+          <strong>Estimated Valuation:</strong> $${formattedValuation} (${formattedMultiple}x)
         `;
+
         document.getElementById('insights').innerHTML = `
-          <strong>Insights:</strong><br>${data.insights}
+          <strong>Insights:</strong><br>${data.insights || 'No insights available'}
         `;
+
         document.getElementById('guidance').innerHTML = `
           <strong>How to Improve Your Valuation:</strong>
-          <ul>${guidance.map(g => `<li>${g.description}</li>`).join('')}</ul>
+          <ul>${(data.guidance || []).map(g => `<li>${g.description || ''}</li>`).join('')}</ul>
         `;
       } catch (error) {
+        console.error('Error:', error);
         document.getElementById('error').textContent = error.message;
         document.getElementById('error').style.display = 'block';
       }
