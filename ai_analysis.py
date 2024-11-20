@@ -164,3 +164,49 @@ class ValuationAI:
             "impact": "moderate",
             "factors": ["Market volatility", "Competitive pressure"]
         }
+
+    def _get_fallback_analysis(self) -> Dict:
+        """Provide fallback analysis when main analysis fails"""
+        return {
+            "market_sentiment": {
+                "overall_sentiment": "neutral",
+                "confidence": 0.5,
+                "trend": "stable"
+            },
+            "growth_potential": {
+                "short_term": {
+                    "rate": 0.05,
+                    "confidence": 0.5,
+                    "factors": ["Market stability"],
+                    "recommendations": ["Consider market research"]
+                },
+                "medium_term": {
+                    "rate": 0.05,
+                    "confidence": 0.5,
+                    "factors": ["Industry average growth"],
+                    "recommendations": ["Monitor market trends"]
+                },
+                "long_term": {
+                    "rate": 0.05,
+                    "confidence": 0.5,
+                    "factors": ["Economic conditions"],
+                    "recommendations": ["Plan for sustainability"]
+                }
+            },
+            "risk_factors": [
+                {
+                    "category": "Market",
+                    "level": "medium",
+                    "impact": "moderate",
+                    "mitigation": "Regular market analysis"
+                }
+            ],
+            "opportunities": [
+                {
+                    "type": "Market Expansion",
+                    "potential": "Medium",
+                    "investment_required": "Moderate",
+                    "expected_roi": "10-15%"
+                }
+            ]
+        }
