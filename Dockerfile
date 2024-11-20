@@ -3,24 +3,45 @@ FROM python:3.11-slim
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1 \
-    PORT=5000
+    PORT=5000 \
+    FLASK_ENV=production \
+    WORKERS=2 \
+    TIMEOUT=30
 
 WORKDIR /app
 
-# Combine RUN commands to reduce layers
+# Combine RUN commands and add security updates
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends build-essential && \
-    rm -rf /var/lib/apt/lists/* && \
-    pip install --no-cache-dir --upgrade pip==24.3.1
+    apt-get install -y --no-install-recommends \
+    build-essential \
+    curl \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    && pip install --no-cache-dir --upgrade pip==24.3.1
 
-# Copy only requirements first to leverage Docker cache
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy only necessary files
-COPY app.py .env ./
-COPY ai_analysis.py competitive_analysis.py strategy_engine.py ./
+# Copy application files
+COPY *.py ./
+COPY .env ./
 
-EXPOSE 5000
+# Create non-root user for security
+RUN useradd -m appuser && \
+    chown -R appuser:appuser /app
+USER appuser
 
-CMD gunicorn --bind 0.0.0.0:$PORT --workers 2 --threads 1 --worker-class uvicorn.workers.UvicornWorker --timeout 30 app:app
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s \
+  CMD curl -f http://localhost:$PORT/health || exit 1
+
+EXPOSE $PORT
+
+CMD gunicorn --bind 0.0.0.0:$PORT \
+    --workers $WORKERS \
+    --threads 1 \
+    --worker-class uvicorn.workers.UvicornWorker \
+    --timeout $TIMEOUT \
+    --worker-tmp-dir /dev/shm \
+    --log-level info \
+    app:app
