@@ -4,7 +4,6 @@ click==8.1.7
 Flask==3.1.0
 Flask-Cors==5.0.0
 Flask-Limiter==3.5.0
-limits==3.8.0
 gunicorn==23.0.0
 itsdangerous==2.2.0
 Jinja2==3.1.4
@@ -21,7 +20,7 @@ plotly==5.18.0
 beautifulsoup4==4.12.2
 requests==2.31.0
 uvicorn==0.27.0
---find-links https://download.pytorch.org/whl/torch_stable.html
-torch==2.1.2+cpu
+# Remove torch CPU-specific version
+torch==2.1.2
 sentencepiece==0.1.99
 protobuf==4.25.2
