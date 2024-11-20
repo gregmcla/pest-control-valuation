@@ -85,12 +85,19 @@ def valuate():
         # Generate detailed metrics analysis
         metrics_analysis = analyze_metrics(data, multiple_adjustments)
         
+        industry_avg_multiple = industry_multiples.get(data["industry"], 5.0)
+        percentile = "Top 25%" if adjusted_multiple > industry_avg_multiple else "Bottom 75%"
+        
         response_data = {
             "valuation": round(valuation, 2),
             "currentMultiple": round(adjusted_multiple, 2),
             "metrics": metrics_analysis,
             "adjustments": multiple_adjustments,
-            "scenarios": generate_enhanced_scenarios(valuation, adjusted_multiple, metrics_analysis)
+            "scenarios": generate_enhanced_scenarios(valuation, adjusted_multiple, metrics_analysis),
+            "industryComparison": {
+                "industryAvgMultiple": industry_avg_multiple,
+                "percentileBenchmark": percentile
+            }
         }
 
         logging.info(f"Sending response: {response_data}")
