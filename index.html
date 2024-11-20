@@ -471,8 +471,40 @@
     </div>
   </div>
 
+  <div id="loading-overlay" class="loading-overlay" style="display: none;">
+    <div class="loading-spinner"></div>
+    <p>Calculating valuation...</p>
+  </div>
+
   <script>
     let valuationChart, metricsChart;
+
+    // Form validation function
+    function validateForm() {
+        const errors = [];
+        const industry = document.getElementById('industry').value;
+        const annualRevenue = parseFloat(document.getElementById('annual-revenue').value);
+        const growthRate = parseFloat(document.getElementById('growth-rate').value);
+        const customerRetention = parseFloat(document.getElementById('customer-retention').value);
+        
+        if (!industry) {
+            errors.push('Please select an industry');
+        }
+        
+        if (!annualRevenue || annualRevenue <= 0) {
+            errors.push('Please enter a valid annual revenue');
+        }
+        
+        if (growthRate && (growthRate < -100 || growthRate > 1000)) {
+            errors.push('Growth rate must be between -100 and 1000');
+        }
+        
+        if (customerRetention && (customerRetention < 0 || customerRetention > 100)) {
+            errors.push('Customer retention must be between 0 and 100');
+        }
+        
+        return errors;
+    }
 
     // Initialize charts
     function initializeCharts() {
@@ -481,7 +513,7 @@
         valuationChart = new Chart(valuationCtx, {
             type: 'bar',
             data: {
-                labels: ['Current Scenario', 'Optimized', 'Best Case'],
+                labels: ['Scenario 1', 'Scenario 2', 'Scenario 3'],
                 datasets: [{
                     label: 'Valuation ($)',
                     data: [0, 0, 0],
@@ -538,18 +570,21 @@
         }
     };
 
+    // Add API configuration
+    const API_CONFIG = {
+        baseUrl: window.location.hostname === 'localhost' 
+            ? 'http://localhost:5000'
+            : 'https://pest-control-valuation.onrender.com',
+        endpoints: {
+            valuate: '/api/valuate',
+            health: '/health'
+        }
+    };
+
     // Form submission handler
     document.getElementById('valuation-form').addEventListener('submit', async (event) => {
         event.preventDefault();
-        
-        const errorElement = document.getElementById('error-message');
-        const resultsElement = document.getElementById('results');
-        
-        errorElement.style.display = 'none';
-        resultsElement.style.display = 'none';
-
         const formData = {
-            industry: document.getElementById('industry').value,
             annualRevenue: parseFloat(document.getElementById('annual-revenue').value) || 0,
             ebitda: parseFloat(document.getElementById('ebitda').value) || 0,
             growthRate: parseFloat(document.getElementById('growth-rate').value) || 0,
@@ -568,6 +603,17 @@
                 mode: 'cors',
                 body: JSON.stringify(formData)
             });
+
+            if (!response.ok) {
+                let errorMessage;
+                try {
+                    const errorData = await response.json();
+                    errorMessage = errorData.error || 'Server error occurred';
+                } catch (e) {
+                    errorMessage = `HTTP error! status: ${response.status}`;
+                }
+                throw new Error(errorMessage);
+            }
 
             if (!response.ok) {
                 let errorMessage;
@@ -673,6 +719,16 @@
         }
     });
 
+    // Add error handling for network issues
+    try {
+        // ...existing fetch code...
+    } catch (networkError) {
+        console.error('Network error:', networkError);
+        errorElement.querySelector('.error-content').textContent = 
+            'Unable to connect to the server. Please check your internet connection and try again.';
+        errorElement.style.display = 'block';
+    }
+
     // EBITDA calculation handler
     document.getElementById('calc-ebitda').addEventListener('click', () => {
         const annualRevenue = parseFloat(document.getElementById('annual-revenue').value);
@@ -720,7 +776,12 @@
       industryComparison: {
         type: 'radar',
         data: {
-          labels: ['Revenue', 'Growth', 'Margin', 'Market Share', 'Risk Profile']
+          labels: ['Revenue', 'Growth', 'Margin', 'Market Share', 'Risk Profile'],
+          datasets: [{
+            label: 'Company Metrics',
+            data: [],
+            backgroundColor: 'rgba(99, 102, 241, 0.5)'
+          }]
         }
       },
       peerBenchmark: {
@@ -732,7 +793,60 @@
           }]
         }
       }
+    };
+  </script>
+</body>
+</html>
+
+        if (!formData.industry) {
+            errors.push('Please select an industry');
+        }
+        
+        if (!formData.annualRevenue || formData.annualRevenue <= 0) {
+            errors.push('Please enter a valid annual revenue');
+        }
+        
+        if (formData.growthRate && (formData.growthRate < -100 || formData.growthRate > 1000)) {
+            errors.push('Growth rate must be between -100 and 1000');
+        }
+        
+        if (formData.customerRetention && (formData.customerRetention < 0 || formData.customerRetention > 100)) {
+            errors.push('Customer retention must be between 0 and 100');
+        }
+        
+        return errors;
     }
+
+    document.getElementById('valuation-form').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const errorElement = document.getElementById('error-message');
+        
+        // Validate form
+        const errors = validateForm(formData);
+        if (errors.length > 0) {
+            errorElement.querySelector('.error-content').innerHTML = errors.join('<br>');
+            errorElement.style.display = 'block';
+            errorElement.scrollIntoView({ behavior: 'smooth' });
+            return;
+        }
+        
+        // ...rest of submission code...
+    });
+    // Add loading state management
+    const loadingOverlay = document.getElementById('loading-overlay');
+    
+    document.getElementById('valuation-form').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        loadingOverlay.style.display = 'flex';
+        
+        try {
+            // ...existing form submission code...
+        } catch (error) {
+            // ...existing error handling...
+        } finally {
+            loadingOverlay.style.display = 'none';
+        }
+    });
   </script>
 </body>
 </html>

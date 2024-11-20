@@ -238,3 +238,96 @@ class StrategyEngine:
             "timeline": "12 months",
             "probability": "15%"
         }
+
+    def _estimate_personnel_needs(self, action: dict) -> dict:
+        """Estimate personnel requirements for action"""
+        priority = action.get("priority", "Medium")
+        timeline = action.get("timeline", "3-6 months")
+        
+        base_needs = {
+            "High": {
+                "project_manager": 1,
+                "specialists": 2,
+                "support_staff": 2
+            },
+            "Medium": {
+                "project_manager": 1,
+                "specialists": 1,
+                "support_staff": 1
+            },
+            "Low": {
+                "specialists": 1,
+                "support_staff": 1
+            }
+        }
+        
+        return base_needs.get(priority, base_needs["Medium"])
+
+    def _determine_external_needs(self, action: dict) -> list:
+        """Determine external support requirements"""
+        needs = []
+        
+        if "marketing" in action.get("action", "").lower():
+            needs.append("Marketing Agency")
+        if "technology" in action.get("action", "").lower():
+            needs.append("IT Consultants")
+        if "efficiency" in action.get("action", "").lower():
+            needs.append("Process Optimization Consultants")
+            
+        return needs if needs else ["No external support required"]
+
+    def _estimate_timeline(self, action: dict) -> dict:
+        """Estimate detailed timeline for action implementation"""
+        priority = action.get("priority", "Medium")
+        timelines = {
+            "High": {
+                "planning": "2-4 weeks",
+                "implementation": "2-3 months",
+                "review": "2 weeks"
+            },
+            "Medium": {
+                "planning": "4-6 weeks",
+                "implementation": "3-4 months",
+                "review": "3 weeks"
+            },
+            "Low": {
+                "planning": "6-8 weeks",
+                "implementation": "4-6 months",
+                "review": "4 weeks"
+            }
+        }
+        return timelines.get(priority, timelines["Medium"])
+
+    def _calculate_roi_estimate(self, action: dict, data: dict) -> dict:
+        """Calculate estimated ROI for action"""
+        revenue = float(data.get("annualRevenue", 0))
+        cost = float(self._calculate_budget(action).replace("$", "").split("-")[0].replace(",", ""))
+        
+        roi_estimates = {
+            "High": {"min": 0.25, "max": 0.4},
+            "Medium": {"min": 0.15, "max": 0.25},
+            "Low": {"min": 0.05, "max": 0.15}
+        }
+        
+        priority = action.get("priority", "Medium")
+        roi_range = roi_estimates.get(priority, roi_estimates["Medium"])
+        
+        return {
+            "estimated_return": round(cost * (1 + roi_range["max"]), 2),
+            "roi_percentage": f"{int(roi_range['min']*100)}-{int(roi_range['max']*100)}%",
+            "payback_period": "6-12 months" if priority == "High" else "12-18 months"
+        }
+
+    def _validate_action(self, action: dict) -> bool:
+        """Validate action data structure"""
+        required_fields = ["action", "priority", "timeline"]
+        return all(field in action for field in required_fields)
+
+    def _get_fallback_resources(self) -> dict:
+        """Provide fallback resource estimation"""
+        return {
+            "budget": "$25,000-50,000",
+            "personnel": {"specialists": 1, "support_staff": 1},
+            "timeline": "3-6 months",
+            "external_support": ["No external support required"]
+        }
