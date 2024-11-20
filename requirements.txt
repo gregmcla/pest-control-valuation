@@ -18,5 +18,5 @@ torch==2.1.2
 sentencepiece==0.1.99
 protobuf==4.25.2
 
-# Add missing dependency
+# Add specific yfinance version
 yfinance==0.2.36

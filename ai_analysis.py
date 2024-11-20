@@ -213,3 +213,65 @@ class ValuationAI:
                 }
             ]
         }
+
+    def _aggregate_sentiment(self, sentiments: List[Dict]) -> str:
+        """Aggregate sentiment scores"""
+        if not sentiments:
+            return "neutral"
+        
+        avg_score = sum(s['score'] for s in sentiments) / len(sentiments)
+        if avg_score > 0.6:
+            return "positive"
+        elif avg_score < 0.4:
+            return "negative"
+        return "neutral"
+
+    def _determine_trend(self, sentiments: List[Dict]) -> str:
+        """Determine sentiment trend"""
+        if not sentiments:
+            return "stable"
+        
+        scores = [s['score'] for s in sentiments]
+        if sum(scores) / len(scores) > 0.6:
+            return "upward"
+        elif sum(scores) / len(scores) < 0.4:
+            return "downward"
+        return "stable"
+
+    def _analyze_market_gaps(self, industry: str) -> List[Dict]:
+        """Analyze market gaps"""
+        return [{
+            "type": "Geographic Coverage",
+            "opportunity": "Market Expansion",
+            "potential": "High",
+            "investment": "Medium"
+        }]
+
+    def _analyze_tech_opportunities(self, industry: str) -> List[Dict]:
+        """Analyze technology opportunities"""
+        return [{
+            "type": "Digital Transformation",
+            "opportunity": "Process Automation",
+            "potential": "High",
+            "investment": "Medium"
+        }]
+
+    def _generate_risk_mitigation(self, category: str) -> str:
+        """Generate risk mitigation strategies"""
+        mitigations = {
+            "Economic": "Diversify revenue streams",
+            "Regulatory": "Maintain compliance protocols",
+            "Competition": "Focus on differentiation",
+            "Technology": "Invest in digital transformation",
+            "Market": "Expand market presence",
+            "Operational": "Optimize processes"
+        }
+        return mitigations.get(category, "Monitor and assess regularly")
+
+    def _assess_trend_sustainability(self, metrics: Dict) -> str:
+        """Assess trend sustainability"""
+        if metrics.get("growth_rate", 0) > 20:
+            return "High"
+        elif metrics.get("growth_rate", 0) > 10:
+            return "Medium"
+        return "Low"

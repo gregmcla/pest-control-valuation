@@ -290,13 +290,21 @@ def initialize_components():
         MODEL_CACHE_DIR = os.getenv('MODEL_CACHE_DIR', '/tmp/models')
         os.makedirs(MODEL_CACHE_DIR, exist_ok=True)
         
-        # Initialize one at a time
-        ai = ValuationAI(model_cache_dir=MODEL_CACHE_DIR)
+        # Initialize with error handling
+        try:
+            ai = ValuationAI(model_cache_dir=MODEL_CACHE_DIR)
+        except Exception as e:
+            logging.error(f"Error initializing ValuationAI: {e}")
+            ai = None
+
         gc.collect()
         comp = CompetitiveAnalysis()
         gc.collect()
         strat = StrategyEngine()
         gc.collect()
+        
+        if ai is None:
+            raise RuntimeError("Failed to initialize ValuationAI")
         
         return ai, comp, strat
     except Exception as e:
