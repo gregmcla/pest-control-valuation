@@ -11,11 +11,17 @@ def home():
 @app.route("/api/valuate", methods=["POST"])  # Fixed route
 def valuate():
     try:
+        print("Received request") # Debug log
         if not request.is_json:
+            print("Invalid content type")
             return jsonify({"error": "Invalid content type"}), 400
 
         data = request.get_json()
+        print(f"Received data: {data}") # Debug log
         
+        if not data:
+            return jsonify({"error": "Empty request"}), 400
+
         # Required fields validation
         if not data.get("industry"):
             return jsonify({"error": "Industry is required"}), 400
@@ -78,10 +84,11 @@ def valuate():
             ]
         }
         
+        print(f"Sending response: {response_data}") # Debug log
         return jsonify(response_data)
 
     except Exception as e:
-        print(f"Error: {str(e)}")
+        print(f"Error in valuate: {str(e)}") # Debug log
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
