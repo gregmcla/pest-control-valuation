@@ -741,34 +741,67 @@
         return `
             <div class="valuation-summary">
                 <h4>Estimated Business Value</h4>
-                <div class="value-highlight">$${formatCurrency(data.valuation)}</div>
-                <div class="badge badge-${getBadgeClass(data.rating)}">${data.rating}</div>
+                <div class="value-highlight">$${formatCurrency(data.valuation || 0)}</div>
+                <div class="badge badge-${getBadgeClass(data.rating || 'Average')}">${data.rating || 'Average'}</div>
             </div>`;
     }
 
     function generateKeyMetrics(data) {
+        const metrics = {
+            ebitdaMultiple: data.ebitdaMultiple || 0,
+            revenueMultiple: data.revenueMultiple || 0,
+            growthRate: data.growthRate || 0,
+            profitMargin: data.profitMargin || 0
+        };
+
         return `
             <div class="metrics-list">
-                <div>EBITDA Multiple: ${data.ebitdaMultiple}x</div>
-                <div>Revenue Multiple: ${data.revenueMultiple}x</div>
-                <div>Growth Rate: ${data.growthRate}%</div>
-                <div>Profit Margin: ${data.profitMargin}%</div>
+                <div>EBITDA Multiple: ${metrics.ebitdaMultiple.toFixed(2)}x</div>
+                <div>Revenue Multiple: ${metrics.revenueMultiple.toFixed(2)}x</div>
+                <div>Growth Rate: ${metrics.growthRate.toFixed(1)}%</div>
+                <div>Profit Margin: ${metrics.profitMargin.toFixed(1)}%</div>
             </div>`;
     }
 
     function generateIndustryComparison(data) {
+        const comparison = {
+            industryAvgMultiple: data.industryAvgMultiple || 0,
+            peerGroupRange: data.peerGroupRange || '3.0x - 5.0x',
+            marketPosition: data.marketPosition || 'Average'
+        };
+
         return `
             <div class="comparison-details">
                 <div class="peer-metrics">
-                    <div>Industry Average Multiple: ${data.industryAvgMultiple}x</div>
-                    <div>Peer Group Range: ${data.peerGroupRange}</div>
-                    <div>Market Position: ${data.marketPosition}</div>
+                    <div>Industry Average Multiple: ${comparison.industryAvgMultiple.toFixed(2)}x</div>
+                    <div>Peer Group Range: ${comparison.peerGroupRange}</div>
+                    <div>Market Position: ${comparison.marketPosition}</div>
                 </div>
             </div>`;
     }
 
     function generateScenarios(data) {
-        return data.scenarios.map(scenario => `
+        const defaultScenarios = [
+            {
+                name: 'Conservative',
+                value: data.valuation * 0.8 || 0,
+                description: 'Conservative estimate based on current market conditions'
+            },
+            {
+                name: 'Base Case',
+                value: data.valuation || 0,
+                description: 'Most likely valuation scenario'
+            },
+            {
+                name: 'Optimistic',
+                value: data.valuation * 1.2 || 0,
+                description: 'Optimistic scenario with favorable market conditions'
+            }
+        ];
+
+        const scenarios = data.scenarios || defaultScenarios;
+
+        return scenarios.map(scenario => `
             <div class="scenario-card">
                 <h4>${scenario.name}</h4>
                 <div class="scenario-value">$${formatCurrency(scenario.value)}</div>
@@ -777,27 +810,39 @@
         `).join('');
     }
 
-    function formatCurrency(value) {
-        return new Intl.NumberFormat('en-US', {
-            maximumFractionDigits: 0
-        }).format(value);
-    }
-
     function updateCharts(data) {
         // Update valuation chart
-        valuationChart.data.labels = data.scenarios.map(s => s.name);
-        valuationChart.data.datasets[0].data = data.scenarios.map(s => s.value);
+        const scenarios = data.scenarios || [
+            { name: 'Conservative', value: data.valuation * 0.8 || 0 },
+            { name: 'Base Case', value: data.valuation || 0 },
+            { name: 'Optimistic', value: data.valuation * 1.2 || 0 }
+        ];
+
+        valuationChart.data.labels = scenarios.map(s => s.name);
+        valuationChart.data.datasets[0].data = scenarios.map(s => s.value);
         valuationChart.update();
 
         // Update metrics chart
-        metricsChart.data.datasets[0].data = [
-            data.growthRate / 20,
-            data.profitMargin / 20,
-            data.customerRetention / 20,
-            data.geographicReach,
-            data.marketShare / 20
-        ];
+        const metrics = [
+            data.growthRate || 0,
+            data.profitMargin || 0,
+            data.customerRetention || 0,
+            data.geographicReach || 0,
+            data.marketShare || 0
+        ].map(value => (value / 20) || 0);
+
+        metricsChart.data.datasets[0].data = metrics;
         metricsChart.update();
+    }
+
+    function formatCurrency(value) {
+        // Ensure value is a number and handle any NaN cases
+        const num = Number(value) || 0;
+        return new Intl.NumberFormat('en-US', {
+            maximumFractionDigits: 0,
+            minimumFractionDigits: 0,
+            style: 'decimal'
+        }).format(num);
     }
   </script>
 </body>
