@@ -5,6 +5,7 @@ import traceback
 from decimal import Decimal, InvalidOperation
 from typing import Dict, List, Union
 import json
+from datetime import datetime  # Add missing import
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})  # Allow all origins for testing
@@ -57,8 +58,31 @@ class ValidationError(Exception):
     """Custom exception for validation errors"""
     pass
 
+class ApiError(Exception):
+    """Base exception for API errors"""
+    def __init__(self, message, status_code=400):
+        super().__init__()
+        self.message = message
+        self.status_code = status_code
+
+def validate_numeric_field(value: Union[str, float, int, Decimal], field_name: str, 
+                         min_value: float = None, max_value: float = None) -> Decimal:
+    """Validate numeric fields with proper error messages"""
+    try:
+        value = Decimal(str(value))
+        if min_value is not None and value < Decimal(str(min_value)):
+            raise ApiError(f"{field_name} must be at least {min_value}")
+        if max_value is not None and value > Decimal(str(max_value)):
+            raise ApiError(f"{field_name} must not exceed {max_value}")
+        return value
+    except (ValueError, InvalidOperation):
+        raise ApiError(f"Invalid {field_name} value")
+
 def validate_input(data: Dict) -> None:
-    """Validate input data with detailed error messages"""
+    """Enhanced input validation"""
+    if not isinstance(data, dict):
+        raise ApiError("Invalid request format")
+
     required_fields = {
         "industry": "Industry selection",
         "annualRevenue": "Annual revenue"
@@ -66,10 +90,22 @@ def validate_input(data: Dict) -> None:
     
     for field, name in required_fields.items():
         if field not in data:
-            raise ValidationError(f"{name} is required")
-        
-    if float(data["annualRevenue"]) <= 0:
-        raise ValidationError("Annual revenue must be positive")
+            raise ApiError(f"{name} is required")
+    
+    # Validate industry
+    if data["industry"] not in INDUSTRY_MULTIPLES:
+        raise ApiError("Invalid industry selection")
+    
+    # Validate numeric fields
+    validate_numeric_field(data["annualRevenue"], "Annual revenue", min_value=0)
+    if "ebitda" in data:
+        validate_numeric_field(data["ebitda"], "EBITDA", min_value=0)
+    if "growthRate" in data:
+        validate_numeric_field(data["growthRate"], "Growth rate", min_value=-100, max_value=1000)
+    if "customerRetention" in data:
+        validate_numeric_field(data["customerRetention"], "Customer retention", min_value=0, max_value=100)
+    if "geographicReach" in data:
+        validate_numeric_field(data["geographicReach"], "Geographic reach", min_value=0)
 
 def calculate_metrics(data: Dict) -> Dict:
     """Calculate all business metrics with error handling"""
@@ -455,5 +491,108 @@ def generate_industry_comparison(data: Dict, metrics: Dict) -> Dict:
         }
     }
 
+@app.errorhandler(ApiError)
+def handle_api_error(error):
+    """Global error handler for API errors"""
+    response = jsonify({
+        "error": error.message,
+        "type": "api_error"
+    })
+    response.status_code = error.status_code
+    return response
+
+@app.errorhandler(500)
+def handle_server_error(error):
+    """Global error handler for server errors"""
+    response = jsonify({
+        "error": "Internal server error occurred",
+        "type": "server_error"
+    })
+    response.status_code = 500
+    return response
+
+# Add rate limiting
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+
+limiter = Limiter(
+    app=app,
+    key_func=get_remote_address,
+    default_limits=["200 per day", "50 per hour"]
+)
+
+# Remove the duplicate valuate route and keep only this enhanced version
+@app.route("/api/valuate", methods=["POST"])
+@limiter.limit("50 per hour")
+def valuate():
+    """Main valuation endpoint with enhanced error handling"""
+    logging.info("Received valuation request")
+    try:
+        if not request.is_json:
+            raise ApiError("Request must be JSON")
+
+        data = request.get_json()
+        logging.info(f"Request data: {data}")
+        
+        validate_input(data)
+        metrics = calculate_metrics(data)
+        adjustments = calculate_adjustments(metrics)
+        valuation = calculate_valuation(metrics, adjustments)
+        
+        response_data = {
+            "valuation": float(valuation),
+            "currentMultiple": float(sum(adjustments.values())),
+            "metrics": {k: float(v) if isinstance(v, Decimal) else v for k, v in metrics.items()},
+            "adjustments": {k: float(v) for k, v in adjustments.items()},
+            "scenarios": generate_enhanced_scenarios(valuation, sum(adjustments.values()), metrics),
+            "industryComparison": generate_industry_comparison(metrics["industry"], metrics)
+        }
+        
+        return jsonify(response_data)
+
+    except ApiError as e:
+        logging.error(f"API error: {str(e)}")
+        return jsonify({"error": e.message, "type": "api_error"}), e.status_code
+    except Exception as e:
+        logging.error(f"Unexpected error: {str(e)}\n{traceback.format_exc()}")
+        return jsonify({"error": "Internal server error", "type": "server_error"}), 500
+
+# Update the industry comparison function
+def generate_industry_comparison(industry: str, metrics: Dict) -> Dict:
+    """Generate detailed industry comparison"""
+    return {
+        "industryAvgMultiple": float(INDUSTRY_MULTIPLES.get(industry, 5.0)),
+        "peerComparison": {
+            "growth": compare_to_peers(metrics["growth_rate"], "growth_rate"),
+            "margin": compare_to_peers(metrics["ebitda_margin"], "margin"),
+            "retention": compare_to_peers(metrics["retention_rate"], "retention")
+        },
+        "recommendations": generate_market_recommendations(metrics)
+    }
+
+# Add health check endpoint
+@app.route("/health", methods=["GET"])
+def health_check():
+    """Health check endpoint"""
+    return jsonify({
+        "status": "healthy",
+        "timestamp": datetime.utcnow().isoformat()
+    })
+
 if __name__ == "__main__":
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    # Configure logging
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+    
+    # Add CORS configuration
+    CORS(app, resources={
+        r"/*": {
+            "origins": ["http://localhost:5000", "https://your-production-domain.com"],
+            "methods": ["GET", "POST"],
+            "allow_headers": ["Content-Type"]
+        }
+    })
+    
+    app.run(debug=False, host='0.0.0.0', port=5000)
