@@ -584,149 +584,91 @@
     // Form submission handler
     document.getElementById('valuation-form').addEventListener('submit', async (event) => {
         event.preventDefault();
-        const formData = {
-            annualRevenue: parseFloat(document.getElementById('annual-revenue').value) || 0,
-            ebitda: parseFloat(document.getElementById('ebitda').value) || 0,
-            growthRate: parseFloat(document.getElementById('growth-rate').value) || 0,
-            customerRetention: parseFloat(document.getElementById('customer-retention').value) || 0,
-            geographicReach: parseFloat(document.getElementById('geographic-reach').value) || 0,
-            recurringRevenue: parseFloat(document.getElementById('recurring-revenue').value) || 0
-        };
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const errorElement = document.getElementById('error-message');
+        const resultsElement = document.getElementById('results');
 
         try {
-            const response = await fetch('https://pest-control-valuation.onrender.com/api/valuate', {
+            loadingOverlay.style.display = 'flex';
+            errorElement.style.display = 'none';
+            
+            const formData = {
+                industry: document.getElementById('industry').value,
+                annualRevenue: parseFloat(document.getElementById('annual-revenue').value) || 0,
+                ebitda: parseFloat(document.getElementById('ebitda').value) || 0,
+                growthRate: parseFloat(document.getElementById('growth-rate').value) || 0,
+                customerRetention: parseFloat(document.getElementById('customer-retention').value) || 0,
+                geographicReach: parseFloat(document.getElementById('geographic-reach').value) || 0,
+                recurringRevenue: parseFloat(document.getElementById('recurring-revenue').value) || 0,
+                businessAge: parseFloat(document.getElementById('business-age').value) || 0,
+                marketShare: parseFloat(document.getElementById('market-share').value) || 0
+            };
+
+            // Validate form data
+            const errors = validateForm(formData);
+            if (errors.length > 0) {
+                throw new Error(errors.join('\n'));
+            }
+
+            const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.endpoints.valuate}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 },
-                mode: 'cors',
                 body: JSON.stringify(formData)
             });
 
             if (!response.ok) {
-                let errorMessage;
-                try {
-                    const errorData = await response.json();
-                    errorMessage = errorData.error || 'Server error occurred';
-                } catch (e) {
-                    errorMessage = `HTTP error! status: ${response.status}`;
-                }
-                throw new Error(errorMessage);
-            }
-
-            if (!response.ok) {
-                let errorMessage;
-                try {
-                    const errorData = await response.json();
-                    errorMessage = errorData.error || 'Server error occurred';
-                } catch {
-                    errorMessage = `HTTP error! status: ${response.status}`;
-                }
-                throw new Error(errorMessage);
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Server error occurred');
             }
 
             const data = await response.json();
-            
-            // Update results display
-            document.getElementById('result').innerHTML = `
-                <div class="valuation-summary">
-                    <h3>Enterprise Value</h3>
-                    <div class="value-highlight">$${data.valuation.toLocaleString()}</div>
-                    <div class="metrics-detail">
-                        <p><strong>Current Multiple:</strong> ${data.currentMultiple.toFixed(2)}x EBITDA</p>
-                        <p><strong>Annual Revenue:</strong> $${formData.annualRevenue.toLocaleString()}</p>
-                        <p><strong>EBITDA:</strong> $${formData.ebitda.toLocaleString()}</p>
-                    </div>
-                </div>
-            `;
-
-            // Update Key Metrics
-            document.getElementById('key-metrics').innerHTML = `
-                <div class="metrics-list">
-                    <p><strong>Operating Margin:</strong> ${data.metrics.ebitda_margin.toFixed(1)}%</p>
-                    <p><strong>Growth Rate:</strong> ${data.metrics.growth_rate.toFixed(1)}%</p>
-                    <p><strong>Customer Retention:</strong> ${data.metrics.retention_rate.toFixed(1)}%</p>
-                    <p><strong>Geographic Reach:</strong> ${data.metrics.geographic_reach} states</p>
-                    <p><strong>Recurring Revenue:</strong> ${data.metrics.recurring_revenue_pct.toFixed(1)}%</p>
-                </div>
-            `;
-
-            // Update Industry Comparison
-            document.getElementById('industry-comparison').innerHTML = `
-                <div class="comparison-details">
-                    <p><strong>Industry Average Multiple:</strong> ${data.industryComparison.industryAvgMultiple.toFixed(1)}x</p>
-                    <div class="peer-metrics">
-                        <p><strong>Growth:</strong> <span class="badge badge-${getBadgeClass(data.industryComparison.peerComparison.growth)}">${data.industryComparison.peerComparison.growth}</span></p>
-                        <p><strong>Margin:</strong> <span class="badge badge-${getBadgeClass(data.industryComparison.peerComparison.margin)}">${data.industryComparison.peerComparison.margin}</span></p>
-                        <p><strong>Retention:</strong> <span class="badge badge-${getBadgeClass(data.industryComparison.peerComparison.retention)}">${data.industryComparison.peerComparison.retention}</span></p>
-                    </div>
-                    <div class="recommendations">
-                        <h4>Recommendations:</h4>
-                        <ul>
-                            ${data.industryComparison.recommendations.map(rec => `<li>${rec}</li>`).join('')}
-                        </ul>
-                    </div>
-                </div>
-            `;
-
-            // Update Scenarios
-            document.getElementById('scenarios').innerHTML = data.scenarios.map(scenario => `
-                <div class="scenario-card">
-                    <h4>${scenario.name}</h4>
-                    <div class="scenario-value">$${scenario.valuation.toLocaleString()}</div>
-                    <p><strong>Multiple:</strong> ${scenario.multiple.toFixed(2)}x</p>
-                    <p>${scenario.description}</p>
-                    ${scenario.requirements ? `
-                        <div class="requirements">
-                            <strong>Requirements:</strong>
-                            <ul>
-                                ${scenario.requirements.map(req => `<li>${req}</li>`).join('')}
-                            </ul>
-                        </div>
-                    ` : ''}
-                </div>
-            `).join('');
-
-            // Update charts
-            if (data.scenarios && valuationChart) {
-                valuationChart.data.labels = data.scenarios.map(s => s.name);
-                valuationChart.data.datasets[0].data = data.scenarios.map(s => s.valuation);
-                valuationChart.update();
-            }
-
-            if (data.metrics && metricsChart) {
-                metricsChart.data.datasets[0].data = [
-                    data.metrics.growth_rate || 0,
-                    data.metrics.ebitda_margin || 0,
-                    data.metrics.retention_rate || 0,
-                    data.metrics.geographic_reach || 0,
-                    data.metrics.revenue / 1000000 || 0 // Convert to millions
-                ];
-                metricsChart.update();
-            }
-
-            // Show results
+            updateResults(data);
             resultsElement.style.display = 'block';
             resultsElement.scrollIntoView({ behavior: 'smooth' });
 
         } catch (error) {
             console.error('Error:', error);
-            errorElement.querySelector('.error-content').textContent = 
-                error.message || 'Failed to connect to the server. Please try again.';
+            errorElement.querySelector('.error-content').textContent = error.message;
             errorElement.style.display = 'block';
             errorElement.scrollIntoView({ behavior: 'smooth' });
+        } finally {
+            loadingOverlay.style.display = 'none';
         }
     });
 
+    function updateResults(data) {
+        // Update all results sections
+        document.getElementById('result').innerHTML = generateValuationSummary(data);
+        document.getElementById('key-metrics').innerHTML = generateKeyMetrics(data);
+        document.getElementById('industry-comparison').innerHTML = generateIndustryComparison(data);
+        document.getElementById('scenarios').innerHTML = generateScenarios(data);
+        updateCharts(data);
+    }
+
     // Add error handling for network issues
-    try {
-        // ...existing fetch code...
-    } catch (networkError) {
-        console.error('Network error:', networkError);
-        errorElement.querySelector('.error-content').textContent = 
-            'Unable to connect to the server. Please check your internet connection and try again.';
-        errorElement.style.display = 'block';
+    async function makeApiRequest(endpoint, data) {
+        try {
+            const response = await fetch(`${API_CONFIG.baseUrl}${endpoint}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            return await response.json();
+        } catch (error) {
+            console.error('API request failed:', error);
+            throw error;
+        }
     }
 
     // EBITDA calculation handler
@@ -794,59 +736,6 @@
         }
       }
     };
-  </script>
-</body>
-</html>
-
-        if (!formData.industry) {
-            errors.push('Please select an industry');
-        }
-        
-        if (!formData.annualRevenue || formData.annualRevenue <= 0) {
-            errors.push('Please enter a valid annual revenue');
-        }
-        
-        if (formData.growthRate && (formData.growthRate < -100 || formData.growthRate > 1000)) {
-            errors.push('Growth rate must be between -100 and 1000');
-        }
-        
-        if (formData.customerRetention && (formData.customerRetention < 0 || formData.customerRetention > 100)) {
-            errors.push('Customer retention must be between 0 and 100');
-        }
-        
-        return errors;
-    }
-
-    document.getElementById('valuation-form').addEventListener('submit', async (event) => {
-        event.preventDefault();
-        const errorElement = document.getElementById('error-message');
-        
-        // Validate form
-        const errors = validateForm(formData);
-        if (errors.length > 0) {
-            errorElement.querySelector('.error-content').innerHTML = errors.join('<br>');
-            errorElement.style.display = 'block';
-            errorElement.scrollIntoView({ behavior: 'smooth' });
-            return;
-        }
-        
-        // ...rest of submission code...
-    });
-    // Add loading state management
-    const loadingOverlay = document.getElementById('loading-overlay');
-    
-    document.getElementById('valuation-form').addEventListener('submit', async (event) => {
-        event.preventDefault();
-        loadingOverlay.style.display = 'flex';
-        
-        try {
-            // ...existing form submission code...
-        } catch (error) {
-            // ...existing error handling...
-        } finally {
-            loadingOverlay.style.display = 'none';
-        }
-    });
   </script>
 </body>
 </html>

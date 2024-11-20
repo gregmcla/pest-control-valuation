@@ -180,3 +180,22 @@ class CompetitiveAnalysis:
             "potential": "High",
             "investment": "Medium"
         }]
+
+class CompetitiveAnalysis:
+    def analyze_market_position(self, metrics: dict, industry_data: dict) -> dict:
+        """Basic competitive analysis"""
+        return {
+            "market_position": {
+                "share": "growing",
+                "rank": "competitive",
+                "trend": "positive"
+            },
+            "competitive_advantages": [
+                {
+                    "type": "Market Coverage",
+                    "strength": "Medium",
+                    "sustainability": "High"
+                }
+            ],
+            "metrics": metrics
+        }

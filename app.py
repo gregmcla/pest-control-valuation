@@ -31,14 +31,13 @@ logging.basicConfig(
 # Update CORS configuration to use allowed origins from environment
 ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS', 'https://pest-control-valuation-1.onrender.com').split(',')
 
-# Update CORS configuration to be more permissive
+# Update CORS configuration to be more permissive for development
 CORS(app, 
      resources={r"/*": {
-         "origins": "*",  # Allow all origins in development
+         "origins": ["http://localhost:3000", "http://localhost:5000", "https://pest-control-valuation.onrender.com"],
          "methods": ["GET", "POST", "OPTIONS"],
          "allow_headers": ["Content-Type", "Authorization"],
-         "max_age": 600,
-         "supports_credentials": True
+         "max_age": 600
      }})
 
 # Configure rate limiter
@@ -642,22 +641,19 @@ def after_request(response):
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-        'Access-Control-Allow-Credentials': 'true',
-        'X-Content-Type-Options': 'nosniff',
-        'X-Frame-Options': 'DENY',
-        'X-XSS-Protection': '1; mode=block',
-        'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
-        'Content-Security-Policy': "default-src 'self' https:; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:;"
+        'Access-Control-Allow-Credentials': 'true'
     })
     return response
 
+
 if __name__ == "__main__":
     # Production settings
-    app.config['JSON_SORT_KEYS'] = False  # Better performance
+    app.config['JSON_SORT_KEYS'] = False
     app.config['PROPAGATE_EXCEPTIONS'] = True
+    # Bind to all network interfaces
     app.run(
-        host='0.0.0.0',
-        port=port,
-        debug=False,  # Ensure debug is False in production
+        host='0.0.0.0',  # This ensures the app is accessible from outside
+        port=int(os.environ.get("PORT", 5000)),
+        debug=False,
         threaded=True
     )
