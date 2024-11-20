@@ -736,6 +736,69 @@
         }
       }
     };
+
+    function generateValuationSummary(data) {
+        return `
+            <div class="valuation-summary">
+                <h4>Estimated Business Value</h4>
+                <div class="value-highlight">$${formatCurrency(data.valuation)}</div>
+                <div class="badge badge-${getBadgeClass(data.rating)}">${data.rating}</div>
+            </div>`;
+    }
+
+    function generateKeyMetrics(data) {
+        return `
+            <div class="metrics-list">
+                <div>EBITDA Multiple: ${data.ebitdaMultiple}x</div>
+                <div>Revenue Multiple: ${data.revenueMultiple}x</div>
+                <div>Growth Rate: ${data.growthRate}%</div>
+                <div>Profit Margin: ${data.profitMargin}%</div>
+            </div>`;
+    }
+
+    function generateIndustryComparison(data) {
+        return `
+            <div class="comparison-details">
+                <div class="peer-metrics">
+                    <div>Industry Average Multiple: ${data.industryAvgMultiple}x</div>
+                    <div>Peer Group Range: ${data.peerGroupRange}</div>
+                    <div>Market Position: ${data.marketPosition}</div>
+                </div>
+            </div>`;
+    }
+
+    function generateScenarios(data) {
+        return data.scenarios.map(scenario => `
+            <div class="scenario-card">
+                <h4>${scenario.name}</h4>
+                <div class="scenario-value">$${formatCurrency(scenario.value)}</div>
+                <div>${scenario.description}</div>
+            </div>
+        `).join('');
+    }
+
+    function formatCurrency(value) {
+        return new Intl.NumberFormat('en-US', {
+            maximumFractionDigits: 0
+        }).format(value);
+    }
+
+    function updateCharts(data) {
+        // Update valuation chart
+        valuationChart.data.labels = data.scenarios.map(s => s.name);
+        valuationChart.data.datasets[0].data = data.scenarios.map(s => s.value);
+        valuationChart.update();
+
+        // Update metrics chart
+        metricsChart.data.datasets[0].data = [
+            data.growthRate / 20,
+            data.profitMargin / 20,
+            data.customerRetention / 20,
+            data.geographicReach,
+            data.marketShare / 20
+        ];
+        metricsChart.update();
+    }
   </script>
 </body>
 </html>
