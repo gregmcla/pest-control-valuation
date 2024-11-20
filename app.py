@@ -40,15 +40,45 @@ def valuate():
 
         # Calculate valuation
         base_multiple = 5.0
-        valuation = ebitda * base_multiple
+        growth_rate = float(data.get("growthRate", 0))
+        customer_retention = float(data.get("customerRetention", 0))
+        geographic_reach = float(data.get("geographicReach", 0))
         
+        # Adjust multiple based on factors
+        adjusted_multiple = base_multiple
+        if growth_rate > 10:
+            adjusted_multiple += 0.5
+        if customer_retention > 80:
+            adjusted_multiple += 0.5
+        if geographic_reach > 3:
+            adjusted_multiple += 0.3
+            
+        valuation = ebitda * adjusted_multiple
+        
+        # Generate insights
+        insights = []
+        if growth_rate < 10:
+            insights.append("Consider implementing growth strategies to increase valuation")
+        if customer_retention < 80:
+            insights.append("Improving customer retention could increase valuation")
+        if geographic_reach < 3:
+            insights.append("Geographic expansion could add value")
+            
         response_data = {
             "valuation": round(valuation, 2),
-            "currentMultiple": base_multiple,
-            "insights": "Basic valuation calculation",
+            "currentMultiple": adjusted_multiple,
+            "insights": insights,
             "guidance": [
-                {"valuation": round(valuation * 1.2, 2), "description": "Growth opportunity"},
-                {"valuation": round(valuation * 1.4, 2), "description": "Best case scenario"}
+                {
+                    "valuation": round(valuation * 1.2, 2),
+                    "description": "With improved customer retention and growth",
+                    "actions": ["Implement customer success program", "Develop growth strategy"]
+                },
+                {
+                    "valuation": round(valuation * 1.4, 2),
+                    "description": "Best case scenario with geographic expansion",
+                    "actions": ["Expand to new markets", "Increase service offerings"]
+                }
             ]
         }
         

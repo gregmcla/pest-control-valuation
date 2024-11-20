@@ -190,8 +190,27 @@
 
         // Update display
         document.getElementById('result').innerHTML = `
-          <strong>Estimated Valuation:</strong> $${data.valuation.toLocaleString()}
+          <strong>Estimated Valuation:</strong> $${data.valuation.toLocaleString()}<br>
+          <strong>Current Multiple:</strong> ${data.currentMultiple}x
         `;
+        
+        // Display insights
+        const insightsList = data.insights.map(insight => `<li>${insight}</li>`).join('');
+        document.getElementById('insights').innerHTML = `
+          <strong>Key Insights:</strong>
+          <ul>${insightsList}</ul>
+        `;
+        
+        // Display guidance
+        const guidanceHtml = data.guidance.map((scenario, index) => `
+          <div>
+            <h3>Scenario ${index + 1}: ${scenario.description}</h3>
+            <p>Potential Valuation: $${scenario.valuation.toLocaleString()}</p>
+            <strong>Recommended Actions:</strong>
+            <ul>${scenario.actions.map(action => `<li>${action}</li>`).join('')}</ul>
+          </div>
+        `).join('');
+        document.getElementById('guidance').innerHTML = guidanceHtml;
         
         // Update chart
         valuationChart.data.datasets[0].data = [
