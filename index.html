@@ -591,6 +591,53 @@
                 </div>
             `;
 
+            // Update Key Metrics
+            document.getElementById('key-metrics').innerHTML = `
+                <div class="metrics-list">
+                    <p><strong>Operating Margin:</strong> ${data.metrics.ebitda_margin.toFixed(1)}%</p>
+                    <p><strong>Growth Rate:</strong> ${data.metrics.growth_rate.toFixed(1)}%</p>
+                    <p><strong>Customer Retention:</strong> ${data.metrics.retention_rate.toFixed(1)}%</p>
+                    <p><strong>Geographic Reach:</strong> ${data.metrics.geographic_reach} states</p>
+                    <p><strong>Recurring Revenue:</strong> ${data.metrics.recurring_revenue_pct.toFixed(1)}%</p>
+                </div>
+            `;
+
+            // Update Industry Comparison
+            document.getElementById('industry-comparison').innerHTML = `
+                <div class="comparison-details">
+                    <p><strong>Industry Average Multiple:</strong> ${data.industryComparison.industryAvgMultiple.toFixed(1)}x</p>
+                    <div class="peer-metrics">
+                        <p><strong>Growth:</strong> <span class="badge badge-${getBadgeClass(data.industryComparison.peerComparison.growth)}">${data.industryComparison.peerComparison.growth}</span></p>
+                        <p><strong>Margin:</strong> <span class="badge badge-${getBadgeClass(data.industryComparison.peerComparison.margin)}">${data.industryComparison.peerComparison.margin}</span></p>
+                        <p><strong>Retention:</strong> <span class="badge badge-${getBadgeClass(data.industryComparison.peerComparison.retention)}">${data.industryComparison.peerComparison.retention}</span></p>
+                    </div>
+                    <div class="recommendations">
+                        <h4>Recommendations:</h4>
+                        <ul>
+                            ${data.industryComparison.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `;
+
+            // Update Scenarios
+            document.getElementById('scenarios').innerHTML = data.scenarios.map(scenario => `
+                <div class="scenario-card">
+                    <h4>${scenario.name}</h4>
+                    <div class="scenario-value">$${scenario.valuation.toLocaleString()}</div>
+                    <p><strong>Multiple:</strong> ${scenario.multiple.toFixed(2)}x</p>
+                    <p>${scenario.description}</p>
+                    ${scenario.requirements ? `
+                        <div class="requirements">
+                            <strong>Requirements:</strong>
+                            <ul>
+                                ${scenario.requirements.map(req => `<li>${req}</li>`).join('')}
+                            </ul>
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+
             // Update charts
             if (data.scenarios && valuationChart) {
                 valuationChart.data.labels = data.scenarios.map(s => s.name);
