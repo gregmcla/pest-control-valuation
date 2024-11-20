@@ -493,10 +493,12 @@
         const metricsHtml = Object.entries(data.metrics || {}).map(([key, metric]) => `
           <div class="metric-card">
             <h4>${key.charAt(0).toUpperCase() + key.slice(1)}</h4>
-            <p>Score: ${metric.score.toFixed(2)}</p>
-            <p>Impact: ${metric.impact}</p>
-            <p>Benchmark: ${metric.benchmark}</p>
-            <p>Recommendation: ${metric.recommendation}</p>
+            ${metric ? `
+              <p>Score: ${typeof metric.score === 'number' ? metric.score.toFixed(2) : 'N/A'}</p>
+              <p>Impact: ${metric.impact || 'N/A'}</p>
+              <p>Benchmark: ${metric.benchmark || 'N/A'}</p>
+              <p>Recommendation: ${metric.recommendation || 'N/A'}</p>
+            ` : '<p>No data available</p>'}
           </div>
         `).join('');
         document.getElementById('insights').innerHTML = metricsHtml;
