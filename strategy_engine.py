@@ -133,3 +133,72 @@ class StrategyEngine:
             "Medium": "$25,000-50,000",
             "Low": "$10,000-25,000"
         }.get(priority, "$25,000-50,000")
+
+    def _determine_size_category(self, data: dict) -> str:
+        """Determine company size category"""
+        revenue = float(data.get("annualRevenue", 0))
+        if revenue > 50000000:
+            return "Enterprise"
+        elif revenue > 10000000:
+            return "Mid-Market"
+        elif revenue > 1000000:
+            return "Small Business"
+        return "Micro Business"
+
+    def _assess_market_position(self, data: dict) -> str:
+        """Assess market position"""
+        market_share = float(data.get("marketShare", 0))
+        if market_share > 20:
+            return "Market Leader"
+        elif market_share > 10:
+            return "Strong Competitor"
+        elif market_share > 5:
+            return "Established Player"
+        return "Market Entrant"
+
+    def _determine_growth_stage(self, data: dict) -> str:
+        """Determine company growth stage"""
+        growth_rate = float(data.get("growthRate", 0))
+        age = float(data.get("businessAge", 0))
+        
+        if growth_rate > 50 and age < 5:
+            return "Early Growth"
+        elif growth_rate > 20:
+            return "Rapid Growth"
+        elif growth_rate > 10:
+            return "Steady Growth"
+        return "Mature"
+
+    def _assess_risk_level(self, data: dict) -> str:
+        """Assess company risk level"""
+        score = 0
+        if float(data.get("customerRetention", 0)) > 80:
+            score += 1
+        if float(data.get("recurringRevenue", 0)) > float(data.get("annualRevenue", 1)) * 0.4:
+            score += 1
+        if float(data.get("geographicReach", 0)) > 3:
+            score += 1
+        return "Low" if score >= 2 else "Medium" if score == 1 else "High"
+    
+    def _analyze_business_areas(self, data: dict, analysis: dict) -> list:
+        """Analyze critical business areas"""
+        areas = []
+        metrics = analysis.get("metrics", {})
+        
+        if metrics.get("ebitda_margin", 0) < 15:
+            areas.append({
+                "name": "Profitability",
+                "priority": "High",
+                "current": metrics.get("ebitda_margin", 0),
+                "target": "20%"
+            })
+            
+        if metrics.get("growth_rate", 0) < 10:
+            areas.append({
+                "name": "Growth",
+                "priority": "High",
+                "current": metrics.get("growth_rate", 0),
+                "target": "15%"
+            })
+            
+        return areas
