@@ -462,6 +462,49 @@
         }
     }
 
+    // Add this function to handle updating all results
+    function updateResults(data) {
+        // Update valuation summary
+        document.getElementById('result').innerHTML = generateValuationSummary(data);
+        
+        // Update key metrics
+        document.getElementById('key-metrics').innerHTML = generateKeyMetrics(data);
+        
+        // Update industry comparison
+        document.getElementById('industry-comparison').innerHTML = generateIndustryComparison(data);
+        
+        // Update scenarios
+        document.getElementById('scenarios').innerHTML = generateScenarios(data);
+        
+        // Update charts last
+        updateCharts(data);
+
+        // Show strategic insights if available
+        if (data.strategicPlan) {
+            document.getElementById('insights').innerHTML = generateStrategicInsights(data.strategicPlan);
+        }
+    }
+
+    // Add strategic insights generator
+    function generateStrategicInsights(plan) {
+        if (!plan) return '';
+        
+        return `
+            <div class="metric-card">
+                <h3>Strategic Recommendations</h3>
+                <div class="insights-list">
+                    ${plan.immediate_actions?.map(action => `
+                        <div class="insight-item">
+                            <strong>${action.action}</strong>
+                            <div>Priority: ${action.priority}</div>
+                            <div>Timeline: ${action.timeline}</div>
+                            <div>Impact: ${action.expected_impact}</div>
+                        </div>
+                    `).join('') || ''}
+                </div>
+            </div>`;
+    }
+
     // Update the form submission handler
     document.getElementById('valuation-form').addEventListener('submit', async (event) => {
         event.preventDefault();
