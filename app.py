@@ -386,11 +386,19 @@ def valuate():
         
         response_data = {
             "valuation": float(valuation),
-            "currentMultiple": float(sum(adjustments.values())),
-            "metrics": {k: float(v) if isinstance(v, Decimal) else v for k, v in metrics.items()},
+            "rating": "Good" if metrics["growth_rate"] > 10 else "Average",
+            "currentMultiple": float(INDUSTRY_MULTIPLES.get(data["industry"], 5.0)),
+            "metrics": {
+                "revenue": float(metrics["revenue"]),
+                "ebitda": float(metrics["ebitda"]),
+                "ebitda_margin": float(metrics["ebitda_margin"]),
+                "growth_rate": float(metrics["growth_rate"]),
+                "retention_rate": float(metrics["retention_rate"]),
+                "geographic_reach": float(metrics["geographic_reach"])
+            },
             "adjustments": {k: float(v) for k, v in adjustments.items()},
             "scenarios": generate_enhanced_scenarios(valuation, sum(adjustments.values()), metrics),
-            "industryComparison": generate_industry_comparison(data["industry"], metrics),  # Fixed this line
+            "industryComparison": generate_industry_comparison(data["industry"], metrics),
             "marketAnalysis": market_trends,
             "competitivePosition": competitive_position,
             "strategicPlan": strategy
@@ -554,26 +562,37 @@ def generate_enhanced_scenarios(valuation, current_multiple, metrics):
     """Enhanced version of scenario generation"""
     valuation = Decimal(str(valuation))
     current_multiple = Decimal(str(current_multiple))
-    return [
-        {
-            "name": "Current",
-            "valuation": float(valuation),  # Convert to float for JSON
-            "multiple": float(current_multiple),
-            "description": "Based on current performance"
-        },
-        {
-            "name": "Optimized",
-            "valuation": float(valuation * Decimal("1.3")),
-            "multiple": float(current_multiple + Decimal("1.0")),
-            "description": "With improved metrics"
-        },
-        {
-            "name": "Best Case",
-            "valuation": float(valuation * Decimal("1.5")),
-            "multiple": float(current_multiple + Decimal("1.5")),
-            "description": "With all metrics at industry best"
-        }
-    ]
+    
+    # Add rating based on metrics
+    rating = "Average"
+    if metrics["growth_rate"] > Decimal("20") and metrics["ebitda_margin"] > Decimal("20"):
+        rating = "Excellent"
+    elif metrics["growth_rate"] > Decimal("10") and metrics["ebitda_margin"] > Decimal("15"):
+        rating = "Good"
+    
+    return {
+        "rating": rating,
+        "scenarios": [
+            {
+                "name": "Conservative",
+                "value": float(valuation * Decimal("0.8")),
+                "multiple": float(current_multiple - Decimal("0.5")),
+                "description": "Based on conservative market conditions"
+            },
+            {
+                "name": "Base Case",
+                "value": float(valuation),
+                "multiple": float(current_multiple),
+                "description": "Based on current performance"
+            },
+            {
+                "name": "Optimistic",
+                "value": float(valuation * Decimal("1.2")),
+                "multiple": float(current_multiple + Decimal("0.5")),
+                "description": "Based on optimistic growth scenarios"
+            }
+        ]
+    }
 
 def calculate_ltv(data):
     """Calculate customer lifetime value"""

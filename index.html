@@ -629,97 +629,67 @@
       }
     };
 
+    function updateCharts(data) {
+        // Update valuation chart with scenarios
+        if (data.scenarios && data.scenarios.scenarios) {
+            const scenarios = data.scenarios.scenarios;
+            valuationChart.data.labels = scenarios.map(s => s.name);
+            valuationChart.data.datasets[0].data = scenarios.map(s => s.value);
+            valuationChart.options.plugins.tooltip.callbacks = {
+                label: (context) => `$${formatCurrency(context.raw)}`
+            };
+            valuationChart.update();
+        }
+
+        // Update metrics chart with normalized values
+        if (data.metrics) {
+            const metrics = [
+                data.metrics.growth_rate || 0,
+                data.metrics.ebitda_margin || 0,
+                data.metrics.retention_rate || 0,
+                data.metrics.geographic_reach || 0,
+                data.metrics.marketShare || 0
+            ].map(value => Math.min((value / 20), 5));
+
+            metricsChart.data.datasets[0].data = metrics;
+            metricsChart.update();
+        }
+    }
+
     function generateValuationSummary(data) {
+        const rating = data.scenarios?.rating || data.rating || 'Average';
         return `
             <div class="valuation-summary">
                 <h4>Estimated Business Value</h4>
                 <div class="value-highlight">$${formatCurrency(data.valuation || 0)}</div>
-                <div class="badge badge-${getBadgeClass(data.rating || 'Average')}">${data.rating || 'Average'}</div>
+                <div class="badge badge-${getBadgeClass(rating)}">${rating}</div>
             </div>`;
     }
 
     function generateKeyMetrics(data) {
-        // Access metrics from the correct location in the response
-        const metrics = {
+        const metrics = data.metrics || {};
+        const formattedMetrics = {
             ebitdaMultiple: data.currentMultiple || 0,
-            revenueMultiple: (data.valuation / (data.metrics?.revenue || 1)).toFixed(2) || 0,
-            growthRate: data.metrics?.growthRate || 0,
-            profitMargin: (data.metrics?.ebitda_margin) || 0,
-            customerRetention: data.metrics?.retention_rate || 0,
-            marketShare: data.metrics?.marketShare || 0
+            revenueMultiple: ((data.valuation || 0) / (metrics.revenue || 1)).toFixed(2),
+            growthRate: metrics.growth_rate || 0,
+            profitMargin: metrics.ebitda_margin || 0,
+            customerRetention: metrics.retention_rate || 0,
+            marketReach: metrics.geographic_reach || 0
         };
 
         return `
             <div class="metrics-list">
-                <div>EBITDA Multiple: ${metrics.ebitdaMultiple.toFixed(2)}x</div>
-                <div>Revenue Multiple: ${metrics.revenueMultiple}x</div>
-                <div>Growth Rate: ${metrics.growthRate.toFixed(1)}%</div>
-                <div>Profit Margin: ${metrics.profitMargin.toFixed(1)}%</div>
-                <div>Customer Retention: ${metrics.customerRetention.toFixed(1)}%</div>
-                <div>Market Share: ${metrics.marketShare.toFixed(1)}%</div>
+                <div>EBITDA Multiple: ${formattedMetrics.ebitdaMultiple.toFixed(2)}x</div>
+                <div>Revenue Multiple: ${formattedMetrics.revenueMultiple}x</div>
+                <div>Growth Rate: ${formattedMetrics.growthRate.toFixed(1)}%</div>
+                <div>Profit Margin: ${formattedMetrics.profitMargin.toFixed(1)}%</div>
+                <div>Customer Retention: ${formattedMetrics.customerRetention.toFixed(1)}%</div>
+                <div>Geographic Reach: ${formattedMetrics.marketReach} states</div>
             </div>`;
-    }
-
-    function generateIndustryComparison(data) {
-        // Access industry comparison data from the correct location
-        const comparison = {
-            industryAvgMultiple: data.industryComparison?.industryAvgMultiple || 0,
-            peerGroupRange: data.industryComparison?.peerComparison || '3.0x - 5.0x',
-            marketPosition: data.competitivePosition?.market_position?.rank || 'Average',
-            peerMetrics: data.industryComparison?.peerComparison || {}
-        };
-
-        return `
-            <div class="comparison-details">
-                <div class="peer-metrics">
-                    <div>Industry Average Multiple: ${comparison.industryAvgMultiple.toFixed(2)}x</div>
-                    <div>Market Position: ${comparison.marketPosition}</div>
-                    <div class="peer-comparison">
-                        <div>Growth: <span class="badge badge-${getBadgeClass(comparison.peerMetrics.growth)}">${comparison.peerMetrics.growth || 'Average'}</span></div>
-                        <div>Margin: <span class="badge badge-${getBadgeClass(comparison.peerMetrics.margin)}">${comparison.peerMetrics.margin || 'Average'}</span></div>
-                        <div>Retention: <span class="badge badge-${getBadgeClass(comparison.peerMetrics.retention)}">${comparison.peerMetrics.retention || 'Average'}</span></div>
-                    </div>
-                </div>
-            </div>`;
-    }
-
-    function updateCharts(data) {
-        // Update valuation chart with scenarios
-        const scenarios = data.scenarios || [
-            { name: 'Conservative', value: data.valuation * 0.8 || 0 },
-            { name: 'Base Case', value: data.valuation || 0 },
-            { name: 'Optimistic', value: data.valuation * 1.2 || 0 }
-        ];
-
-        valuationChart.data.labels = scenarios.map(s => s.name);
-        valuationChart.data.datasets[0].data = scenarios.map(s => s.value);
-        valuationChart.update();
-
-        // Update metrics chart with normalized values
-        const metrics = [
-            data.metrics?.growthRate || 0,
-            data.metrics?.ebitda_margin || 0,
-            data.metrics?.retention_rate || 0,
-            data.metrics?.geographic_reach || 0,
-            data.metrics?.marketShare || 0
-        ].map(value => Math.min((value / 20), 5));
-
-        metricsChart.data.datasets[0].data = metrics;
-        metricsChart.update();
-    }
-
-    function formatCurrency(value) {
-        // Ensure value is a number and handle any NaN cases
-        const num = Number(value) || 0;
-        return new Intl.NumberFormat('en-US', {
-            maximumFractionDigits: 0,
-            minimumFractionDigits: 0,
-            style: 'decimal'
-        }).format(num);
     }
 
     function generateScenarios(data) {
-        const defaultScenarios = [
+        const scenarios = data.scenarios?.scenarios || [
             {
                 name: 'Conservative',
                 value: data.valuation * 0.8 || 0,
@@ -737,8 +707,6 @@
             }
         ];
 
-        const scenarios = data.scenarios || defaultScenarios;
-
         return scenarios.map(scenario => `
             <div class="scenario-card">
                 <h4>${scenario.name}</h4>
@@ -746,6 +714,16 @@
                 <div>${scenario.description}</div>
             </div>
         `).join('');
+    }
+
+    function formatCurrency(value) {
+        // Ensure value is a number and handle any NaN cases
+        const num = Number(value) || 0;
+        return new Intl.NumberFormat('en-US', {
+            maximumFractionDigits: 0,
+            minimumFractionDigits: 0,
+            style: 'decimal'
+        }).format(num);
     }
   </script>
 </body>
