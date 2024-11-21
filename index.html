@@ -426,7 +426,7 @@
 
     // Update API configuration with better error handling
     const API_CONFIG = {
-        baseUrl: window.location.hostname === 'localhost' 
+        baseUrl: window.location.hostname.includes('localhost') 
             ? 'http://localhost:5000'
             : 'https://pest-control-valuation.onrender.com',
         endpoints: {
@@ -439,27 +439,40 @@
         }
     };
 
-    // Add retry logic for API requests
+    // Update makeApiRequest function with better error handling
     async function makeApiRequest(endpoint, data, retries = 3) {
+        let lastError;
+        
         for (let i = 0; i < retries; i++) {
             try {
+                console.log(`Attempting API request to ${API_CONFIG.baseUrl}${endpoint}`);
                 const response = await fetch(`${API_CONFIG.baseUrl}${endpoint}`, {
                     method: 'POST',
                     headers: API_CONFIG.headers,
+                    mode: 'cors',
+                    credentials: 'omit',
                     body: JSON.stringify(data)
                 });
-                
+
                 if (!response.ok) {
                     const errorData = await response.json();
                     throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
                 }
-                
-                return await response.json();
+
+                const responseData = await response.json();
+                console.log('API response:', responseData);
+                return responseData;
+
             } catch (error) {
-                if (i === retries - 1) throw error;
-                await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+                console.error(`Attempt ${i + 1} failed:`, error);
+                lastError = error;
+                if (i < retries - 1) {
+                    await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+                }
             }
         }
+        
+        throw new Error(`Failed after ${retries} attempts. Last error: ${lastError.message}`);
     }
 
     // Add this function to handle updating all results

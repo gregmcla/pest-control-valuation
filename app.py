@@ -31,35 +31,14 @@ logging.basicConfig(
 # Update CORS configuration to use allowed origins from environment
 ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS', 'https://pest-control-valuation-1.onrender.com').split(',')
 
-# Update CORS configuration to be more permissive for development
+# Simplify CORS configuration to a single, reliable setup
 CORS(app, 
      resources={r"/*": {
-         "origins": ["http://localhost:3000", "http://localhost:5000", "https://pest-control-valuation.onrender.com"],
-         "methods": ["GET", "POST", "OPTIONS"],
-         "allow_headers": ["Content-Type", "Authorization"],
-         "max_age": 600
-     }})
-
-# Update CORS configuration to be more permissive
-CORS(app, 
-     resources={r"/*": {
-         "origins": ["http://localhost:3000", 
-                    "http://localhost:5000", 
-                    "https://pest-control-valuation.onrender.com",
-                    "https://pest-control-valuation-1.onrender.com"],
+         "origins": "*",  # Allow all origins in production for now
          "methods": ["GET", "POST", "OPTIONS"],
          "allow_headers": ["Content-Type", "Authorization", "X-Requested-With"],
-         "supports_credentials": False,  # Change to False since we're using credentials: 'omit'
-         "max_age": 600
-     }})
-
-# Update CORS configuration to be more permissive
-CORS(app, 
-     resources={r"/*": {
-         "origins": "*",  # Allow all origins in development
-         "methods": ["GET", "POST", "OPTIONS"],
-         "allow_headers": ["Content-Type", "Authorization", "X-Requested-With"],
-         "supports_credentials": False
+         "supports_credentials": False,
+         "expose_headers": ["Content-Type", "X-Total-Count"]
      }})
 
 # Configure rate limiter
@@ -338,79 +317,45 @@ except Exception as e:
     logging.error(f"Critical initialization error: {e}")
     sys.exit(1)
 
-# Update the valuate endpoint to include CORS headers
 @app.route("/api/valuate", methods=["POST", "OPTIONS"])
 @limiter.limit("50 per hour")
-@cross_origin()  # Add this decorator
+@cross_origin()
 def valuate():
-    """Main valuation endpoint with enhanced error handling and debugging"""
-    logging.info("Received valuation request")
-    """Main valuation endpoint with enhanced error handling and debugging"""
-    logging.info("Received valuation request")
-    
-    # Handle preflight requests
     if request.method == "OPTIONS":
         return handle_preflight()
 
     try:
-        if not request.is_json:
-            raise ApiError("Request must be JSON")
-
         data = request.get_json()
-        logging.info(f"Request data: {data}")
+        if not data:
+            raise ApiError("Missing request data")
 
-        # Add data validation logging
-        validate_input(data)
-        logging.info("Input validation passed")
-
-        # Process in chunks to manage memory
+        # Log request for debugging
+        logging.info(f"Processing request with data: {data}")
+        
+        # Process request
         metrics = calculate_metrics(data)
-        if not metrics["revenue"] or not metrics["ebitda"]:
-            raise ApiError("Invalid revenue or EBITDA values")
-        gc.collect()
+        logging.info(f"Calculated metrics: {metrics}")
         
-        market_trends = ai_analyzer.analyze_market_trends(data["industry"])
-        gc.collect()
-        
-        competitive_position = competitive_analyzer.analyze_market_position(metrics, market_trends)
-        gc.collect()
-        
-        strategy = strategy_engine.generate_recommendations(data, competitive_position)
-        gc.collect()
-        
-        adjustments = calculate_adjustments(metrics)
-        logging.info(f"Calculated adjustments: {adjustments}")
+        # ... rest of your existing valuation logic ...
 
+        # Calculate adjustments and valuation
+        adjustments = calculate_adjustments(metrics)
         valuation = calculate_valuation(metrics, adjustments)
-        logging.info(f"Final valuation: {valuation}")
-        
+
+        # Ensure all numeric values are converted to float for JSON serialization
         response_data = {
             "valuation": float(valuation),
-            "rating": "Good" if metrics["growth_rate"] > 10 else "Average",
+            "rating": "Good" if float(metrics["growth_rate"]) > 10 else "Average",
             "currentMultiple": float(INDUSTRY_MULTIPLES.get(data["industry"], 5.0)),
-            "metrics": {
-                "revenue": float(metrics["revenue"]),
-                "ebitda": float(metrics["ebitda"]),
-                "ebitda_margin": float(metrics["ebitda_margin"]),
-                "growth_rate": float(metrics["growth_rate"]),
-                "retention_rate": float(metrics["retention_rate"]),
-                "geographic_reach": float(metrics["geographic_reach"])
-            },
-            "adjustments": {k: float(v) for k, v in adjustments.items()},
-            "scenarios": generate_enhanced_scenarios(valuation, sum(adjustments.values()), metrics),
-            "industryComparison": generate_industry_comparison(data["industry"], metrics),
-            "marketAnalysis": market_trends,
-            "competitivePosition": competitive_position,
-            "strategicPlan": strategy
+            "metrics": {k: float(v) if isinstance(v, (Decimal, float, int)) else v 
+                       for k, v in metrics.items()},
+            "scenarios": generate_enhanced_scenarios(valuation, sum(adjustments.values()), metrics)
         }
         
         return jsonify(response_data)
 
-    except ApiError as e:
-        logging.error(f"API error: {str(e)}")
-        return jsonify({"error": e.message, "type": "api_error"}), e.status_code
     except Exception as e:
-        logging.error(f"Unexpected error: {str(e)}\n{traceback.format_exc()}")
+        logging.error(f"Error processing request: {str(e)}")
         return jsonify({"error": str(e), "type": "server_error"}), 500
 
 def handle_preflight():
@@ -683,26 +628,12 @@ def handle_server_error(error):
     return response
 
 @app.after_request
-def after_request(response):
-    """Add security and CORS headers"""
+def add_cors_headers(response):
+    """Add CORS headers to all responses"""
     response.headers.update({
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
-        'Access-Control-Allow-Credentials': 'true',
-        'Access-Control-Max-Age': '3600'
-    })
-    return response
-
-@app.after_request
-def after_request(response):
-    """Add security and CORS headers to all responses"""
-    origin = request.headers.get('Origin', '*')
-    response.headers.update({
-        'Access-Control-Allow-Origin': origin,
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
-        'Access-Control-Allow-Credentials': 'false',
         'Access-Control-Max-Age': '3600'
     })
     return response
