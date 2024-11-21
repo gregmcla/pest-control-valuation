@@ -1,11 +1,12 @@
 import os
 from flask import Flask, request, jsonify
-from flask_cors import CORS, cross_origin
+from flask_cors import CORS
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+from flask_login import LoginManager
 import logging
-import traceback
-import sys
 from decimal import Decimal, InvalidOperation
 from typing import Dict, List, Union
 from datetime import datetime
@@ -15,39 +16,53 @@ from strategy_engine import StrategyEngine
 from dotenv import load_dotenv
 import gc
 
-load_dotenv()  # Load environment variables
+# Initialize Flask app
+app = Flask(__name__, static_folder='../frontend/build', static_url_path='/')
 
-# Initialize Flask app and configure logging first
-app = Flask(__name__)
+# Load environment variables
+load_dotenv()
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URI', 'sqlite:///app.db')
 
-# Get port from environment variable (Render sets this automatically)
-port = int(os.environ.get("PORT", 5000))
+# Initialize extensions
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
+login_manager = LoginManager(app)
 
+# Register blueprints
+try:
+    import sys
+    sys.path.append(os.path.join(os.path.dirname(__file__), 'routes'))
+    from routes.auth import auth_bp
+    app.register_blueprint(auth_bp)
+except ImportError:
+    logging.error("Failed to import 'auth'. Ensure the file exists and is correctly placed.")
+try:
+    from routes.api import api_bp
+    app.register_blueprint(api_bp, url_prefix='/api')
+except ImportError:
+    logging.error("Failed to import 'routes.api'. Ensure the file exists and is correctly placed.")
+
+# Serve React front-end
+@app.route('/')
+def index():
+    return app.send_static_file('index.html')
+
+# Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=os.getenv('LOG_LEVEL', 'INFO'),
+    format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
-# Update CORS configuration to use allowed origins from environment
-ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS', 'https://pest-control-valuation-1.onrender.com').split(',')
+# Simplify CORS configuration to allow all origins
+CORS(app, resources={r"/*": {"origins": "*"}})
 
-# Simplify CORS configuration to a single, reliable setup
-CORS(app, 
-     resources={r"/*": {
-         "origins": "*",  # Allow all origins in production for now
-         "methods": ["GET", "POST", "OPTIONS"],
-         "allow_headers": ["Content-Type", "Authorization", "X-Requested-With"],
-         "supports_credentials": False,
-         "expose_headers": ["Content-Type", "X-Total-Count"]
-     }})
-
-# Configure rate limiter
-RATE_LIMIT = os.getenv('API_RATE_LIMIT', '50/hour')
+# Configure rate limiter using environment variable
 limiter = Limiter(
     app=app,
     key_func=get_remote_address,
-    default_limits=[RATE_LIMIT],
-    storage_uri="memory://"  # Use in-memory storage for simplicity
+    default_limits=[os.getenv('API_RATE_LIMIT', '50/hour')],
+    storage_uri="memory://"
 )
 
 # Enhanced industry benchmarks with more detailed metrics
@@ -277,8 +292,9 @@ def health_check():
 @app.errorhandler(Exception)
 def handle_exception(e):
     """Handle all exceptions and ensure CORS headers are set"""
+    logging.error(f"Unhandled exception: {e}")
     response = jsonify({
-        "error": str(e),
+        "error": "An unexpected error occurred.",
         "type": "server_error"
     })
     response.status_code = 500
@@ -317,53 +333,39 @@ except Exception as e:
     logging.error(f"Critical initialization error: {e}")
     sys.exit(1)
 
-@app.route("/api/valuate", methods=["POST", "OPTIONS"])
+@app.route("/api/valuate", methods=["POST"])
 @limiter.limit("50 per hour")
-@cross_origin()
 def valuate():
-    if request.method == "OPTIONS":
-        return handle_preflight()
-
     try:
         data = request.get_json()
         if not data:
             raise ApiError("Missing request data")
 
-        # Log request for debugging
-        logging.info(f"Processing request with data: {data}")
-        
         # Process request
         metrics = calculate_metrics(data)
-        logging.info(f"Calculated metrics: {metrics}")
-        
-        # ... rest of your existing valuation logic ...
-
-        # Calculate adjustments and valuation
         adjustments = calculate_adjustments(metrics)
         valuation = calculate_valuation(metrics, adjustments)
+        rating = calculate_rating(metrics)
+        current_multiple = INDUSTRY_MULTIPLES.get(data.get("industry"), Decimal("5.0"))
+        scenarios = generate_enhanced_scenarios(valuation, sum(adjustments.values()), metrics)
 
-        # Ensure all numeric values are converted to float for JSON serialization
         response_data = {
             "valuation": float(valuation),
-            "rating": "Good" if float(metrics["growth_rate"]) > 10 else "Average",
-            "currentMultiple": float(INDUSTRY_MULTIPLES.get(data["industry"], 5.0)),
-            "metrics": {k: float(v) if isinstance(v, (Decimal, float, int)) else v 
-                       for k, v in metrics.items()},
-            "scenarios": generate_enhanced_scenarios(valuation, sum(adjustments.values()), metrics)
+            "rating": rating,
+            "currentMultiple": float(current_multiple),
+            "metrics": {k: float(v) if isinstance(v, Decimal) else v for k, v in metrics.items()},
+            "scenarios": scenarios
         }
-        
+
         return jsonify(response_data)
 
-    except Exception as e:
-        logging.error(f"Error processing request: {str(e)}")
-        return jsonify({"error": str(e), "type": "server_error"}), 500
+    except ApiError as e:
+        logging.error(f"API error: {e.message}")
+        return jsonify({"error": e.message, "type": "api_error"}), e.status_code
 
-def handle_preflight():
-    """Handle CORS preflight requests"""
-    response = jsonify({"status": "ok"})
-    response.headers.add("Access-Control-Allow-Methods", "POST, OPTIONS")
-    response.headers.add("Access-Control-Allow-Headers", "Content-Type")
-    return response
+    except Exception as e:
+        logging.error(f"Server error: {str(e)}")
+        return jsonify({"error": "An unexpected error occurred", "type": "server_error"}), 500
 
 def calculate_adjustments(metrics: Dict) -> Dict[str, Decimal]:
     """Calculate all valuation adjustments"""
@@ -430,6 +432,14 @@ def generate_valuation_scenarios(base_valuation, data, current_multiple):
             "requirements": ["Implement customer success program", "Improve service quality"]
         }
     ]
+
+def calculate_rating(metrics: Dict) -> str:
+    """Determine the rating based on metrics"""
+    if metrics["growth_rate"] > Decimal("20") and metrics["ebitda_margin"] > Decimal("20"):
+        return "Excellent"
+    elif metrics["growth_rate"] > Decimal("10") and metrics["ebitda_margin"] > Decimal("15"):
+        return "Good"
+    return "Average"
 
 def calculate_key_metrics(data, valuation):
     annual_revenue = float(data["annualRevenue"])
@@ -617,35 +627,9 @@ def handle_api_error(error):
     response.status_code = error.status_code
     return response
 
-@app.errorhandler(500)
-def handle_server_error(error):
-    """Global error handler for server errors"""
-    response = jsonify({
-        "error": "Internal server error occurred",
-        "type": "server_error"
-    })
-    response.status_code = 500
-    return response
-
-@app.after_request
-def add_cors_headers(response):
-    """Add CORS headers to all responses"""
-    response.headers.update({
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
-        'Access-Control-Max-Age': '3600'
-    })
-    return response
-
 if __name__ == "__main__":
-    # Production settings
-    app.config['JSON_SORT_KEYS'] = False
-    app.config['PROPAGATE_EXCEPTIONS'] = True
-    # Bind to all network interfaces
     app.run(
-        host='0.0.0.0',  # This ensures the app is accessible from outside
+        host='0.0.0.0',
         port=int(os.environ.get("PORT", 5000)),
-        debug=False,
-        threaded=True
+        debug=False
     )

@@ -16,6 +16,7 @@ INDUSTRY_TICKERS = {
 class ValuationAI:
     def __init__(self, model_cache_dir='/tmp/models'):
         self.cache_dir = model_cache_dir
+        self.model = pipeline('text-generation', model='gpt-2', cache_dir=model_cache_dir)
 
     def analyze_market_trends(self, industry: str) -> dict:
         """Simple market trends analysis"""
@@ -43,3 +44,11 @@ class ValuationAI:
                 }
             ]
         }
+
+    def generate_insights(self, data):
+        # Generate insights using the model
+        # ...existing code...
+
+        # Clean up to free memory
+        del self.model
+        gc.collect()

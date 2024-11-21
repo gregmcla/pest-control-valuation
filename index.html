@@ -192,7 +192,6 @@
       animation: slideIn 0.3s ease-out;
     }
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
   <div class="container">
@@ -330,6 +329,8 @@
     <p>Calculating valuation...</p>
   </div>
 
+  <!-- Moved script tags to the end of the body -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
     let valuationChart, metricsChart;
 
@@ -424,7 +425,7 @@
         }
     };
 
-    // Update API configuration with better error handling
+    // Updated API configuration
     const API_CONFIG = {
         baseUrl: window.location.hostname.includes('localhost') 
             ? 'http://localhost:5000'
@@ -439,40 +440,26 @@
         }
     };
 
-    // Update makeApiRequest function with better error handling
-    async function makeApiRequest(endpoint, data, retries = 3) {
-        let lastError;
-        
-        for (let i = 0; i < retries; i++) {
-            try {
-                console.log(`Attempting API request to ${API_CONFIG.baseUrl}${endpoint}`);
-                const response = await fetch(`${API_CONFIG.baseUrl}${endpoint}`, {
-                    method: 'POST',
-                    headers: API_CONFIG.headers,
-                    mode: 'cors',
-                    credentials: 'omit',
-                    body: JSON.stringify(data)
-                });
+    // Simplified makeApiRequest function
+    async function makeApiRequest(endpoint, data) {
+        try {
+            const response = await fetch(`${API_CONFIG.baseUrl}${endpoint}`, {
+                method: 'POST',
+                headers: API_CONFIG.headers,
+                body: JSON.stringify(data)
+            });
 
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-                }
-
-                const responseData = await response.json();
-                console.log('API response:', responseData);
-                return responseData;
-
-            } catch (error) {
-                console.error(`Attempt ${i + 1} failed:`, error);
-                lastError = error;
-                if (i < retries - 1) {
-                    await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
-                }
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
             }
+
+            return await response.json();
+
+        } catch (error) {
+            console.error('API request failed:', error);
+            throw error;
         }
-        
-        throw new Error(`Failed after ${retries} attempts. Last error: ${lastError.message}`);
     }
 
     // Add this function to handle updating all results
@@ -518,7 +505,7 @@
             </div>`;
     }
 
-    // Update the form submission handler
+    // Simplified form submission handler
     document.getElementById('valuation-form').addEventListener('submit', async (event) => {
         event.preventDefault();
         const loadingOverlay = document.getElementById('loading-overlay');

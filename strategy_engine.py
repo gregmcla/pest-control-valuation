@@ -1,4 +1,10 @@
+from typing import Dict, List
+import logging
+
 class StrategyEngine:
+    def __init__(self):
+        pass
+
     def generate_recommendations(self, company_data: dict, market_analysis: dict) -> dict:
         """Generate comprehensive strategic recommendations"""
         immediate_actions = self.get_priority_actions(company_data, market_analysis)
@@ -331,3 +337,44 @@ class StrategyEngine:
             "timeline": "3-6 months",
             "external_support": ["No external support required"]
         }
+
+    def generate_strategic_plan(self, metrics: Dict) -> Dict:
+        """Generate a strategic plan based on business metrics"""
+        logging.info("Generating strategic plan")
+        plan = {
+            "growth_strategy": self._determine_growth_strategy(metrics),
+            "operational_improvements": self._identify_operational_improvements(metrics),
+            "market_expansion": self._assess_market_expansion_opportunities(metrics),
+            "risk_mitigation": self._develop_risk_mitigation_plan(metrics)
+        }
+        return plan
+
+    def _determine_growth_strategy(self, metrics: Dict) -> List[str]:
+        """Determine growth strategies"""
+        strategies = []
+        if metrics["growth_rate"] < 10:
+            strategies.append("Invest in marketing and sales to boost growth")
+        if metrics["recurring_revenue_pct"] < 50:
+            strategies.append("Develop subscription-based services to increase recurring revenue")
+        return strategies
+
+    def _identify_operational_improvements(self, metrics: Dict) -> List[str]:
+        """Identify operational improvements"""
+        improvements = []
+        if metrics["ebitda_margin"] < 15:
+            improvements.append("Optimize cost structures to improve margins")
+        return improvements
+
+    def _assess_market_expansion_opportunities(self, metrics: Dict) -> List[str]:
+        """Assess market expansion opportunities"""
+        opportunities = []
+        if metrics["geographic_reach"] < 5:
+            opportunities.append("Expand into new geographic markets to increase reach")
+        return opportunities
+
+    def _develop_risk_mitigation_plan(self, metrics: Dict) -> List[str]:
+        """Develop a risk mitigation plan"""
+        risks = []
+        if metrics["retention_rate"] < 80:
+            risks.append("Implement customer loyalty programs to improve retention")
+        return risks
