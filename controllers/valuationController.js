@@ -1,5 +1,5 @@
 
-const ValuationService = require('../services/valuationService');
+const ValuationService = require('../services/ValuationService');
 
 module.exports = async (req, res) => {
     try {
