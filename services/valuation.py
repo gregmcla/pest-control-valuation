@@ -1,7 +1,13 @@
 
 from decimal import Decimal
 from typing import Dict
-from pest_control_valuation.services.constants import INDUSTRY_MULTIPLES
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+try:
+    from pest_control_valuation.services.constants import INDUSTRY_MULTIPLES
+except ImportError:
+    from services.constants import INDUSTRY_MULTIPLES
 
 class ValuationService:
     def calculate(self, data: Dict) -> Dict:

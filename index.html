@@ -1,730 +1,222 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Business Valuation Tool</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --primary-color: #6366f1;
-      --primary-dark: #4f46e5;
-      --primary-light: #818cf8;
-      --surface-light: #f8fafc;
-      --surface-dark: #1e293b;
-      --success-color: #10b981;
-      --warning-color: #f59e0b;
-      --error-color: #ef4444;
-      --text-primary: #0f172a;
-      --text-secondary: #64748b;
-      --border-radius: 0.75rem;
-      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-      --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Pest Control Valuation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0f172a;
+            --primary-light: #1e293b;
+            --accent: #3b82f6;
+            --text: #334155;
+            --text-light: #64748b;
+            --bg: #f8fafc;
+            --border: #e2e8f0;
+            --radius: 12px;
+        }
 
-    body {
-      font-family: 'Inter', sans-serif;
-      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-      color: var(--text-primary);
-      line-height: 1.6;
-      min-height: 100vh;
-      margin: 0;
-      padding: 1rem;
-    }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 2rem;
+            line-height: 1.6;
+        }
 
-    .dashboard {
-      display: grid;
-      gap: 2rem;
-      grid-template-columns: 350px 1fr;
-      max-width: 1440px;
-      margin: 1rem auto;
-      padding: 1rem;
-    }
+        .app {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 2rem;
+        }
 
-    .sidebar {
-      background: white;
-      padding: 1.5rem;
-      border-radius: var(--border-radius);
-      box-shadow: var(--shadow-lg);
-      position: sticky;
-      top: 1rem;
-      height: fit-content;
-      border: 1px solid rgba(148, 163, 184, 0.1);
-      backdrop-filter: blur(8px);
-    }
+        .form-card {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--radius);
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            position: sticky;
+            top: 2rem;
+            height: fit-content;
+        }
 
-    .main-content {
-      background: white;
-      padding: 2rem;
-      border-radius: var(--border-radius);
-      box-shadow: var(--shadow-md);
-    }
+        h1 {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin: 0 0 2rem;
+        }
 
-    input, select {
-      width: 100%;
-      padding: 0.75rem 1rem;
-      border: 1px solid #e2e8f0;
-      border-radius: 0.5rem;
-      font-size: 0.95rem;
-      transition: var(--transition);
-      background: white;
-    }
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
 
-    input:focus, select:focus {
-      outline: none;
-      border-color: var(--primary-light);
-      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-    }
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
 
-    button {
-      width: 100%;
-      padding: 0.875rem 1.5rem;
-      border: none;
-      border-radius: 0.5rem;
-      background: var(--primary-color);
-      color: white;
-      font-weight: 600;
-      font-size: 0.875rem;
-      cursor: pointer;
-      transition: var(--transition);
-      position: relative;
-      overflow: hidden;
-    }
+        input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
 
-    button:hover {
-      background: var(--primary-dark);
-      transform: translateY(-1px);
-    }
+        input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
 
-    .metric-card {
-      background: white;
-      padding: 1.5rem;
-      border-radius: var(--border-radius);
-      border: 1px solid #e2e8f0;
-      transition: var(--transition);
-    }
+        button {
+            width: 100%;
+            padding: 0.875rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
 
-    .value-highlight {
-      font-size: 2.5rem;
-      font-weight: 700;
-      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-      background-clip: text;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin: 1rem 0;
-    }
+        button:hover {
+            background: var(--primary-light);
+        }
 
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 0.25rem 0.75rem;
-      border-radius: 9999px;
-      font-size: 0.75rem;
-      font-weight: 500;
-      gap: 0.25rem;
-    }
+        .results {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--radius);
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
 
-    .chart-container {
-      background: white;
-      padding: 1.5rem;
-      border-radius: var(--border-radius);
-      border: 1px solid #e2e8f0;
-      box-shadow: var(--shadow-sm);
-    }
+        .value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 1rem 0;
+        }
 
-    .loading-overlay {
-      background: rgba(255, 255, 255, 0.8);
-      backdrop-filter: blur(4px);
-    }
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
 
-    .loading-spinner {
-      width: 2.5rem;
-      height: 2.5rem;
-      border: 3px solid var(--primary-light);
-      border-top: 3px solid var(--primary-color);
-    }
+        .metric-card {
+            padding: 1.5rem;
+            background: var(--bg);
+            border-radius: var(--radius);
+        }
 
-    .results-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 1.5rem;
-    }
+        .metric-label {
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
 
-    .scenario-card {
-      background: white;
-      padding: 1.5rem;
-      border-radius: var(--border-radius);
-      border: 1px solid #e2e8f0;
-      transition: var(--transition);
-    }
+        .metric-value {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-top: 0.5rem;
+        }
 
-    .scenario-card:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-md);
-    }
-
-    @media (max-width: 1024px) {
-      .dashboard {
-        grid-template-columns: 1fr;
-      }
-      
-      .sidebar {
-        position: static;
-      }
-    }
-
-    /* Add smooth animations */
-    @keyframes slideIn {
-      from { 
-        transform: translateY(1rem);
-        opacity: 0;
-      }
-      to {
-        transform: translateY(0);
-        opacity: 1;
-      }
-    }
-
-    #results {
-      animation: slideIn 0.3s ease-out;
-    }
-  </style>
+        @media (max-width: 1024px) {
+            .app {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-card {
+                position: static;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <div class="dashboard">
-      <aside class="sidebar">
-        <form id="valuation-form">
-          <div class="form-group">
-            <label for="industry">Industry</label>
-            <select id="industry" required>
-              <option value="" disabled selected>Select an Industry</option>
-              <optgroup label="Software and Technology Services">
-                <option value="SaaS">SaaS Provider</option>
-                <option value="IT Consulting">IT Consulting & Managed Services</option>
-                <option value="Custom Software">Custom Software Development</option>
-              </optgroup>
-              <optgroup label="Healthcare Services">
-                <option value="Medical Practice">Medical Practice</option>
-                <option value="Home Healthcare">Home Healthcare Provider</option>
-                <option value="Diagnostic Center">Diagnostic & Imaging Center</option>
-              </optgroup>
-              <optgroup label="Manufacturing">
-                <option value="Industrial Manufacturing">Industrial Manufacturing</option>
-                <option value="Specialty Manufacturing">Specialty Manufacturing</option>
-                <option value="Food Manufacturing">Food & Beverage Manufacturing</option>
-              </optgroup>
-              <optgroup label="Trades and Home Services">
-                <option value="Plumbing">Plumbing Services</option>
-                <option value="Electrical">Electrical Services</option>
-                <option value="HVAC">HVAC Services</option>
-                <option value="Roofing">Roofing Services</option>
-                <option value="Pest Control">Pest Control Services</option>
-                <option value="Landscaping">Landscaping & Lawn Care</option>
-              </optgroup>
-              <!-- Continue with all other industry groups -->
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="annual-revenue">Annual Revenue ($)</label>
-            <input type="number" id="annual-revenue" placeholder="Enter Annual Revenue" required>
-          </div>
-
-          <div class="form-group">
-            <label for="ebitda">EBITDA ($)</label>
-            <input type="number" id="ebitda" placeholder="Enter EBITDA">
-            <button type="button" id="calc-ebitda">Estimate EBITDA</button>
-          </div>
-
-          <div class="form-group">
-            <label for="growth-rate">Growth Rate (%)</label>
-            <input type="number" id="growth-rate" placeholder="Optional Growth Rate">
-          </div>
-
-          <div class="form-group">
-            <label for="customer-retention">Customer Retention (%)</label>
-            <input type="number" id="customer-retention" placeholder="Optional Retention Rate">
-          </div>
-
-          <div class="form-group">
-            <label for="geographic-reach">Geographic Reach (# of States)</label>
-            <input type="number" id="geographic-reach" placeholder="Optional Geographic Reach">
-          </div>
-
-          <div class="form-group">
-            <label for="ebitda-multiple">EBITDA Multiple</label>
-            <input type="number" id="ebitda-multiple" placeholder="Optional Multiple">
-          </div>
-
-          <div class="form-group">
-            <label for="recurring-revenue">Recurring Revenue ($)</label>
-            <input type="number" id="recurring-revenue" placeholder="Optional Recurring Revenue">
-          </div>
-
-          <div class="form-group">
-            <label for="business-age">Years in Business</label>
-            <input type="number" id="business-age" placeholder="Number of Years">
-          </div>
-
-          <div class="form-group">
-            <label for="employee-count">Number of Employees</label>
-            <input type="number" id="employee-count" placeholder="Employee Count">
-          </div>
-
-          <div class="form-group">
-            <label for="market-share">Market Share in Service Area (%)</label>
-            <input type="number" id="market-share" placeholder="Estimated Market Share">
-          </div>
-
-          <button type="submit">Calculate Valuation</button>
-        </form>
-      </aside>
-
-      <main class="main-content">
-        <div id="error-message" class="error-card" style="display: none;">
-          <div class="error-content"></div>
-        </div>
-
-        <div id="results" style="display: none;">
-          <div class="metric-card">
-            <h2>Valuation Summary</h2>
-            <div id="result"></div>
-          </div>
-
-          <div class="results-grid">
-            <div class="metric-card">
-              <h3>Key Metrics</h3>
-              <div id="key-metrics"></div>
-            </div>
-            <div class="metric-card">
-              <h3>Industry Comparison</h3>
-              <div id="industry-comparison"></div>
-            </div>
-            <div class="chart-container">
-              <canvas id="valuation-chart"></canvas>
-            </div>
-            <div class="chart-container">
-              <canvas id="metrics-chart"></canvas>
-            </div>
-          </div>
-
-          <div class="scenario-grid">
-            <h3>Valuation Scenarios</h3>
-            <div id="scenarios"></div>
-          </div>
-
-          <div class="metrics-grid" id="insights"></div>
-          <div class="metrics-grid" id="guidance"></div>
-        </div>
-      </main>
-    </div>
-  </div>
-
-  <div id="loading-overlay" class="loading-overlay" style="display: none;">
-    <div class="loading-spinner"></div>
-    <p>Calculating valuation...</p>
-  </div>
-
-  <!-- Moved script tags to the end of the body -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script>
-    let valuationChart, metricsChart;
-
-    // Form validation function
-    function validateForm() {
-        const errors = [];
-        const industry = document.getElementById('industry').value;
-        const annualRevenue = parseFloat(document.getElementById('annual-revenue').value);
-        const growthRate = parseFloat(document.getElementById('growth-rate').value);
-        const customerRetention = parseFloat(document.getElementById('customer-retention').value);
-        
-        if (!industry) {
-            errors.push('Please select an industry');
-        }
-        
-        if (!annualRevenue || annualRevenue <= 0) {
-            errors.push('Please enter a valid annual revenue');
-        }
-        
-        if (growthRate && (growthRate < -100 || growthRate > 1000)) {
-            errors.push('Growth rate must be between -100 and 1000');
-        }
-        
-        if (customerRetention && (customerRetention < 0 || customerRetention > 100)) {
-            errors.push('Customer retention must be between 0 and 100');
-        }
-        
-        return errors;
-    }
-
-    // Initialize charts
-    function initializeCharts() {
-        // Valuation chart
-        const valuationCtx = document.getElementById('valuation-chart').getContext('2d');
-        valuationChart = new Chart(valuationCtx, {
-            type: 'bar',
-            data: {
-                labels: ['Scenario 1', 'Scenario 2', 'Scenario 3'],
-                datasets: [{
-                    label: 'Valuation ($)',
-                    data: [0, 0, 0],
-                    backgroundColor: ['rgba(75, 192, 192, 0.2)', 'rgba(54, 162, 235, 0.2)', 'rgba(255, 206, 86, 0.2)'],
-                    borderColor: ['rgba(75, 192, 192, 1)', 'rgba(54, 162, 235, 1)', 'rgba(255, 206, 86, 1)'],
-                    borderWidth: 1
-                }]
-            },
-            options: chartOptions
-        });
-
-        // Metrics chart
-        const metricsCtx = document.getElementById('metrics-chart').getContext('2d');
-        metricsChart = new Chart(metricsCtx, {
-            type: 'radar',
-            data: {
-                labels: ['Growth', 'Profitability', 'Retention', 'Market Reach', 'Size'],
-                datasets: [{
-                    label: 'Company Metrics',
-                    data: [0, 0, 0, 0, 0],
-                    backgroundColor: 'rgba(52, 152, 219, 0.2)',
-                    borderColor: 'rgba(52, 152, 219, 1)',
-                    pointBackgroundColor: 'rgba(52, 152, 219, 1)'
-                }]
-            },
-            options: {
-                ...chartOptions,
-                scales: {
-                    r: {
-                        beginAtZero: true,
-                        max: 5
-                    }
-                }
-            }
-        });
-    }
-
-    // Chart options
-    const chartOptions = {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: { position: 'bottom' },
-            tooltip: {
-                backgroundColor: 'rgba(0,0,0,0.8)',
-                padding: 12,
-                titleFont: { size: 14 },
-                bodyFont: { size: 13 }
-            }
-        },
-        animation: {
-            duration: 1000,
-            easing: 'easeInOutQuart'
-        }
-    };
-
-    // Updated API configuration
-    const API_CONFIG = {
-        baseUrl: window.location.hostname.includes('localhost') 
-            ? 'http://localhost:5000'
-            : 'https://pest-control-valuation.onrender.com',
-        endpoints: {
-            valuate: '/api/valuate',
-            health: '/health'
-        },
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        }
-    };
-
-    // Simplified makeApiRequest function
-    async function makeApiRequest(endpoint, data) {
-        try {
-            const response = await fetch(`${API_CONFIG.baseUrl}${endpoint}`, {
-                method: 'POST',
-                headers: API_CONFIG.headers,
-                body: JSON.stringify(data)
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-            }
-
-            return await response.json();
-
-        } catch (error) {
-            console.error('API request failed:', error);
-            throw error;
-        }
-    }
-
-    // Add this function to handle updating all results
-    function updateResults(data) {
-        // Update valuation summary
-        document.getElementById('result').innerHTML = generateValuationSummary(data);
-        
-        // Update key metrics
-        document.getElementById('key-metrics').innerHTML = generateKeyMetrics(data);
-        
-        // Update industry comparison
-        document.getElementById('industry-comparison').innerHTML = generateIndustryComparison(data);
-        
-        // Update scenarios
-        document.getElementById('scenarios').innerHTML = generateScenarios(data);
-        
-        // Update charts last
-        updateCharts(data);
-
-        // Show strategic insights if available
-        if (data.strategicPlan) {
-            document.getElementById('insights').innerHTML = generateStrategicInsights(data.strategicPlan);
-        }
-    }
-
-    // Add strategic insights generator
-    function generateStrategicInsights(plan) {
-        if (!plan) return '';
-        
-        return `
-            <div class="metric-card">
-                <h3>Strategic Recommendations</h3>
-                <div class="insights-list">
-                    ${plan.immediate_actions?.map(action => `
-                        <div class="insight-item">
-                            <strong>${action.action}</strong>
-                            <div>Priority: ${action.priority}</div>
-                            <div>Timeline: ${action.timeline}</div>
-                            <div>Impact: ${action.expected_impact}</div>
-                        </div>
-                    `).join('') || ''}
+    <div class="app">
+        <div class="form-card">
+            <h1>Business Valuation Calculator</h1>
+            <form id="valuationForm">
+                <div class="input-group">
+                    <label>Annual Revenue</label>
+                    <input type="number" id="revenue" required min="0" placeholder="Enter amount in USD">
                 </div>
-            </div>`;
-    }
+                <div class="input-group">
+                    <label>EBITDA</label>
+                    <input type="number" id="ebitda" required min="0" placeholder="Enter amount in USD">
+                </div>
+                <div class="input-group">
+                    <label>Customer Retention Rate (%)</label>
+                    <input type="number" id="retention" required min="0" max="100" placeholder="Enter percentage">
+                </div>
+                <button type="submit">Calculate Valuation</button>
+            </form>
+        </div>
 
-    // Simplified form submission handler
-    document.getElementById('valuation-form').addEventListener('submit', async (event) => {
-        event.preventDefault();
-        const loadingOverlay = document.getElementById('loading-overlay');
-        const errorElement = document.getElementById('error-message');
-        const resultsElement = document.getElementById('results');
+        <div class="results" id="results" style="display: none;">
+            <h2>Valuation Result</h2>
+            <div class="value" id="valuationResult"></div>
+            <div class="metrics" id="metricsGrid"></div>
+        </div>
+    </div>
 
-        try {
-            loadingOverlay.style.display = 'flex';
-            errorElement.style.display = 'none';
-            
-            const formData = getFormData();  // Extract form data collection to separate function
-            const errors = validateForm(formData);
-            
-            if (errors.length > 0) {
-                throw new Error(errors.join('\n'));
+    <script>
+        // Simplified JavaScript
+        document.getElementById('valuationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                const data = {
+                    revenue: Number(document.getElementById('revenue').value),
+                    ebitda: Number(document.getElementById('ebitda').value),
+                    retention: Number(document.getElementById('retention').value)
+                };
+
+                const response = await fetch('/api/valuate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                displayResults(result);
+            } catch (error) {
+                alert('Valuation calculation failed. Please try again.');
             }
+        });
 
-            const data = await makeApiRequest(API_CONFIG.endpoints.valuate, formData);
-            updateResults(data);
-            showResults(resultsElement);
-
-        } catch (error) {
-            handleError(error, errorElement);
-        } finally {
-            loadingOverlay.style.display = 'none';
+        function displayResults(data) {
+            document.getElementById('results').style.display = 'block';
+            document.getElementById('valuationResult').textContent = 
+                `$${data.value.toLocaleString()}`;
+            
+            // Display metrics
+            const metrics = document.getElementById('metricsGrid');
+            metrics.innerHTML = `
+                <div class="metric-card">
+                    <div class="metric-label">EBITDA Multiple</div>
+                    <div class="metric-value">${data.metrics.multiple}x</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Revenue Multiple</div>
+                    <div class="metric-value">${data.metrics.revenueMultiple}x</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Risk Score</div>
+                    <div class="metric-value">${data.metrics.riskScore}/10</div>
+                </div>
+            `;
         }
-    });
-
-    // Helper function to get form data
-    function getFormData() {
-        return {
-            industry: document.getElementById('industry').value,
-            annualRevenue: parseFloat(document.getElementById('annual-revenue').value) || 0,
-            ebitda: parseFloat(document.getElementById('ebitda').value) || 0,
-            growthRate: parseFloat(document.getElementById('growth-rate').value) || 0,
-            customerRetention: parseFloat(document.getElementById('customer-retention').value) || 0,
-            geographicReach: parseFloat(document.getElementById('geographic-reach').value) || 0,
-            recurringRevenue: parseFloat(document.getElementById('recurring-revenue').value) || 0,
-            businessAge: parseFloat(document.getElementById('business-age').value) || 0,
-            marketShare: parseFloat(document.getElementById('market-share').value) || 0
-        };
-    }
-
-    // Helper function to show results
-    function showResults(resultsElement) {
-        resultsElement.style.display = 'block';
-        resultsElement.scrollIntoView({ behavior: 'smooth' });
-    }
-
-    // Helper function to handle errors
-    function handleError(error, errorElement) {
-        console.error('Error:', error);
-        errorElement.querySelector('.error-content').textContent = error.message;
-        errorElement.style.display = 'block';
-        errorElement.scrollIntoView({ behavior: 'smooth' });
-    }
-
-    // EBITDA calculation handler
-    document.getElementById('calc-ebitda').addEventListener('click', () => {
-        const annualRevenue = parseFloat(document.getElementById('annual-revenue').value);
-        if (isNaN(annualRevenue) || annualRevenue <= 0) {
-            alert('Please enter a valid annual revenue value first');
-            return;
-        }
-        const estimatedEBITDA = (annualRevenue * 0.15);
-        document.getElementById('ebitda').value = estimatedEBITDA.toFixed(2);
-        alert(`Estimated EBITDA is $${estimatedEBITDA.toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        })}`);
-    });
-
-    // Initialize charts on page load
-    document.addEventListener('DOMContentLoaded', initializeCharts);
-
-    // Helper function for badge classes
-    function getBadgeClass(comparison) {
-        switch(comparison) {
-            case 'Top 10%':
-            case 'Top 25%':
-                return 'success';
-            case 'Average':
-                return 'warning';
-            default:
-                return 'error';
-        }
-    }
-
-    // Add new chart types
-    const charts = {
-      valuationTrend: {
-        type: 'line',
-        data: {
-          labels: ['Current', '1 Year', '3 Years', '5 Years'],
-          datasets: [{
-            label: 'Projected Value ($M)',
-            borderColor: 'rgba(37, 99, 235, 1)',
-            fill: true
-          }]
-        }
-      },
-      industryComparison: {
-        type: 'radar',
-        data: {
-          labels: ['Revenue', 'Growth', 'Margin', 'Market Share', 'Risk Profile'],
-          datasets: [{
-            label: 'Company Metrics',
-            data: [],
-            backgroundColor: 'rgba(99, 102, 241, 0.5)'
-          }]
-        }
-      },
-      peerBenchmark: {
-        type: 'scatter',
-        data: {
-          datasets: [{
-            label: 'Industry Peers',
-            backgroundColor: 'rgba(99, 102, 241, 0.5)'
-          }]
-        }
-      }
-    };
-
-    function updateCharts(data) {
-        // Update valuation chart with scenarios
-        if (data.scenarios && data.scenarios.scenarios) {
-            const scenarios = data.scenarios.scenarios;
-            valuationChart.data.labels = scenarios.map(s => s.name);
-            valuationChart.data.datasets[0].data = scenarios.map(s => s.value);
-            valuationChart.options.plugins.tooltip.callbacks = {
-                label: (context) => `$${formatCurrency(context.raw)}`
-            };
-            valuationChart.update();
-        }
-
-        // Update metrics chart with normalized values
-        if (data.metrics) {
-            const metrics = [
-                data.metrics.growth_rate || 0,
-                data.metrics.ebitda_margin || 0,
-                data.metrics.retention_rate || 0,
-                data.metrics.geographic_reach || 0,
-                data.metrics.marketShare || 0
-            ].map(value => Math.min((value / 20), 5));
-
-            metricsChart.data.datasets[0].data = metrics;
-            metricsChart.update();
-        }
-    }
-
-    function generateValuationSummary(data) {
-        const rating = data.scenarios?.rating || data.rating || 'Average';
-        return `
-            <div class="valuation-summary">
-                <h4>Estimated Business Value</h4>
-                <div class="value-highlight">$${formatCurrency(data.valuation || 0)}</div>
-                <div class="badge badge-${getBadgeClass(rating)}">${rating}</div>
-            </div>`;
-    }
-
-    function generateKeyMetrics(data) {
-        const metrics = data.metrics || {};
-        const formattedMetrics = {
-            ebitdaMultiple: data.currentMultiple || 0,
-            revenueMultiple: ((data.valuation || 0) / (metrics.revenue || 1)).toFixed(2),
-            growthRate: metrics.growth_rate || 0,
-            profitMargin: metrics.ebitda_margin || 0,
-            customerRetention: metrics.retention_rate || 0,
-            marketReach: metrics.geographic_reach || 0
-        };
-
-        return `
-            <div class="metrics-list">
-                <div>EBITDA Multiple: ${formattedMetrics.ebitdaMultiple.toFixed(2)}x</div>
-                <div>Revenue Multiple: ${formattedMetrics.revenueMultiple}x</div>
-                <div>Growth Rate: ${formattedMetrics.growthRate.toFixed(1)}%</div>
-                <div>Profit Margin: ${formattedMetrics.profitMargin.toFixed(1)}%</div>
-                <div>Customer Retention: ${formattedMetrics.customerRetention.toFixed(1)}%</div>
-                <div>Geographic Reach: ${formattedMetrics.marketReach} states</div>
-            </div>`;
-    }
-
-    function generateScenarios(data) {
-        const scenarios = data.scenarios?.scenarios || [
-            {
-                name: 'Conservative',
-                value: data.valuation * 0.8 || 0,
-                description: 'Conservative estimate based on current market conditions'
-            },
-            {
-                name: 'Base Case',
-                value: data.valuation || 0,
-                description: 'Most likely valuation scenario'
-            },
-            {
-                name: 'Optimistic',
-                value: data.valuation * 1.2 || 0,
-                description: 'Optimistic scenario with favorable market conditions'
-            }
-        ];
-
-        return scenarios.map(scenario => `
-            <div class="scenario-card">
-                <h4>${scenario.name}</h4>
-                <div class="scenario-value">$${formatCurrency(scenario.value)}</div>
-                <div>${scenario.description}</div>
-            </div>
-        `).join('');
-    }
-
-    function formatCurrency(value) {
-        // Ensure value is a number and handle any NaN cases
-        const num = Number(value) || 0;
-        return new Intl.NumberFormat('en-US', {
-            maximumFractionDigits: 0,
-            minimumFractionDigits: 0,
-            style: 'decimal'
-        }).format(num);
-    }
-  </script>
+    </script>
 </body>
 </html>
