@@ -3,220 +3,456 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Professional Pest Control Valuation</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Main Street AI — AI Playbooks for HVAC Businesses</title>
+    <meta name="description" content="Get a 5-minute weekly playbook showing exactly what AI to implement in your HVAC business to make more money and save time.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #0f172a;
-            --primary-light: #1e293b;
-            --accent: #3b82f6;
-            --text: #334155;
+            --primary: #0c1a2e;
+            --accent: #f97316;
+            --accent-hover: #ea580c;
+            --text: #1e293b;
             --text-light: #64748b;
-            --bg: #f8fafc;
+            --bg: #ffffff;
+            --bg-alt: #f8fafc;
             --border: #e2e8f0;
-            --radius: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background: var(--bg);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             color: var(--text);
-            margin: 0;
-            padding: 2rem;
             line-height: 1.6;
+            background: var(--bg);
         }
 
-        .app {
-            max-width: 1200px;
+        nav {
+            padding: 1.25rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1100px;
             margin: 0 auto;
-            display: grid;
-            grid-template-columns: 380px 1fr;
-            gap: 2rem;
         }
 
-        .form-card {
-            background: white;
-            padding: 2rem;
-            border-radius: var(--radius);
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-            position: sticky;
-            top: 2rem;
-            height: fit-content;
+        .logo {
+            font-weight: 800;
+            font-size: 1.2rem;
+            color: var(--primary);
+        }
+
+        .logo span {
+            color: var(--accent);
+        }
+
+        .hero {
+            max-width: 720px;
+            margin: 4rem auto 0;
+            text-align: center;
+            padding: 0 1.5rem;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #fff7ed;
+            color: var(--accent);
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 0.4rem 1rem;
+            border-radius: 100px;
+            margin-bottom: 1.5rem;
+            letter-spacing: 0.02em;
         }
 
         h1 {
-            font-size: 1.5rem;
+            font-size: clamp(2rem, 5vw, 3.2rem);
+            font-weight: 800;
             color: var(--primary);
-            margin: 0 0 2rem;
+            line-height: 1.15;
+            margin-bottom: 1.25rem;
         }
 
-        .input-group {
-            margin-bottom: 1.5rem;
+        h1 .highlight {
+            color: var(--accent);
         }
 
-        label {
-            display: block;
-            font-size: 0.875rem;
-            font-weight: 500;
-            margin-bottom: 0.5rem;
-            color: var(--primary);
+        .hero p {
+            font-size: 1.15rem;
+            color: var(--text-light);
+            max-width: 540px;
+            margin: 0 auto 2.5rem;
         }
 
-        input {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            font-size: 0.95rem;
-            transition: all 0.2s;
+        .signup-form {
+            display: flex;
+            gap: 0.75rem;
+            max-width: 480px;
+            margin: 0 auto 1rem;
         }
 
-        input:focus {
+        .signup-form input[type="email"] {
+            flex: 1;
+            padding: 0.9rem 1.1rem;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        .signup-form input[type="email"]:focus {
             outline: none;
             border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
 
-        button {
-            width: 100%;
-            padding: 0.875rem;
-            background: var(--primary);
+        .signup-form button {
+            padding: 0.9rem 1.75rem;
+            background: var(--accent);
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
+            font-size: 1rem;
             font-weight: 600;
+            font-family: inherit;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: background 0.2s;
+            white-space: nowrap;
         }
 
-        button:hover {
-            background: var(--primary-light);
+        .signup-form button:hover {
+            background: var(--accent-hover);
         }
 
-        .results {
-            background: white;
-            padding: 2rem;
-            border-radius: var(--radius);
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-        }
-
-        .value {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: var(--primary);
-            margin: 1rem 0;
-        }
-
-        .metrics {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin-top: 2rem;
-        }
-
-        .metric-card {
-            padding: 1.5rem;
-            background: var(--bg);
-            border-radius: var(--radius);
-        }
-
-        .metric-label {
-            font-size: 0.875rem;
+        .form-note {
+            font-size: 0.8rem;
             color: var(--text-light);
         }
 
-        .metric-value {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: var(--primary);
-            margin-top: 0.5rem;
+        .success-message {
+            display: none;
+            background: #f0fdf4;
+            color: #166534;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 500;
+            max-width: 480px;
+            margin: 0 auto;
         }
 
-        @media (max-width: 1024px) {
-            .app {
+        .section {
+            max-width: 900px;
+            margin: 5rem auto 0;
+            padding: 0 1.5rem;
+        }
+
+        .section-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--accent);
+            margin-bottom: 0.75rem;
+        }
+
+        h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .section > p {
+            color: var(--text-light);
+            font-size: 1.05rem;
+            margin-bottom: 2.5rem;
+            max-width: 600px;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.25rem;
+        }
+
+        .feature-card {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1.75rem;
+        }
+
+        .feature-card .icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card:nth-child(1) .icon { background: #fef3c7; }
+        .feature-card:nth-child(2) .icon { background: #dbeafe; }
+        .feature-card:nth-child(3) .icon { background: #d1fae5; }
+        .feature-card:nth-child(4) .icon { background: #fce7f3; }
+
+        .feature-card h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-card p {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            line-height: 1.55;
+        }
+
+        .preview-section {
+            max-width: 900px;
+            margin: 5rem auto 0;
+            padding: 0 1.5rem;
+        }
+
+        .preview-card {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 2.5rem;
+            margin-top: 2rem;
+        }
+
+        .preview-card .issue-header {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+        }
+
+        .preview-card h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+        }
+
+        .preview-item {
+            margin-bottom: 1.5rem;
+        }
+
+        .preview-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .preview-item h4 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.35rem;
+        }
+
+        .preview-item p {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+
+        .preview-item code {
+            display: block;
+            background: var(--primary);
+            color: #e2e8f0;
+            padding: 1rem 1.25rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            margin-top: 0.5rem;
+            white-space: pre-wrap;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+        }
+
+        .bottom-cta {
+            max-width: 600px;
+            margin: 5rem auto;
+            text-align: center;
+            padding: 3rem 1.5rem;
+        }
+
+        .bottom-cta h2 {
+            margin-bottom: 0.75rem;
+        }
+
+        .bottom-cta p {
+            color: var(--text-light);
+            margin-bottom: 2rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            font-size: 0.8rem;
+            color: var(--text-light);
+            border-top: 1px solid var(--border);
+        }
+
+        @media (max-width: 640px) {
+            .hero {
+                margin-top: 2.5rem;
+            }
+
+            .signup-form {
+                flex-direction: column;
+            }
+
+            .signup-form button {
+                width: 100%;
+            }
+
+            .features {
                 grid-template-columns: 1fr;
             }
-            
-            .form-card {
-                position: static;
+
+            .preview-card {
+                padding: 1.5rem;
             }
         }
     </style>
 </head>
 <body>
-    <div class="app">
-        <div class="form-card">
-            <h1>Business Valuation Calculator</h1>
-            <form id="valuationForm">
-                <div class="input-group">
-                    <label>Annual Revenue</label>
-                    <input type="number" id="revenue" required min="0" placeholder="Enter amount in USD">
-                </div>
-                <div class="input-group">
-                    <label>EBITDA</label>
-                    <input type="number" id="ebitda" required min="0" placeholder="Enter amount in USD">
-                </div>
-                <div class="input-group">
-                    <label>Customer Retention Rate (%)</label>
-                    <input type="number" id="retention" required min="0" max="100" placeholder="Enter percentage">
-                </div>
-                <button type="submit">Calculate Valuation</button>
-            </form>
-        </div>
 
-        <div class="results" id="results" style="display: none;">
-            <h2>Valuation Result</h2>
-            <div class="value" id="valuationResult"></div>
-            <div class="metrics" id="metricsGrid"></div>
+    <nav>
+        <div class="logo">Main Street <span>AI</span></div>
+    </nav>
+
+    <section class="hero">
+        <div class="badge">Built for HVAC businesses</div>
+        <h1>We turn AI into <span class="highlight">actual profit</span> for HVAC businesses.</h1>
+        <p>Get a 5-minute weekly playbook showing exactly what to implement this week to make more money or save time.</p>
+
+        <form class="signup-form" id="signupForm">
+            <input type="email" id="emailInput" placeholder="Enter your email" required>
+            <button type="submit">Get the playbook</button>
+        </form>
+        <p class="form-note">Free weekly issue. Unsubscribe anytime.</p>
+        <div class="success-message" id="successMessage">
+            You're in. Check your inbox for the first issue.
         </div>
-    </div>
+    </section>
+
+    <section class="section">
+        <p class="section-label">Every week you get</p>
+        <h2>No fluff. Just what works this week.</h2>
+        <p>Each issue is built around one question: does this make or save money for your HVAC business right now?</p>
+
+        <div class="features">
+            <div class="feature-card">
+                <div class="icon">&#128270;</div>
+                <h3>What changed this week</h3>
+                <p>AI moves fast. We filter out the noise and tell you only what actually matters for HVAC businesses.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">&#9889;</div>
+                <h3>Do this now</h3>
+                <p>1&ndash;3 concrete, tactical actions you can take immediately. Respond to leads faster, automate reminders, improve follow-ups.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">&#128203;</div>
+                <h3>Steal this</h3>
+                <p>Copy/paste prompts, scripts, and workflows you can literally use in 30 seconds. No setup required.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">&#128640;</div>
+                <h3>5-minute upgrade</h3>
+                <p>One small tweak with high ROI. A better way to respond to inbound requests, a simple automation using tools you already have.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="preview-section">
+        <p class="section-label">Sample issue</p>
+        <h2>Here's what an issue looks like</h2>
+
+        <div class="preview-card">
+            <p class="issue-header">Main Street AI &mdash; HVAC Edition &bull; Issue #1</p>
+            <h3>Speed kills (your competition): How faster lead response wins more jobs</h3>
+
+            <div class="preview-item">
+                <h4>What changed this week</h4>
+                <p>Google now factors response time into local service ad rankings. HVAC businesses that respond to inquiries within 5 minutes are 10x more likely to book the job than those who wait an hour. New AI tools make instant response possible without hiring staff.</p>
+            </div>
+
+            <div class="preview-item">
+                <h4>Do this now</h4>
+                <p>1. Set up an auto-reply for every inbound lead that arrives after hours&mdash;acknowledge the request and confirm you'll follow up by 8 AM.<br>
+                2. Use AI to draft personalized quote follow-ups for any estimate that's more than 48 hours old.<br>
+                3. Create a simple "service reminder" text sequence for customers who haven't booked maintenance in 12+ months.</p>
+            </div>
+
+            <div class="preview-item">
+                <h4>Steal this &mdash; instant lead response prompt</h4>
+                <code>You are an assistant for [Your HVAC Company]. A potential customer
+just submitted a request through our website. Write a friendly,
+professional text message that:
+- Thanks them for reaching out
+- Confirms we received their request for [SERVICE TYPE]
+- Lets them know a technician will follow up within [TIMEFRAME]
+- Asks if the issue is urgent so we can prioritize
+
+Keep it under 3 sentences. Sound human, not corporate.</code>
+            </div>
+
+            <div class="preview-item">
+                <h4>5-minute upgrade</h4>
+                <p>Go to your Google Business profile right now and update your business description to mention "same-day service" and "fast response." Businesses with these keywords get 23% more clicks from local searches. Takes 5 minutes, costs nothing.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="bottom-cta">
+        <h2>Start making AI work for your HVAC business</h2>
+        <p>Join other HVAC owners getting actionable AI playbooks every week. No jargon, no fluff&mdash;just what works.</p>
+        <form class="signup-form" id="signupForm2">
+            <input type="email" id="emailInput2" placeholder="Enter your email" required>
+            <button type="submit">Get the playbook</button>
+        </form>
+        <div class="success-message" id="successMessage2">
+            You're in. Check your inbox for the first issue.
+        </div>
+    </section>
+
+    <footer>
+        &copy; 2026 Main Street AI. Built for HVAC businesses.
+    </footer>
 
     <script>
-        // Simplified JavaScript
-        document.getElementById('valuationForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            try {
-                const data = {
-                    revenue: Number(document.getElementById('revenue').value),
-                    ebitda: Number(document.getElementById('ebitda').value),
-                    retention: Number(document.getElementById('retention').value)
-                };
+        function handleSignup(formId, emailId, successId) {
+            const form = document.getElementById(formId);
+            const success = document.getElementById(successId);
 
-                const response = await fetch('/api/valuate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const email = document.getElementById(emailId).value;
 
-                const result = await response.json();
-                displayResults(result);
-            } catch (error) {
-                alert('Valuation calculation failed. Please try again.');
-            }
-        });
+                const emails = JSON.parse(localStorage.getItem('mainstreetai_emails') || '[]');
+                emails.push({ email: email, date: new Date().toISOString() });
+                localStorage.setItem('mainstreetai_emails', JSON.stringify(emails));
 
-        function displayResults(data) {
-            document.getElementById('results').style.display = 'block';
-            document.getElementById('valuationResult').textContent = 
-                `$${data.value.toLocaleString()}`;
-            
-            // Display metrics
-            const metrics = document.getElementById('metricsGrid');
-            metrics.innerHTML = `
-                <div class="metric-card">
-                    <div class="metric-label">EBITDA Multiple</div>
-                    <div class="metric-value">${data.metrics.multiple}x</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-label">Revenue Multiple</div>
-                    <div class="metric-value">${data.metrics.revenueMultiple}x</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-label">Risk Score</div>
-                    <div class="metric-value">${data.metrics.riskScore}/10</div>
-                </div>
-            `;
+                form.style.display = 'none';
+                success.style.display = 'block';
+            });
         }
+
+        handleSignup('signupForm', 'emailInput', 'successMessage');
+        handleSignup('signupForm2', 'emailInput2', 'successMessage2');
     </script>
+
 </body>
 </html>
